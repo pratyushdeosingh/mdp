@@ -1,118 +1,74 @@
 /*
- * MDP IoT Firmware — GPS & Motion Tracking System
- * Review III — Hardware Integration
+ * MDP IoT Firmware — GPS & Accident Detection System
+ * Review III — 100% Hardware Integration
  *
- * Reads NEO-6M GPS, ADXL345 Accelerometer, SIM800L GSM
+ * Reads NEO-6M GPS, MPU6050 Accelerometer/Gyroscope
+ * Detects accidents via acceleration threshold
  * Outputs one JSON line per second to Serial (USB) at 9600 baud
  *
  * Libraries required (install via Arduino IDE Library Manager):
- *   - TinyGPS++        (by Mikal Hart)
- *   - Adafruit ADXL345 (by Adafruit)
+ *   - TinyGPS++              (by Mikal Hart)
+ *   - Adafruit MPU6050       (by Adafruit)
  *   - Adafruit Unified Sensor (by Adafruit)
- *   - ArduinoJson      (by Benoit Blanchon)
+ *   - ArduinoJson            (by Benoit Blanchon)
  *
  * Wiring:
- *   NEO-6M GPS   — TX → pin 4, RX → pin 3  (SoftwareSerial)
- *   SIM800L GSM  — TX → pin 7, RX → pin 8  (SoftwareSerial)
- *   ADXL345      — SDA → A4, SCL → A5       (I2C)
- *   Battery      — Voltage divider → A0
- *   SIM800L VCC  — External 3.7–4.2V (NOT from Arduino 5V)
+ *   NEO-6M GPS    — TX → pin 4, RX → pin 3  (SoftwareSerial)
+ *   MPU6050       — SDA → A4, SCL → A5       (I2C)
+ *   Buzzer        — pin 8
+ *   Cancel Button — pin 7 (INPUT_PULLUP, active LOW)
  */
 
-#include <SoftwareSerial.h>
-#include <TinyGPS++.h>
 #include <Wire.h>
+#include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
-#include <Adafruit_ADXL345_U.h>
+#include <TinyGPS++.h>
+#include <SoftwareSerial.h>
 #include <ArduinoJson.h>
 
 // ── Pin Configuration ──────────────────────────────────────
 #define GPS_RX_PIN   4
 #define GPS_TX_PIN   3
-#define GSM_RX_PIN   7
-#define GSM_TX_PIN   8
-#define BATTERY_PIN  A0
+#define BUZZER_PIN   8
+#define BUTTON_PIN   7
+
+// ── Accident Detection ─────────────────────────────────────
+#define ACCIDENT_THRESHOLD 25.0   // Total acceleration threshold (m/s²)
+#define ALERT_DURATION     10000  // 10 seconds buzzer alert window
 
 // ── Objects ────────────────────────────────────────────────
-SoftwareSerial gpsSerial(GPS_RX_PIN, GPS_TX_PIN);
-SoftwareSerial gsmSerial(GSM_RX_PIN, GSM_TX_PIN);
+Adafruit_MPU6050 mpu;
 TinyGPSPlus gps;
-Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(12345);
+SoftwareSerial gpsSerial(GPS_RX_PIN, GPS_TX_PIN);
 
 // ── State ──────────────────────────────────────────────────
+bool accidentDetected = false;
+unsigned long accidentTime = 0;
 unsigned long lastSend = 0;
 const unsigned long SEND_INTERVAL = 1000;  // 1 second
-bool accelAvailable = false;
-int lastSignalStrength = 0;
+bool mpuAvailable = false;
 
 // ── Setup ──────────────────────────────────────────────────
 void setup() {
-  Serial.begin(9600);           // USB serial to laptop
-  gpsSerial.begin(9600);        // NEO-6M default baud
-  gsmSerial.begin(9600);        // SIM800L default baud
+  Serial.begin(9600);
+  gpsSerial.begin(9600);
+
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  digitalWrite(BUZZER_PIN, LOW);
 
   Wire.begin();
 
-  // Initialize accelerometer
-  if (accel.begin()) {
-    accelAvailable = true;
-    accel.setRange(ADXL345_RANGE_4_G);
+  // Initialize MPU6050
+  if (mpu.begin()) {
+    mpuAvailable = true;
+    mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+    mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
   }
-
-  // Initialize GSM module
-  gsmSerial.listen();
-  gsmSerial.println("AT");
-  delay(1000);
 
   // Startup message
   Serial.println("{\"status\":\"boot\",\"msg\":\"MDP firmware ready\"}");
-}
-
-// ── Query GSM Signal Strength ──────────────────────────────
-// Returns 0–31 (raw CSQ value), or 0 on failure
-int querySignalStrength() {
-  gsmSerial.listen();
-  delay(50);
-
-  // Flush any old data
-  while (gsmSerial.available()) gsmSerial.read();
-
-  gsmSerial.println("AT+CSQ");
-  delay(500);
-
-  String response = "";
-  unsigned long timeout = millis() + 1000;
-  while (millis() < timeout) {
-    while (gsmSerial.available()) {
-      char c = (char)gsmSerial.read();
-      response += c;
-    }
-    if (response.indexOf("OK") >= 0) break;
-  }
-
-  // Parse "+CSQ: XX,Y"
-  int idx = response.indexOf("+CSQ:");
-  if (idx >= 0) {
-    int commaIdx = response.indexOf(",", idx);
-    if (commaIdx > idx) {
-      int val = response.substring(idx + 5, commaIdx).toInt();
-      if (val == 99) return 0;  // 99 means not detectable
-      return val;
-    }
-  }
-  return 0;
-}
-
-// ── Read Battery Voltage ───────────────────────────────────
-// Assumes a voltage divider (10K/10K) from Vin to A0
-// Adjust the map() values based on your actual divider and battery
-int readBatteryPercent() {
-  int raw = analogRead(BATTERY_PIN);
-  // 10-bit ADC: 0–1023
-  // With 10K/10K divider: 3.5V battery → ~1.75V → ~358
-  //                        4.2V battery → ~2.1V  → ~430
-  int percent = map(raw, 358, 430, 0, 100);
-  return constrain(percent, 0, 100);
 }
 
 // ── Main Loop ──────────────────────────────────────────────
@@ -126,34 +82,47 @@ void loop() {
     }
   }
 
-  // ── 2. Check if it's time to send ──
+  // ── 2. Read accelerometer ──
+  float ax = 0, ay = 0, az = 0;
+  float totalAccel = 0;
+
+  if (mpuAvailable) {
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+    ax = a.acceleration.x;
+    ay = a.acceleration.y;
+    az = a.acceleration.z;
+    totalAccel = sqrt(ax * ax + ay * ay + az * az);
+  }
+
+  // ── 3. Accident detection ──
+  if (totalAccel > ACCIDENT_THRESHOLD && !accidentDetected) {
+    accidentDetected = true;
+    accidentTime = millis();
+  }
+
+  // Handle active accident alert
+  if (accidentDetected) {
+    // Check cancel button (active LOW with pullup)
+    if (digitalRead(BUTTON_PIN) == LOW) {
+      accidentDetected = false;
+      digitalWrite(BUZZER_PIN, LOW);
+    }
+    // Auto-clear after alert duration
+    else if (millis() - accidentTime > ALERT_DURATION) {
+      accidentDetected = false;
+      digitalWrite(BUZZER_PIN, LOW);
+    }
+    else {
+      // Buzzer beeping pattern (500ms on/off)
+      digitalWrite(BUZZER_PIN, (millis() / 500) % 2 == 0 ? HIGH : LOW);
+    }
+  }
+
+  // ── 4. Send JSON every SEND_INTERVAL ──
   if (millis() - lastSend < SEND_INTERVAL) return;
   lastSend = millis();
 
-  // ── 3. Read accelerometer ──
-  float ax = 0, ay = 0, az = 0;
-  if (accelAvailable) {
-    sensors_event_t event;
-    accel.getEvent(&event);
-    ax = event.acceleration.x;
-    ay = event.acceleration.y;
-    az = event.acceleration.z;
-  }
-
-  // ── 4. Query GSM signal (every 5 seconds to avoid overhead) ──
-  static unsigned long lastGsmQuery = 0;
-  if (millis() - lastGsmQuery >= 5000) {
-    lastSignalStrength = querySignalStrength();
-    lastGsmQuery = millis();
-  }
-  // Map 0-31 CSQ range to 0-100 percent
-  int signalPercent = map(lastSignalStrength, 0, 31, 0, 100);
-  signalPercent = constrain(signalPercent, 0, 100);
-
-  // ── 5. Read battery ──
-  int batteryPercent = readBatteryPercent();
-
-  // ── 6. Build and send JSON ──
   StaticJsonDocument<256> doc;
 
   if (gps.location.isValid()) {
@@ -179,8 +148,8 @@ void loop() {
   doc["ax"] = serialized(String(ax, 3));
   doc["ay"] = serialized(String(ay, 3));
   doc["az"] = serialized(String(az, 3));
-  doc["sig"] = signalPercent;
-  doc["bat"] = batteryPercent;
+  doc["ta"] = serialized(String(totalAccel, 2));
+  doc["ad"] = accidentDetected ? 1 : 0;
   doc["tmp"] = 0;  // Replace with actual temp sensor if available
 
   serializeJson(doc, Serial);

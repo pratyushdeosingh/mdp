@@ -49,7 +49,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const newLog: LogEntry = {
         timestamp: Date.now(),
         type: 'info',
-        message: `[HW] GPS: ${data.gps.latitude.toFixed(4)},${data.gps.longitude.toFixed(4)} | Spd: ${data.gps.speed} km/h | Sig: ${data.signalStrength}%`,
+        message: `[HW] GPS: ${data.gps.latitude.toFixed(4)},${data.gps.longitude.toFixed(4)} | Spd: ${data.gps.speed} km/h | Accel: ${data.totalAcceleration} m/s²${data.accidentDetected ? ' | !! ACCIDENT !!' : ''}`,
       };
       const updated = [...prev, newLog];
       return updated.length > MAX_LOGS ? updated.slice(-MAX_LOGS) : updated;

@@ -12,7 +12,8 @@ export interface SensorData {
     z: number;
   };
   systemStatus: 'online' | 'offline' | 'warning';
-  signalStrength: number;
+  totalAcceleration: number;
+  accidentDetected: boolean;
   batteryLevel: number;
   temperature: number;
 }
@@ -45,8 +46,8 @@ export interface ArduinoRawData {
   ax: number;
   ay: number;
   az: number;
-  sig: number;
-  bat: number;
+  ta: number;
+  ad: number;
   tmp: number;
 }
 

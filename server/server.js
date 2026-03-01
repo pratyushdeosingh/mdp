@@ -46,7 +46,6 @@ let connectionState = {
 // ── Transform Arduino short-key JSON → full SensorData ─────
 function transformArduinoData(raw) {
   const hasGPS = raw.lat !== 0 || raw.lng !== 0;
-  const hasSig = (raw.sig ?? 0) > 0;
 
   return {
     type: 'data',
@@ -63,8 +62,9 @@ function transformArduinoData(raw) {
         y: raw.ay ?? 0,
         z: raw.az ?? 0,
       },
-      systemStatus: hasGPS && hasSig ? 'online' : hasGPS || hasSig ? 'warning' : 'warning',
-      signalStrength: raw.sig ?? 0,
+      systemStatus: hasGPS ? 'online' : 'warning',
+      totalAcceleration: raw.ta ?? 0,
+      accidentDetected: (raw.ad ?? 0) === 1,
       batteryLevel: raw.bat ?? 0,
       temperature: raw.tmp ?? 0,
     },

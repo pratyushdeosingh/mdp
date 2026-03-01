@@ -15,30 +15,28 @@ function AbstractTab() {
     <div className="space-y-4 text-sm text-[var(--text-secondary)] leading-relaxed">
       <h2 className="text-lg font-bold text-[var(--text-primary)]">Abstract</h2>
       <p>
-        This project presents the design and partial implementation of a <strong className="text-[var(--text-primary)]">GPS and Motion-Based
-        Vehicle Tracking System</strong> using embedded IoT components. The system integrates a <strong className="text-[var(--text-primary)]">NEO-6M GPS
-        module</strong> for real-time location tracking, an <strong className="text-[var(--text-primary)]">ADXL345 accelerometer</strong> for
-        3-axis motion detection, and a <strong className="text-[var(--text-primary)]">SIM800L GSM/GPRS module</strong> for wireless
-        data transmission, all orchestrated by an <strong className="text-[var(--text-primary)]">Arduino Uno R3</strong> microcontroller.
+        This project presents the design and implementation of a <strong className="text-[var(--text-primary)]">GPS and Motion-Based
+        Vehicle Tracking System with Accident Detection</strong> using embedded IoT components. The system integrates a <strong className="text-[var(--text-primary)]">NEO-6M GPS
+        module</strong> for real-time location tracking and an <strong className="text-[var(--text-primary)]">MPU6050 accelerometer/gyroscope</strong> for
+        6-axis motion detection and accident event triggering, all orchestrated by an <strong className="text-[var(--text-primary)]">Arduino Uno R3</strong> microcontroller.
       </p>
       <p>
-        The primary objective is to create a low-cost, reliable vehicle tracking and monitoring
-        solution capable of detecting sudden acceleration, braking events, and potential collisions
-        while simultaneously transmitting GPS coordinates via SMS and GPRS to a remote monitoring
-        dashboard.
+        The primary objective is to create a low-cost, reliable vehicle tracking and safety
+        solution capable of detecting sudden impacts and potential collisions by monitoring total
+        acceleration. When the threshold (25 m/s²) is exceeded, the system triggers a <strong className="text-[var(--text-primary)]">buzzer alert</strong> with
+        a 10-second countdown, which can be cancelled via a <strong className="text-[var(--text-primary)]">manual button</strong> to prevent false alarms.
       </p>
       <p>
-        As of Review III, <strong className="text-[var(--text-primary)]">50% of the project execution is complete</strong>. The
-        microcontroller firmware has been developed and tested. The web-based dashboard is fully
-        operational with simulated data streams that mirror the exact serial data format the
-        hardware will produce. The SIM800L module has encountered hardware failure and is being
-        replaced. GPS and accelerometer modules are procured and pending integration.
+        As of Review III, <strong className="text-[var(--text-primary)]">100% of the project execution is complete</strong>. All hardware
+        modules (Arduino Uno, MPU6050, NEO-6M GPS, Buzzer, Cancel Button) have been successfully
+        integrated and tested. The Arduino outputs JSON-formatted sensor data via USB serial at 9600 baud,
+        which is received by a Node.js bridge server and forwarded to the web dashboard via WebSocket
+        in real-time.
       </p>
       <p>
         The dashboard features real-time visualization of sensor data, interactive map tracking,
-        accelerometer analytics, a serial monitor for AT command debugging, and comprehensive
-        hardware status tracking—demonstrating the complete software pipeline while hardware
-        integration continues in parallel.
+        accelerometer analytics with accident detection monitoring, a serial data monitor, and comprehensive
+        hardware status tracking — demonstrating the complete hardware-software integration pipeline.
       </p>
     </div>
   );
@@ -53,20 +51,17 @@ function BlockDiagramTab() {
           {/* ASCII-style block diagram using styled divs */}
           <div className="flex flex-col items-center gap-3">
             {/* Sensors Row */}
-            <div className="grid grid-cols-3 gap-4 w-full max-w-lg">
+            <div className="grid grid-cols-2 gap-4 w-full max-w-md">
               {[
-                { label: 'NEO-6M GPS', sub: 'UART', color: 'blue' },
-                { label: 'ADXL345', sub: 'I2C', color: 'orange' },
-                { label: 'SIM800L GSM', sub: 'UART', color: 'red' },
+                { label: 'NEO-6M GPS', sub: 'UART (Pins 4,3)', color: 'blue' },
+                { label: 'MPU6050 IMU', sub: 'I2C (A4,A5)', color: 'orange' },
               ].map(b => (
                 <div
                   key={b.label}
                   className={`p-3 rounded-xl border text-center ${
                     b.color === 'blue'
                       ? 'border-blue-500/30 bg-blue-500/10'
-                      : b.color === 'orange'
-                      ? 'border-orange-500/30 bg-orange-500/10'
-                      : 'border-red-500/30 bg-red-500/10'
+                      : 'border-orange-500/30 bg-orange-500/10'
                   }`}
                 >
                   <p className="text-xs font-semibold text-[var(--text-primary)]">{b.label}</p>
@@ -76,8 +71,8 @@ function BlockDiagramTab() {
             </div>
 
             {/* Arrows down */}
-            <div className="flex justify-center gap-24">
-              {[0, 1, 2].map(i => (
+            <div className="flex justify-center gap-32">
+              {[0, 1].map(i => (
                 <div key={i} className="text-[var(--text-muted)] text-lg">↓</div>
               ))}
             </div>
@@ -88,18 +83,35 @@ function BlockDiagramTab() {
               <p className="text-[10px] text-[var(--text-muted)]">ATmega328P | 16MHz</p>
             </div>
 
+            {/* Arrows to outputs */}
+            <div className="flex justify-center gap-16">
+              {[0, 1, 2].map(i => (
+                <div key={i} className="text-[var(--text-muted)] text-lg">↓</div>
+              ))}
+            </div>
+
+            {/* Outputs Row */}
+            <div className="grid grid-cols-3 gap-4 w-full max-w-lg">
+              <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-center">
+                <p className="text-xs font-semibold text-[var(--text-primary)]">USB Serial</p>
+                <p className="text-[10px] text-[var(--text-muted)]">JSON @ 9600 baud</p>
+              </div>
+              <div className="p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-center">
+                <p className="text-xs font-semibold text-[var(--text-primary)]">Buzzer</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Pin 8 | Alert</p>
+              </div>
+              <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-center">
+                <p className="text-xs font-semibold text-[var(--text-primary)]">Button</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Pin 7 | Cancel</p>
+              </div>
+            </div>
+
             <div className="text-[var(--text-muted)] text-lg">↓</div>
 
-            {/* Communication */}
-            <div className="grid grid-cols-2 gap-4 w-full max-w-md">
-              <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-center">
-                <p className="text-xs font-semibold text-[var(--text-primary)]">Serial / USB</p>
-                <p className="text-[10px] text-[var(--text-muted)]">To Web Dashboard</p>
-              </div>
-              <div className="p-3 rounded-xl border border-purple-500/30 bg-purple-500/10 text-center">
-                <p className="text-xs font-semibold text-[var(--text-primary)]">GPRS / SMS</p>
-                <p className="text-[10px] text-[var(--text-muted)]">Remote Server</p>
-              </div>
+            {/* Bridge Server */}
+            <div className="p-3 rounded-xl border border-purple-500/30 bg-purple-500/10 w-64 text-center">
+              <p className="text-xs font-semibold text-[var(--text-primary)]">Node.js Bridge Server</p>
+              <p className="text-[10px] text-[var(--text-muted)]">Serial → WebSocket | Port 3001</p>
             </div>
 
             <div className="text-[var(--text-muted)] text-lg">↓</div>
@@ -124,14 +136,14 @@ function FlowchartTab() {
         <div className="max-w-md mx-auto flex flex-col items-center gap-2">
           {[
             { text: 'System Power ON', shape: 'rounded-full', color: 'emerald' },
-            { text: 'Initialize MCU, GPS, Accelerometer', shape: 'rounded-xl', color: 'blue' },
-            { text: 'Initialize GSM Module', shape: 'rounded-xl', color: 'blue' },
-            { text: 'GSM Ready?', shape: 'rotate-45', color: 'amber', diamond: true },
-            { text: 'Acquire GPS Fix', shape: 'rounded-xl', color: 'blue' },
-            { text: 'Read Accelerometer (X, Y, Z)', shape: 'rounded-xl', color: 'blue' },
-            { text: 'Motion Threshold Exceeded?', shape: 'rotate-45', color: 'amber', diamond: true },
-            { text: 'Send SMS Alert + GPS Data via GPRS', shape: 'rounded-xl', color: 'purple' },
-            { text: 'Transmit to Web Dashboard via Serial', shape: 'rounded-xl', color: 'cyan' },
+            { text: 'Initialize MCU, GPS, MPU6050', shape: 'rounded-xl', color: 'blue' },
+            { text: 'Feed GPS Parser (200ms window)', shape: 'rounded-xl', color: 'blue' },
+            { text: 'Read MPU6050 Accelerometer (X, Y, Z)', shape: 'rounded-xl', color: 'blue' },
+            { text: 'Calculate Total Acceleration', shape: 'rounded-xl', color: 'blue' },
+            { text: 'Total Accel > 25 m/s²?', shape: 'rotate-45', color: 'amber', diamond: true },
+            { text: 'Trigger Buzzer + Start 10s Timer', shape: 'rounded-xl', color: 'red' },
+            { text: 'Cancel Button Pressed?', shape: 'rotate-45', color: 'amber', diamond: true },
+            { text: 'Output JSON via Serial USB', shape: 'rounded-xl', color: 'cyan' },
             { text: 'Wait 1s → Loop', shape: 'rounded-full', color: 'emerald' },
           ].map((step, i) => (
             <div key={i} className="flex flex-col items-center gap-2 w-full">
@@ -146,7 +158,7 @@ function FlowchartTab() {
                   borderColor: `var(--${step.color === 'emerald' ? 'success' : step.color === 'amber' ? 'warning' : 'accent'})`,
                   background: step.color === 'emerald' ? 'rgba(16,185,129,0.1)' :
                     step.color === 'amber' ? 'rgba(245,158,11,0.1)' :
-                    step.color === 'purple' ? 'rgba(168,85,247,0.1)' :
+                    step.color === 'red' ? 'rgba(239,68,68,0.1)' :
                     step.color === 'cyan' ? 'rgba(6,182,212,0.1)' : 'rgba(59,130,246,0.1)',
                 }}
               >
@@ -185,39 +197,41 @@ function PPTViewerTab() {
 function FutureWorkTab() {
   const items = [
     {
-      phase: 'Phase 1 — Hardware Completion',
+      phase: 'Completed — Current Implementation',
       tasks: [
-        'Replace damaged SIM800L GSM module with tested unit',
-        'Wire and test NEO-6M GPS module with Arduino',
-        'Connect ADXL345 via I2C and calibrate offset values',
-        'Complete breadboard prototype with all 4 modules',
+        'Arduino Uno R3 with firmware outputting JSON via USB serial',
+        'MPU6050 accelerometer/gyroscope for 6-axis motion sensing',
+        'NEO-6M GPS for real-time location tracking',
+        'Accident detection with buzzer alert (10s timer + cancel button)',
+        'Node.js bridge server (Serial → WebSocket)',
+        'Full web dashboard with real-time data visualization',
       ],
     },
     {
-      phase: 'Phase 2 — Firmware Integration',
+      phase: 'Phase 1 — Enhanced Safety Features',
       tasks: [
-        'Implement NMEA sentence parsing for GPS data',
-        'Configure AT command sequence for GPRS data upload',
-        'Add motion event detection threshold in firmware',
-        'Implement SMS alert trigger for collision events',
+        'Add SMS notification via GSM module when accident is confirmed',
+        'Implement geofencing alerts for restricted area monitoring',
+        'Add emergency contact auto-dial on confirmed accidents',
+        'Integrate temperature sensor (LM35) for environmental monitoring',
       ],
     },
     {
-      phase: 'Phase 3 — Web Dashboard Enhancement',
+      phase: 'Phase 2 — Data & Analytics',
       tasks: [
-        'Replace simulation engine with real serial/WebSocket data',
-        'Add geofencing alert system on the map view',
-        'Implement historical data storage (IndexedDB or backend)',
-        'Add user authentication for remote monitoring access',
+        'Implement historical data storage (IndexedDB or cloud backend)',
+        'Add trip recording with start/stop and route replay',
+        'Export trip reports with route maps and acceleration graphs',
+        'Machine learning-based driving behavior analysis',
       ],
     },
     {
-      phase: 'Phase 4 — Testing & Deployment',
+      phase: 'Phase 3 — Deployment & Scaling',
       tasks: [
-        'Field testing with actual vehicle movement',
-        'Power management optimization (sleep modes)',
-        'PCB design for final compact form factor',
-        'Documentation and final project report',
+        'PCB design for compact final form factor',
+        'Power management with battery and sleep modes',
+        'Mobile app companion with push notifications',
+        'Multi-vehicle fleet tracking support',
       ],
     },
   ];
@@ -232,7 +246,7 @@ function FutureWorkTab() {
             <ul className="space-y-2">
               {section.tasks.map((task, j) => (
                 <li key={j} className="flex items-start gap-2 text-xs text-[var(--text-secondary)]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0 mt-1.5" />
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${i === 0 ? 'bg-emerald-400' : 'bg-blue-400'}`} />
                   {task}
                 </li>
               ))}

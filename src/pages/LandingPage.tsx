@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Radio, ArrowRight, Cpu, MapPin, Activity, Wifi } from 'lucide-react';
+import { Radio, ArrowRight, Cpu, MapPin, Activity, Shield } from 'lucide-react';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -51,14 +51,14 @@ export default function LandingPage() {
           Basic Multidisciplinary Project — Review III
         </p>
         <p className="text-sm text-[var(--text-muted)] mb-8 max-w-lg mx-auto">
-          Real-time IoT dashboard integrating GPS (NEO-6M), accelerometer (ADXL345),
-          and GSM (SIM800L) modules with Arduino Uno for vehicle tracking and motion detection.
+          Real-time IoT dashboard integrating GPS (NEO-6M), accelerometer (MPU6050),
+          and accident detection with Arduino Uno for vehicle tracking, motion sensing, and safety alerting.
         </p>
 
         {/* Execution badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/25 mb-10">
           <span className="w-2 h-2 rounded-full bg-emerald-400 pulse-live" />
-          <span className="text-sm font-semibold text-emerald-400">50% Execution Achieved</span>
+          <span className="text-sm font-semibold text-emerald-400">100% Execution Achieved</span>
         </div>
 
         {/* Enter button */}
@@ -77,7 +77,7 @@ export default function LandingPage() {
           {[
             { icon: MapPin, label: 'GPS Tracking' },
             { icon: Activity, label: 'Motion Detection' },
-            { icon: Wifi, label: 'GSM Communication' },
+            { icon: Shield, label: 'Accident Detection' },
             { icon: Cpu, label: 'Embedded IoT' },
           ].map(feat => (
             <div

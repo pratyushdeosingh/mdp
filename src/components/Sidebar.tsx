@@ -22,16 +22,16 @@ const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/map', label: 'Live Map', icon: Map },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { path: '/serial', label: 'GSM Monitor', icon: Terminal },
+  { path: '/serial', label: 'Serial Monitor', icon: Terminal },
   { path: '/hardware', label: 'Hardware', icon: Cpu },
   { path: '/docs', label: 'Documentation', icon: FileText },
 ];
 
 const hardwareModules = [
-  { name: 'Arduino Uno R3', id: 'mcu', status: 'working' as const, description: 'Main microcontroller unit – firmware uploaded and running', nextAction: 'Integrate with sensor modules', icon: 'cpu' },
-  { name: 'SIM800L GSM Module', id: 'gsm', status: 'damaged' as const, description: 'GSM/GPRS module for SMS and data transmission – hardware fault detected', nextAction: 'Replace module; order backup unit', icon: 'radio' },
-  { name: 'NEO-6M GPS Module', id: 'gps', status: 'pending' as const, description: 'GPS receiver for location tracking – awaiting integration', nextAction: 'Wire to MCU and test NMEA parsing', icon: 'map-pin' },
-  { name: 'ADXL345 Accelerometer', id: 'acc', status: 'pending' as const, description: '3-axis accelerometer for motion detection – I2C interface ready', nextAction: 'Connect via I2C bus and calibrate', icon: 'activity' },
+  { name: 'Arduino Uno R3', id: 'mcu', status: 'working' as const, description: 'Main microcontroller unit – firmware uploaded and running', nextAction: 'All modules integrated and operational', icon: 'cpu' },
+  { name: 'MPU6050 Accelerometer/Gyroscope', id: 'mpu', status: 'working' as const, description: '6-axis IMU for motion and accident detection – I2C interface active', nextAction: 'Calibrated and running accident detection', icon: 'activity' },
+  { name: 'NEO-6M GPS Module', id: 'gps', status: 'working' as const, description: 'GPS receiver for real-time location tracking – NMEA parsing active', nextAction: 'Tracking operational with satellite fix', icon: 'map-pin' },
+  { name: 'Buzzer Alert System', id: 'buzzer', status: 'working' as const, description: 'Piezo buzzer for accident alert – driven from pin 8', nextAction: 'Alert system tested and operational', icon: 'radio' },
 ];
 
 interface SidebarProps {

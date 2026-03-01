@@ -41,9 +41,9 @@ export default function SerialMonitor() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">GSM / Serial Monitor</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Serial Monitor</h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            Live AT command trace and system event log
+            Live sensor data trace and system event log
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -62,7 +62,7 @@ export default function SerialMonitor() {
         {/* Terminal header */}
         <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[var(--glass-border)] bg-[var(--bg-secondary)]/50">
           <Terminal size={14} className="text-[var(--text-muted)]" />
-          <span className="text-xs font-medium text-[var(--text-muted)]">Serial Output — COM3</span>
+          <span className="text-xs font-medium text-[var(--text-muted)]">Serial Output — USB</span>
           <div className="ml-auto flex gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
             <div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" />
@@ -80,7 +80,7 @@ export default function SerialMonitor() {
           <div className="text-[var(--text-muted)] mb-2 opacity-50">
             <p>═══════════════════════════════════════════</p>
             <p>  MDP IoT System — Serial Monitor v1.0</p>
-            <p>  GPS & Motion Tracking System</p>
+            <p>  GPS & Accident Detection System</p>
             <p>  Baud Rate: 9600 | Mode: {dataMode.toUpperCase()}</p>
             <p>═══════════════════════════════════════════</p>
             <p>&nbsp;</p>
@@ -105,7 +105,6 @@ export default function SerialMonitor() {
       {/* Legend */}
       <div className="flex flex-wrap gap-4 text-xs">
         {[
-          { color: 'text-cyan-400', label: 'AT Commands' },
           { color: 'text-emerald-400', label: 'Success' },
           { color: 'text-blue-400', label: 'Info' },
           { color: 'text-amber-400', label: 'Warning' },

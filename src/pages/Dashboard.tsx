@@ -3,10 +3,11 @@ import {
   Navigation,
   Gauge,
   Activity,
-  Wifi,
+  AlertTriangle,
   Battery,
   Thermometer,
   Radio,
+  Shield,
 } from 'lucide-react';
 import MetricCard from '../components/MetricCard';
 import StatusBadge from '../components/StatusBadge';
@@ -102,6 +103,17 @@ export default function Dashboard() {
         />
       </div>
 
+      {/* Accident Detection Alert */}
+      {d.accidentDetected && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3 animate-pulse">
+          <AlertTriangle size={24} className="text-red-400 shrink-0" />
+          <div>
+            <p className="text-sm font-bold text-red-400">ACCIDENT DETECTED</p>
+            <p className="text-xs text-red-400/80">Total acceleration exceeded threshold (25 m/s²). Buzzer alert active.</p>
+          </div>
+        </div>
+      )}
+
       {/* Accelerometer + System */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <GlassCard>
@@ -116,9 +128,26 @@ export default function Dashboard() {
                 <p className="text-2xl font-bold text-[var(--text-primary)]">
                   {d.accelerometer[axis]}
                 </p>
-                <p className="text-[10px] text-[var(--text-muted)]">g-force</p>
+                <p className="text-[10px] text-[var(--text-muted)]">m/s²</p>
               </div>
             ))}
+          </div>
+          {/* Total Acceleration */}
+          <div className="mt-3 p-3 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Shield size={14} className={d.accidentDetected ? 'text-red-400' : 'text-emerald-400'} />
+              <span className="text-sm text-[var(--text-secondary)]">Total Acceleration</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-[var(--text-primary)]">{d.totalAcceleration} m/s²</span>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                d.accidentDetected
+                  ? 'bg-red-500/15 text-red-400'
+                  : 'bg-emerald-500/15 text-emerald-400'
+              }`}>
+                {d.accidentDetected ? 'ALERT' : 'SAFE'}
+              </span>
+            </div>
           </div>
         </GlassCard>
 
@@ -130,18 +159,16 @@ export default function Dashboard() {
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)]">
               <div className="flex items-center gap-2">
-                <Wifi size={14} className="text-blue-400" />
-                <span className="text-sm text-[var(--text-secondary)]">Signal Strength</span>
+                <Activity size={14} className="text-blue-400" />
+                <span className="text-sm text-[var(--text-secondary)]">Accident Detection</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-24 h-2 rounded-full bg-[var(--border-color)] overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-blue-400 transition-all duration-500"
-                    style={{ width: `${d.signalStrength}%` }}
-                  />
-                </div>
-                <span className="text-sm font-medium text-[var(--text-primary)]">{d.signalStrength}%</span>
-              </div>
+              <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+                d.accidentDetected
+                  ? 'bg-red-500/15 text-red-400'
+                  : 'bg-emerald-500/15 text-emerald-400'
+              }`}>
+                {d.accidentDetected ? 'TRIGGERED' : 'Normal'}
+              </span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)]">
               <div className="flex items-center gap-2">

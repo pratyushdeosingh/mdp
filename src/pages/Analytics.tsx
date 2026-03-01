@@ -12,7 +12,7 @@ import {
 } from 'recharts';
 import GlassCard from '../components/GlassCard';
 import { useAppContext } from '../context/AppContext';
-import { Activity, Gauge } from 'lucide-react';
+import { Activity, Gauge, Shield } from 'lucide-react';
 
 export default function Analytics() {
   const { sensorHistory } = useAppContext();
@@ -33,7 +33,7 @@ export default function Analytics() {
     accZ: d.accelerometer.z,
     speed: d.gps.speed,
     altitude: d.gps.altitude,
-    signal: d.signalStrength,
+    totalAccel: d.totalAcceleration,
   }));
 
   const tooltipStyle = {
@@ -123,7 +123,7 @@ export default function Analytics() {
         </ResponsiveContainer>
       </GlassCard>
 
-      {/* Altitude + Signal side by side */}
+      {/* Altitude + Total Acceleration side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <GlassCard>
           <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Altitude vs Time</h3>
@@ -145,20 +145,23 @@ export default function Analytics() {
         </GlassCard>
 
         <GlassCard>
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Signal Strength vs Time</h3>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+            <Shield size={14} className="text-red-400" />
+            Total Acceleration vs Time
+          </h3>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={chartData}>
               <defs>
-                <linearGradient id="sigGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                <linearGradient id="accelGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
               <XAxis dataKey="time" tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" interval="preserveStartEnd" />
-              <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" unit="%" domain={[0, 100]} />
+              <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" unit=" m/s²" />
               <Tooltip {...tooltipStyle} />
-              <Area type="monotone" dataKey="signal" stroke="#3b82f6" strokeWidth={2} fill="url(#sigGradient)" name="Signal" />
+              <Area type="monotone" dataKey="totalAccel" stroke="#ef4444" strokeWidth={2} fill="url(#accelGradient)" name="Total Accel" />
             </AreaChart>
           </ResponsiveContainer>
         </GlassCard>
