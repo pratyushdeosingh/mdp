@@ -40,7 +40,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
-  const { theme, toggleTheme, dataMode, setDataMode, sensorData, sensorHistory } = useAppContext();
+  const { theme, toggleTheme, dataMode, setDataMode, sensorData, sensorHistory, connectionStatus } = useAppContext();
   const location = useLocation();
 
   const isLanding = location.pathname === '/';
@@ -115,6 +115,20 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
           >
             <Wifi size={16} className={dataMode === 'simulation' ? 'text-blue-400' : 'text-emerald-400'} />
           </button>
+        )}
+        {dataMode === 'hardware' && !collapsed && (
+          <div className="flex items-center gap-1.5 mt-2 px-1">
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              connectionStatus === 'connected' ? 'bg-emerald-400 pulse-live' :
+              connectionStatus === 'connecting' ? 'bg-amber-400 animate-pulse' :
+              'bg-red-400'
+            }`} />
+            <span className="text-[9px] text-[var(--text-muted)]">
+              {connectionStatus === 'connected' ? 'Device connected' :
+               connectionStatus === 'connecting' ? 'Connecting...' :
+               'No device'}
+            </span>
+          </div>
         )}
       </div>
 

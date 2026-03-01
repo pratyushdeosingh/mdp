@@ -7,30 +7,36 @@ import {
   Battery,
   Thermometer,
   Radio,
-  AlertTriangle,
 } from 'lucide-react';
 import MetricCard from '../components/MetricCard';
 import StatusBadge from '../components/StatusBadge';
 import GlassCard from '../components/GlassCard';
+import ConnectionPanel from '../components/ConnectionPanel';
 import { useAppContext } from '../context/AppContext';
 
 export default function Dashboard() {
-  const { sensorData, dataMode, isStreaming, setIsStreaming } = useAppContext();
+  const { sensorData, dataMode, isStreaming, setIsStreaming, connectionStatus } = useAppContext();
 
-  if (dataMode === 'hardware' || !sensorData) {
+  // Hardware mode with no data yet — show connection panel
+  if (dataMode === 'hardware' && !sensorData) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 animate-fade-in-up">
-        <div className="p-6 rounded-3xl bg-amber-500/10 border border-amber-500/20">
-          <AlertTriangle size={48} className="text-amber-400" />
-        </div>
-        <h2 className="text-2xl font-bold text-[var(--text-primary)]">Waiting for Device</h2>
-        <p className="text-[var(--text-secondary)] text-center max-w-md">
-          Hardware mode is active. Connect your Arduino via serial port to begin receiving live sensor data.
-        </p>
-        <div className="flex items-center gap-2 mt-2">
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-sm text-amber-400 font-medium">Listening on COM port...</span>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 animate-fade-in-up">
+        <ConnectionPanel />
+        {connectionStatus === 'connected' && (
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-sm text-emerald-400 font-medium">Connected — waiting for first data packet...</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Simulation mode still loading
+  if (!sensorData) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <p className="text-[var(--text-muted)]">Initializing sensors...</p>
       </div>
     );
   }
@@ -166,7 +172,7 @@ export default function Dashboard() {
       {/* Timestamp */}
       <div className="text-center">
         <p className="text-xs text-[var(--text-muted)]">
-          Last updated: {new Date(d.timestamp).toLocaleTimeString()} · Simulation Mode ·{' '}
+          Last updated: {new Date(d.timestamp).toLocaleTimeString()} · {dataMode === 'hardware' ? 'Hardware Mode' : 'Simulation Mode'} ·{' '}
           {isStreaming ? 'Updating every 1s' : 'Stream paused'}
         </p>
       </div>

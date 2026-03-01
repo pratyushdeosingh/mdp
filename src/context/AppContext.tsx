@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import type { SensorData, LogEntry, DataMode, ThemeMode } from '../types';
+import type { SensorData, LogEntry, DataMode, ThemeMode, ConnectionStatus, SerialPortInfo } from '../types';
 import { generateSensorData, generateLogEntry } from '../utils/simulator';
+import { useSerialConnection } from '../hooks/useSerialConnection';
 
 interface AppContextType {
   sensorData: SensorData | null;
@@ -12,6 +13,15 @@ interface AppContextType {
   setDataMode: (mode: DataMode) => void;
   toggleTheme: () => void;
   setIsStreaming: (v: boolean) => void;
+  // Hardware connection
+  connectionStatus: ConnectionStatus;
+  availablePorts: SerialPortInfo[];
+  selectedPort: string;
+  setSelectedPort: (port: string) => void;
+  lastConnectionError: string | null;
+  refreshPorts: () => Promise<void>;
+  connectSerial: (port: string) => Promise<void>;
+  disconnectSerial: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -27,6 +37,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<ThemeMode>('dark');
   const [isStreaming, setIsStreaming] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Hardware data callback — receives SensorData from the WebSocket bridge
+  const handleHardwareData = useCallback((data: SensorData) => {
+    setSensorData(data);
+    setSensorHistory(prev => {
+      const updated = [...prev, data];
+      return updated.length > MAX_HISTORY ? updated.slice(-MAX_HISTORY) : updated;
+    });
+    setLogs(prev => {
+      const newLog: LogEntry = {
+        timestamp: Date.now(),
+        type: 'info',
+        message: `[HW] GPS: ${data.gps.latitude.toFixed(4)},${data.gps.longitude.toFixed(4)} | Spd: ${data.gps.speed} km/h | Sig: ${data.signalStrength}%`,
+      };
+      const updated = [...prev, newLog];
+      return updated.length > MAX_LOGS ? updated.slice(-MAX_LOGS) : updated;
+    });
+  }, []);
+
+  // Serial connection hook
+  const serial = useSerialConnection(handleHardwareData);
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => {
@@ -72,13 +103,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (intervalRef.current) clearInterval(intervalRef.current);
       };
     } else if (dataMode === 'hardware') {
-      // In hardware mode, clear interval and show waiting state
+      // Stop simulation interval
       if (intervalRef.current) clearInterval(intervalRef.current);
+      // Clear sensor data — will be populated by hardware connection
       setSensorData(null);
+      setSensorHistory([]);
       setLogs(prev => [...prev, {
         timestamp: Date.now(),
         type: 'warning',
-        message: '[SYS] Switched to HARDWARE mode – Waiting for device connection...',
+        message: '[SYS] Switched to HARDWARE mode – Use the connection panel to connect your Arduino.',
       }]);
     }
   }, [dataMode, isStreaming]);
@@ -95,6 +128,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setDataMode,
         toggleTheme,
         setIsStreaming,
+        // Hardware connection state
+        connectionStatus: serial.connectionStatus,
+        availablePorts: serial.availablePorts,
+        selectedPort: serial.selectedPort,
+        setSelectedPort: serial.setSelectedPort,
+        lastConnectionError: serial.lastError,
+        refreshPorts: serial.refreshPorts,
+        connectSerial: serial.connect,
+        disconnectSerial: serial.disconnect,
       }}
     >
       {children}

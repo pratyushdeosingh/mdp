@@ -167,19 +167,15 @@ function PPTViewerTab() {
     <div className="space-y-4">
       <h2 className="text-lg font-bold text-[var(--text-primary)]">Presentation Viewer</h2>
       <GlassCard className="p-0 overflow-hidden">
-        <div className="flex items-center justify-center h-96 bg-[var(--bg-secondary)] rounded-2xl">
-          <div className="text-center p-8">
-            <Presentation size={48} className="text-[var(--text-muted)] mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">PPT Viewer Placeholder</h3>
-            <p className="text-sm text-[var(--text-muted)] max-w-md">
-              Upload your project presentation (.pptx) and embed it here using
-              Google Slides or Microsoft Office Online iframe. This section will
-              display the actual Review III presentation slides.
-            </p>
-            <div className="mt-4 p-3 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs text-[var(--text-muted)] terminal-text">
-              {'<iframe src="https://docs.google.com/presentation/d/YOUR_PPT_ID/embed" />'}
-            </div>
-          </div>
+        <div className="w-full" style={{ height: '600px' }}>
+          <iframe
+            src="https://docs.google.com/presentation/d/e/2PACX-1vQwzo7CsKPlFXdhLu8-7LbdzcO5w03hOFQE2GQqbht-PAisAy4cKKAMy98n7k-7eQ/embed?start=false&loop=false&delayms=3000"
+            frameBorder="0"
+            width="100%"
+            height="100%"
+            allowFullScreen
+            style={{ borderRadius: '16px' }}
+          />
         </div>
       </GlassCard>
     </div>

@@ -1,0 +1,15 @@
+{
+  "name": "mdp-serial-bridge",
+  "version": "1.0.0",
+  "description": "Serial-to-WebSocket bridge for MDP IoT Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "serialport": "^12.0.0",
+    "ws": "^8.18.0"
+  }
+}
