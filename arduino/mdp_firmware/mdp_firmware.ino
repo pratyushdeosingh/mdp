@@ -1,43 +1,33 @@
 /*
  * MDP IoT Firmware — GPS & Accident Detection System
- * Review III — 100% Hardware Integration
+ * Review III — 100% Hardware Integration (Raw I2C MPU6050)
  *
  * Reads NEO-6M GPS, MPU6050 Accelerometer/Gyroscope
  * Detects accidents via acceleration threshold
  * Outputs one JSON line per second to Serial (USB) at 9600 baud
  *
- * Libraries required (install via Arduino IDE Library Manager):
- *   - TinyGPS++              (by Mikal Hart)
- *   - Adafruit MPU6050       (by Adafruit)
- *   - Adafruit Unified Sensor (by Adafruit)
- *   - ArduinoJson            (by Benoit Blanchon)
- *
  * Wiring:
- *   NEO-6M GPS    — TX → pin 4, RX → pin 3  (SoftwareSerial)
- *   MPU6050       — SDA → A4, SCL → A5       (I2C)
- *   Buzzer        — pin 8
- *   Cancel Button — pin 7 (INPUT_PULLUP, active LOW)
+ * NEO-6M GPS    — TX → pin 4, RX → pin 3
+ * MPU6050       — SDA → A4, SCL → A5
+ * Buzzer        — pin 8
  */
 
 #include <Wire.h>
-#include <Adafruit_MPU6050.h>
-#include <Adafruit_Sensor.h>
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
 
-// ── Pin Configuration ──────────────────────────────────────
+// ── Pin & Hardware Configuration ───────────────────────────
 #define GPS_RX_PIN   4
 #define GPS_TX_PIN   3
 #define BUZZER_PIN   8
-#define BUTTON_PIN   7
+const int MPU_ADDR = 0x68;
 
 // ── Accident Detection ─────────────────────────────────────
 #define ACCIDENT_THRESHOLD 25.0   // Total acceleration threshold (m/s²)
 #define ALERT_DURATION     10000  // 10 seconds buzzer alert window
 
 // ── Objects ────────────────────────────────────────────────
-Adafruit_MPU6050 mpu;
 TinyGPSPlus gps;
 SoftwareSerial gpsSerial(GPS_RX_PIN, GPS_TX_PIN);
 
@@ -54,17 +44,20 @@ void setup() {
   gpsSerial.begin(9600);
 
   pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
   digitalWrite(BUZZER_PIN, LOW);
 
   Wire.begin();
 
-  // Initialize MPU6050
-  if (mpu.begin()) {
+  // Initialize MPU6050 directly via I2C
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(0x6B);  // PWR_MGMT_1 register
+  Wire.write(0);     // Set to 0 to wake up
+  byte error = Wire.endTransmission(true);
+
+  if (error == 0) {
     mpuAvailable = true;
-    mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-    mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+  } else {
+    mpuAvailable = false;
   }
 
   // Startup message
@@ -82,16 +75,26 @@ void loop() {
     }
   }
 
-  // ── 2. Read accelerometer ──
+  // ── 2. Read accelerometer (Raw I2C) ──
   float ax = 0, ay = 0, az = 0;
   float totalAccel = 0;
 
   if (mpuAvailable) {
-    sensors_event_t a, g, temp;
-    mpu.getEvent(&a, &g, &temp);
-    ax = a.acceleration.x;
-    ay = a.acceleration.y;
-    az = a.acceleration.z;
+    Wire.beginTransmission(MPU_ADDR);
+    Wire.write(0x3B);  // Start at ACCEL_XOUT_H
+    Wire.endTransmission(false);
+    Wire.requestFrom(MPU_ADDR, 6, true);
+
+    // Read and combine raw bytes
+    int16_t raw_AcX = Wire.read() << 8 | Wire.read();  
+    int16_t raw_AcY = Wire.read() << 8 | Wire.read();  
+    int16_t raw_AcZ = Wire.read() << 8 | Wire.read();  
+
+    // Convert to m/s^2 (Assuming default +/- 2g scale)
+    ax = (raw_AcX / 16384.0) * 9.81;
+    ay = (raw_AcY / 16384.0) * 9.81;
+    az = (raw_AcZ / 16384.0) * 9.81;
+
     totalAccel = sqrt(ax * ax + ay * ay + az * az);
   }
 
@@ -103,13 +106,8 @@ void loop() {
 
   // Handle active accident alert
   if (accidentDetected) {
-    // Check cancel button (active LOW with pullup)
-    if (digitalRead(BUTTON_PIN) == LOW) {
-      accidentDetected = false;
-      digitalWrite(BUZZER_PIN, LOW);
-    }
-    // Auto-clear after alert duration
-    else if (millis() - accidentTime > ALERT_DURATION) {
+    // Auto-clear after alert duration (10 seconds)
+    if (millis() - accidentTime > ALERT_DURATION) {
       accidentDetected = false;
       digitalWrite(BUZZER_PIN, LOW);
     }
@@ -150,8 +148,8 @@ void loop() {
   doc["az"] = serialized(String(az, 3));
   doc["ta"] = serialized(String(totalAccel, 2));
   doc["ad"] = accidentDetected ? 1 : 0;
-  doc["tmp"] = 0;  // Replace with actual temp sensor if available
+  doc["tmp"] = 0;  // Placeholder for temp
 
   serializeJson(doc, Serial);
-  Serial.println();  // Newline delimiter — bridge reads line-by-line
+  Serial.println();  // Newline delimiter
 }
