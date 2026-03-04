@@ -50,15 +50,24 @@ body {
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
   min-height: 100vh;
+  margin: 0;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--text-muted);
   border-radius: 3px;
@@ -72,39 +81,82 @@ body {
   border-radius: 16px;
   transition: all 0.3s ease;
 }
+
 .glass-card:hover {
   border-color: var(--accent);
   box-shadow: 0 0 20px var(--accent-glow);
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--success); }
-  50% { opacity: 0.6; box-shadow: 0 0 12px var(--success); }
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 4px var(--success);
+  }
+
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 12px var(--success);
+  }
 }
+
 .pulse-live {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
-.stagger-children > * {
+.stagger-children>* {
   animation: fadeInUp 0.4s ease-out forwards;
   opacity: 0;
 }
-.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
-.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
-.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
-.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
-.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
-.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
-.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
-.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+
+.stagger-children>*:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.stagger-children>*:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.stagger-children>*:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.stagger-children>*:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.stagger-children>*:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.stagger-children>*:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+.stagger-children>*:nth-child(7) {
+  animation-delay: 0.35s;
+}
+
+.stagger-children>*:nth-child(8) {
+  animation-delay: 0.4s;
+}
 
 .terminal-text {
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
@@ -113,6 +165,7 @@ body {
 .dark .leaflet-tile-pane {
   filter: brightness(0.7) contrast(1.1) saturate(0.8);
 }
+
 .dark .leaflet-control-zoom a {
   background: var(--bg-secondary) !important;
   color: var(--text-primary) !important;
@@ -122,4 +175,49 @@ body {
 .dark .recharts-default-tooltip {
   background: var(--bg-secondary) !important;
   border-color: var(--border-color) !important;
+}
+
+.threshold-bar {
+  transition: width 0.5s ease-out;
+}
+
+/* Gauge animations */
+.gauge-container {
+  transition: filter 0.5s ease;
+}
+
+.gauge-alert {
+  filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.3));
+}
+
+@keyframes needlePulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.gauge-needle-pulse {
+  animation: needlePulse 0.8s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(239, 68, 68, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.5);
+  }
+}
+
+.gauge-status-pulse {
+  animation: statusPulse 1.5s ease-in-out infinite;
 }

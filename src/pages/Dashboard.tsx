@@ -7,12 +7,15 @@ import {
   Battery,
   Thermometer,
   Radio,
-  Shield,
+  Mountain,
+  Satellite,
+  Clock,
 } from 'lucide-react';
 import MetricCard from '../components/MetricCard';
 import StatusBadge from '../components/StatusBadge';
 import GlassCard from '../components/GlassCard';
 import ConnectionPanel from '../components/ConnectionPanel';
+import AccelerationGauge from '../components/AccelerationGauge';
 import { useAppContext } from '../context/AppContext';
 
 export default function Dashboard() {
@@ -45,37 +48,49 @@ export default function Dashboard() {
   const d = sensorData;
 
   return (
-    <div className="space-y-6">
+    <div className="grid h-full min-h-full grid-rows-[auto_auto_1fr_auto] gap-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="relative flex flex-col items-center justify-center text-center">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">System Dashboard</h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
-            Real-time telemetry from IoT sensor array
+          <h1 className="text-xl font-bold text-[var(--text-primary)]">System Dashboard</h1>
+          <p className="text-sm text-[var(--text-muted)] mt-1 mb-6">
+            Real-time telemetry from Smart Safety Helmet sensors
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="sm:absolute sm:right-0 sm:top-0 flex items-center gap-3 mt-4 sm:mt-1">
           <StatusBadge status={d.systemStatus} size="md" />
           <button
             onClick={() => setIsStreaming(!isStreaming)}
-            className={`px-4 py-2 rounded-xl text-xs font-medium border transition-all ${
-              isStreaming
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                : 'bg-red-500/10 border-red-500/30 text-red-400'
-            }`}
+            className={`px-4 py-2 rounded-xl text-xs font-medium border transition-all ${isStreaming
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+              : 'bg-red-500/10 border-red-500/30 text-red-400'
+              }`}
           >
             {isStreaming ? 'Streaming' : 'Paused'}
           </button>
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
+      {/* Accident Detection Alert */}
+      {d.accidentDetected && (
+        <div className="p-5 rounded-2xl bg-red-500/10 border-2 border-red-500/40 flex items-center gap-4 animate-pulse">
+          <div className="p-3 rounded-xl bg-red-500/20">
+            <AlertTriangle size={28} className="text-red-400" />
+          </div>
+          <div>
+            <p className="text-base font-bold text-red-400">⚠ ACCIDENT DETECTED</p>
+            <p className="text-sm text-red-400/80 mt-0.5">Total acceleration exceeded threshold (25 m/s²). Buzzer alert active.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Metrics Grid — GPS & Motion */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children mb-2">
         <MetricCard
           label="Latitude"
           value={d.gps.latitude}
           unit="deg"
-          icon={<MapPin size={20} />}
+          icon={<MapPin size={24} />}
           color="text-blue-400"
           pulse
         />
@@ -83,7 +98,7 @@ export default function Dashboard() {
           label="Longitude"
           value={d.gps.longitude}
           unit="deg"
-          icon={<Navigation size={20} />}
+          icon={<Navigation size={24} />}
           color="text-cyan-400"
           pulse
         />
@@ -91,118 +106,154 @@ export default function Dashboard() {
           label="Speed"
           value={d.gps.speed}
           unit="km/h"
-          icon={<Gauge size={20} />}
+          icon={<Gauge size={24} />}
           color="text-emerald-400"
         />
         <MetricCard
           label="Altitude"
           value={d.gps.altitude}
           unit="m"
-          icon={<MapPin size={20} />}
+          icon={<Mountain size={24} />}
           color="text-purple-400"
         />
       </div>
 
-      {/* Accident Detection Alert */}
-      {d.accidentDetected && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3 animate-pulse">
-          <AlertTriangle size={24} className="text-red-400 shrink-0" />
-          <div>
-            <p className="text-sm font-bold text-red-400">ACCIDENT DETECTED</p>
-            <p className="text-xs text-red-400/80">Total acceleration exceeded threshold (25 m/s²). Buzzer alert active.</p>
-          </div>
-        </div>
-      )}
+      {/* Accelerometer + System — Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-      {/* Accelerometer + System */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <GlassCard>
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-            <Activity size={16} className="text-orange-400" />
-            Accelerometer Readings
+        {/* Accelerometer Card */}
+        <GlassCard className="p-8 flex flex-col">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] tracking-wider mb-6 flex items-center gap-2 shrink-0">
+            <Activity size={18} className="text-orange-400" />
+            ACCELEROMETER READINGS
           </h3>
-          <div className="grid grid-cols-3 gap-3">
+
+          {/* Axis Values */}
+          <div className="grid grid-cols-3 gap-6 mb-8 shrink-0">
             {(['x', 'y', 'z'] as const).map(axis => (
-              <div key={axis} className="text-center p-3 rounded-xl bg-[var(--bg-secondary)]">
-                <p className="text-xs text-[var(--text-muted)] uppercase mb-1">Axis {axis.toUpperCase()}</p>
-                <p className="text-2xl font-bold text-[var(--text-primary)]">
-                  {d.accelerometer[axis]}
-                </p>
-                <p className="text-[10px] text-[var(--text-muted)]">m/s²</p>
+              <div key={axis} className="text-center p-5 rounded-2xl bg-[var(--bg-secondary)]">
+                <p className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-2">Axis {axis.toUpperCase()}</p>
+                <div className="flex items-baseline justify-center gap-1.5">
+                  <span className="text-2xl font-bold text-[var(--text-primary)] leading-tight">{d.accelerometer[axis]}</span>
+                  <span className="text-xs font-medium text-[var(--text-muted)]">m/s²</span>
+                </div>
               </div>
             ))}
           </div>
-          {/* Total Acceleration */}
-          <div className="mt-3 p-3 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Shield size={14} className={d.accidentDetected ? 'text-red-400' : 'text-emerald-400'} />
-              <span className="text-sm text-[var(--text-secondary)]">Total Acceleration</span>
+
+          {/* Acceleration Gauge */}
+          <div className="flex-1 flex flex-col justify-center items-center py-4 min-h-[260px]">
+            <div className="text-center mb-2 z-10">
+              <span className="text-sm font-semibold text-[var(--text-primary)] tracking-wide">Resultant Acceleration</span>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5 opacity-80">Calculated from X, Y, Z axes (√(ax² + ay² + az²))</p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-[var(--text-primary)]">{d.totalAcceleration} m/s²</span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                d.accidentDetected
-                  ? 'bg-red-500/15 text-red-400'
-                  : 'bg-emerald-500/15 text-emerald-400'
-              }`}>
-                {d.accidentDetected ? 'ALERT' : 'SAFE'}
-              </span>
-            </div>
+            <AccelerationGauge
+              value={d.totalAcceleration}
+              maxValue={30}
+              threshold={25}
+              accidentDetected={d.accidentDetected}
+            />
           </div>
         </GlassCard>
 
-        <GlassCard>
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-            <Radio size={16} className="text-blue-400" />
-            System Vitals
+        {/* System Vitals Card */}
+        <GlassCard className="p-8 flex flex-col">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] tracking-wider mb-6 flex items-center gap-2 shrink-0">
+            <Radio size={18} className="text-blue-400" />
+            SYSTEM VITALS
           </h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)]">
-              <div className="flex items-center gap-2">
-                <Activity size={14} className="text-blue-400" />
-                <span className="text-sm text-[var(--text-secondary)]">Accident Detection</span>
+          <div className="flex-1 flex flex-col justify-center gap-5">
+            {/* Accident Detection */}
+            <div className="flex items-center justify-between py-4 px-5 rounded-2xl bg-[var(--bg-secondary)]">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className={`p-2 rounded-lg shrink-0 ${d.accidentDetected ? 'bg-red-500/15' : 'bg-blue-500/15'}`}>
+                  <Activity size={18} className={d.accidentDetected ? 'text-red-400' : 'text-blue-400'} />
+                </div>
+                <span className="text-sm font-medium text-[var(--text-secondary)]">Accident Detection</span>
               </div>
-              <span className={`text-sm font-medium px-3 py-1 rounded-full ${
-                d.accidentDetected
-                  ? 'bg-red-500/15 text-red-400'
-                  : 'bg-emerald-500/15 text-emerald-400'
-              }`}>
+              <span className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ${d.accidentDetected
+                ? 'bg-red-500/15 text-red-400'
+                : 'bg-emerald-500/15 text-emerald-400'
+                }`}>
                 {d.accidentDetected ? 'TRIGGERED' : 'Normal'}
               </span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)]">
-              <div className="flex items-center gap-2">
-                <Battery size={14} className="text-emerald-400" />
-                <span className="text-sm text-[var(--text-secondary)]">Battery Level</span>
+
+            {/* Battery Level */}
+            <div className="flex items-center justify-between py-4 px-5 rounded-2xl bg-[var(--bg-secondary)]">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-lg bg-emerald-500/15 shrink-0">
+                  <Battery size={18} className="text-emerald-400" />
+                </div>
+                <span className="text-sm font-medium text-[var(--text-secondary)]">Battery</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-24 h-2 rounded-full bg-[var(--border-color)] overflow-hidden">
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="w-24 h-3 rounded-full bg-[var(--border-color)] overflow-hidden">
                   <div
                     className="h-full rounded-full bg-emerald-400 transition-all duration-500"
                     style={{ width: `${d.batteryLevel}%` }}
                   />
                 </div>
-                <span className="text-sm font-medium text-[var(--text-primary)]">{d.batteryLevel}%</span>
+                <span className="text-sm font-bold text-[var(--text-primary)]">{d.batteryLevel}%</span>
               </div>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)]">
-              <div className="flex items-center gap-2">
-                <Thermometer size={14} className="text-red-400" />
-                <span className="text-sm text-[var(--text-secondary)]">Temperature</span>
+
+            {/* Temperature */}
+            <div className="flex items-center justify-between py-4 px-5 rounded-2xl bg-[var(--bg-secondary)]">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-lg bg-red-500/15 shrink-0">
+                  <Thermometer size={18} className="text-red-400" />
+                </div>
+                <span className="text-sm font-medium text-[var(--text-secondary)]">Temperature</span>
               </div>
-              <span className="text-sm font-medium text-[var(--text-primary)]">{d.temperature} °C</span>
+              <span className="text-sm font-bold text-[var(--text-primary)] shrink-0">{d.temperature} °C</span>
+            </div>
+
+            {/* System Status */}
+            <div className="flex items-center justify-between py-4 px-5 rounded-2xl bg-[var(--bg-secondary)]">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-lg bg-purple-500/15 shrink-0">
+                  <Satellite size={18} className="text-purple-400" />
+                </div>
+                <span className="text-sm font-medium text-[var(--text-secondary)]">System Status</span>
+              </div>
+              <StatusBadge status={d.systemStatus} size="md" />
             </div>
           </div>
         </GlassCard>
       </div>
 
-      {/* Timestamp */}
-      <div className="text-center">
-        <p className="text-xs text-[var(--text-muted)]">
-          Last updated: {new Date(d.timestamp).toLocaleTimeString()} · {dataMode === 'hardware' ? 'Hardware Mode' : 'Simulation Mode'} ·{' '}
-          {isStreaming ? 'Updating every 1s' : 'Stream paused'}
-        </p>
-      </div>
+      {/* GPS Info Strip */}
+      <GlassCard className="p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2.5">
+              <Satellite size={16} className="text-blue-400" />
+              <span className="text-sm text-[var(--text-muted)]">GPS</span>
+              <span className="text-sm font-semibold text-emerald-400">Active</span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <MapPin size={16} className="text-cyan-400" />
+              <span className="text-sm text-[var(--text-muted)]">Position</span>
+              <span className="text-sm font-medium text-[var(--text-primary)]">
+                {d.gps.latitude}°, {d.gps.longitude}°
+              </span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <Gauge size={16} className="text-emerald-400" />
+              <span className="text-sm text-[var(--text-muted)]">Velocity</span>
+              <span className="text-sm font-medium text-[var(--text-primary)]">{d.gps.speed} km/h</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <Clock size={16} className="text-[var(--text-muted)]" />
+            <span className="text-sm text-[var(--text-muted)]">
+              {new Date(d.timestamp).toLocaleTimeString()} · {dataMode === 'hardware' ? 'Hardware' : 'Simulation'} ·{' '}
+              {isStreaming ? 'Live' : 'Paused'}
+            </span>
+          </div>
+        </div>
+      </GlassCard>
     </div>
   );
 }

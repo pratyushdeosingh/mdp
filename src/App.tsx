@@ -11,21 +11,23 @@ import Documentation from './pages/Documentation';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppProvider>
-        <Routes>
-          <Route element={<DashboardLayout />}>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/map" element={<LiveMap />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/serial" element={<SerialMonitor />} />
-            <Route path="/hardware" element={<HardwareStatus />} />
-            <Route path="/docs" element={<Documentation />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AppProvider>
-    </BrowserRouter>
+    <div className="flex flex-col w-full min-h-screen h-full">
+      <BrowserRouter>
+        <AppProvider>
+          <Routes>
+            <Route element={<DashboardLayout />}>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/map" element={<LiveMap />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/serial" element={<SerialMonitor />} />
+              <Route path="/hardware" element={<HardwareStatus />} />
+              <Route path="/docs" element={<Documentation />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AppProvider>
+      </BrowserRouter>
+    </div>
   );
 }
