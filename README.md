@@ -1,12 +1,13 @@
-# MDP - Motor Dynamics Platform
+# MDP — Smart Safety Helmet
 
-A real-time IoT vehicle telemetry dashboard for GPS tracking, motion monitoring, and accident detection. Built with React + TypeScript for the frontend and a Node.js bridge server that connects to an Arduino over USB serial.
+A **Multidisciplinary Project (MDP)** that implements an IoT-based safety system designed to reduce fatalities caused by delayed emergency response during road accidents. Built with an Arduino-based embedded system for the hardware layer, and a React + TypeScript real-time dashboard for monitoring and visualization.
 
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Problem Statement](#problem-statement)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
@@ -22,15 +23,27 @@ A real-time IoT vehicle telemetry dashboard for GPS tracking, motion monitoring,
 - [Dashboard Pages](#dashboard-pages)
 - [Arduino Data Format](#arduino-data-format)
 - [Architecture](#architecture)
+- [Current Limitations](#current-limitations)
+- [Future Scope](#future-scope)
 
 ---
 
 ## Overview
 
-MDP streams live sensor data from an Arduino Uno (GPS + accelerometer) to a web dashboard via a WebSocket bridge. It supports two modes:
+The **Smart Safety Helmet** is an IoT-based safety system that integrates sensors into a helmet to continuously monitor a rider's movement. An **MPU6050 accelerometer and gyroscope** detects sudden impacts, abnormal motion, or crashes. When such an event is detected, the system triggers an emergency response mechanism — including a buzzer alert with a cancellable countdown timer.
 
-- **Simulation Mode** — no hardware needed, generates fake GPS/sensor data for testing
-- **Hardware Mode** — connects to a real Arduino over USB serial and streams live data
+The core controller is an **Arduino Uno R3** microcontroller, which processes sensor data and controls the communication modules. A **NEO-6M GPS module** provides real-time location tracking. All sensor data is streamed to a web-based dashboard via a Node.js WebSocket bridge server for real-time visualization and monitoring.
+
+The system supports two modes:
+
+- **Simulation Mode** — no hardware needed, generates simulated GPS/sensor data for testing and development
+- **Hardware Mode** — connects to a real Arduino over USB serial and streams live data from the helmet
+
+---
+
+## Problem Statement
+
+Many accident victims are unable to call for help due to severe injuries or unconsciousness, which leads to critical delays in medical assistance. This project aims to bridge that gap by **automatically detecting accidents and triggering emergency alerts**, thereby reducing emergency response time and potentially saving lives.
 
 ---
 
@@ -38,7 +51,8 @@ MDP streams live sensor data from an Arduino Uno (GPS + accelerometer) to a web 
 
 - Real-time GPS tracking with interactive map and trail history
 - Accelerometer data visualization (X, Y, Z axes)
-- Accident detection with buzzer alert (threshold: 25 m/s²)
+- Automatic accident detection with buzzer alert (threshold: 25 m/s²)
+- 10-second cancel countdown to prevent false alarms
 - Historical analytics charts (last 60 seconds of data)
 - Serial monitor with color-coded log messages
 - Hardware status panel showing module integration info
@@ -206,7 +220,7 @@ Requires the Arduino to be flashed and the bridge server running.
 | **Analytics** | Historical charts for the last 60 seconds of accelerometer, speed, and altitude data |
 | **Serial Monitor** | Terminal-style log viewer with color-coded info / warning / error / success messages |
 | **Hardware Status** | Details of all connected hardware modules and integration status |
-| **Documentation** | Project documentation and reference |
+| **Documentation** | Project documentation, abstract, diagrams, and roadmap |
 
 ---
 
@@ -278,3 +292,21 @@ Simulation Mode:
         v
   React Dashboard (localhost:5173)
 ```
+
+---
+
+## Current Limitations
+
+- **GSM communication not implemented** — The SIM module is part of the hardware design but a SIM card is not currently available. Therefore, the GSM-based automated SOS messaging (sending rider's GPS location to emergency contacts/hospitals) is not functional in the current prototype.
+- The present version focuses on **accident detection using the MPU6050 sensor** along with alert mechanisms (buzzer, dashboard notifications).
+
+---
+
+## Future Scope
+
+- **GSM/SIM Module Integration** — Send automated SOS messages with GPS coordinates to emergency contacts or hospitals when an accident is confirmed
+- **Mobile App Companion** — Push notifications and real-time monitoring from a mobile device
+- **Cloud IoT Platform Integration** — Data logging and historical analysis via cloud backends
+- **PCB Design** — Compact form factor for embedding into a production helmet
+- **Battery & Power Management** — Rechargeable battery with sleep modes for extended usage
+- **Machine Learning** — Driving behavior analysis and improved accident detection accuracy

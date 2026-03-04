@@ -13,12 +13,12 @@ export function generateSystemReport(
   // Title
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text('MDP IoT System Report', 105, 20, { align: 'center' });
+  doc.text('Smart Safety Helmet — System Report', 105, 20, { align: 'center' });
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text(`Generated: ${now.toLocaleString()}`, 105, 28, { align: 'center' });
-  doc.text('GPS & Accident Detection System – Review III', 105, 34, { align: 'center' });
+  doc.text('IoT Accident Detection & GPS Tracking – MDP Review III', 105, 34, { align: 'center' });
 
   // Horizontal line
   doc.setDrawColor(59, 130, 246);
@@ -83,5 +83,5 @@ export function generateSystemReport(
   doc.setFont('helvetica', 'bold');
   doc.text('Project Status: Review III – 100% Execution Achieved', 20, 78);
 
-  doc.save(`MDP_System_Report_${now.toISOString().split('T')[0]}.pdf`);
+  doc.save(`Smart_Safety_Helmet_Report_${now.toISOString().split('T')[0]}.pdf`);
 }

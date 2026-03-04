@@ -15,28 +15,37 @@ function AbstractTab() {
     <div className="space-y-4 text-sm text-[var(--text-secondary)] leading-relaxed">
       <h2 className="text-lg font-bold text-[var(--text-primary)]">Abstract</h2>
       <p>
-        This project presents the design and implementation of a <strong className="text-[var(--text-primary)]">GPS and Motion-Based
-        Vehicle Tracking System with Accident Detection</strong> using embedded IoT components. The system integrates a <strong className="text-[var(--text-primary)]">NEO-6M GPS
-        module</strong> for real-time location tracking and an <strong className="text-[var(--text-primary)]">MPU6050 accelerometer/gyroscope</strong> for
-        6-axis motion detection and accident event triggering, all orchestrated by an <strong className="text-[var(--text-primary)]">Arduino Uno R3</strong> microcontroller.
+        The <strong className="text-[var(--text-primary)]">Smart Safety Helmet</strong> is an IoT-based safety system
+        designed to reduce fatalities caused by delayed emergency response during road accidents. Many accident victims
+        are unable to call for help due to severe injuries or unconsciousness, which leads to delays in medical assistance.
+        This project aims to bridge that gap by <strong className="text-[var(--text-primary)]">automatically detecting
+          accidents and sending emergency alerts</strong>.
       </p>
       <p>
-        The primary objective is to create a low-cost, reliable vehicle tracking and safety
-        solution capable of detecting sudden impacts and potential collisions by monitoring total
-        acceleration. When the threshold (25 m/s²) is exceeded, the system triggers a <strong className="text-[var(--text-primary)]">buzzer alert</strong> with
-        a 10-second countdown, which can be cancelled via a <strong className="text-[var(--text-primary)]">manual button</strong> to prevent false alarms.
+        The system uses sensors integrated into a helmet to continuously monitor the rider's movement. An
+        <strong className="text-[var(--text-primary)]"> MPU6050 accelerometer and gyroscope</strong> detects sudden
+        impacts, abnormal motion, or crashes. When such an event is detected, the system triggers an emergency response
+        mechanism. The core controller is an <strong className="text-[var(--text-primary)]">Arduino Uno R3</strong>
+        microcontroller, which processes sensor data and controls the communication modules.
       </p>
       <p>
-        As of Review III, <strong className="text-[var(--text-primary)]">100% of the project execution is complete</strong>. All hardware
-        modules (Arduino Uno, MPU6050, NEO-6M GPS, Buzzer, Cancel Button) have been successfully
-        integrated and tested. The Arduino outputs JSON-formatted sensor data via USB serial at 9600 baud,
-        which is received by a Node.js bridge server and forwarded to the web dashboard via WebSocket
-        in real-time.
+        In the complete design, the helmet also includes <strong className="text-[var(--text-primary)]">GPS and GSM
+          communication modules</strong> to send an automated SOS message containing the rider's location to emergency
+        contacts or hospitals. The <strong className="text-[var(--text-primary)]">NEO-6M GPS module</strong> provides
+        real-time location tracking, while all sensor data is streamed to a web dashboard via a Node.js WebSocket bridge
+        server for real-time visualization.
       </p>
       <p>
-        The dashboard features real-time visualization of sensor data, interactive map tracking,
-        accelerometer analytics with accident detection monitoring, a serial data monitor, and comprehensive
-        hardware status tracking — demonstrating the complete hardware-software integration pipeline.
+        However, the GSM communication functionality is currently not implemented in the working prototype because a
+        SIM card is not available for the SIM module. Therefore, the present version focuses mainly on
+        <strong className="text-[var(--text-primary)]"> accident detection using the MPU6050 sensor</strong> along with
+        alert mechanisms such as buzzers and dashboard notifications, while the GSM-based SOS messaging feature remains
+        part of the planned future implementation.
+      </p>
+      <p>
+        Overall, the Smart Safety Helmet demonstrates how embedded systems, sensors, and IoT technologies can be combined
+        to improve road safety. By enabling automatic accident detection and faster emergency response, the system has the
+        potential to reduce response time, increase rider safety, and contribute to smarter transportation systems.
       </p>
     </div>
   );
@@ -58,11 +67,10 @@ function BlockDiagramTab() {
               ].map(b => (
                 <div
                   key={b.label}
-                  className={`p-3 rounded-xl border text-center ${
-                    b.color === 'blue'
+                  className={`p-3 rounded-xl border text-center ${b.color === 'blue'
                       ? 'border-blue-500/30 bg-blue-500/10'
                       : 'border-orange-500/30 bg-orange-500/10'
-                  }`}
+                    }`}
                 >
                   <p className="text-xs font-semibold text-[var(--text-primary)]">{b.label}</p>
                   <p className="text-[10px] text-[var(--text-muted)]">{b.sub}</p>
@@ -149,17 +157,16 @@ function FlowchartTab() {
             <div key={i} className="flex flex-col items-center gap-2 w-full">
               {i > 0 && <div className="text-[var(--text-muted)]">↓</div>}
               <div
-                className={`p-3 border text-center w-full max-w-xs ${
-                  step.diamond
+                className={`p-3 border text-center w-full max-w-xs ${step.diamond
                     ? `border-${step.color}-500/30 bg-${step.color}-500/10 rounded-xl`
                     : `border-${step.color}-500/30 bg-${step.color}-500/10 ${step.shape}`
-                }`}
+                  }`}
                 style={{
                   borderColor: `var(--${step.color === 'emerald' ? 'success' : step.color === 'amber' ? 'warning' : 'accent'})`,
                   background: step.color === 'emerald' ? 'rgba(16,185,129,0.1)' :
                     step.color === 'amber' ? 'rgba(245,158,11,0.1)' :
-                    step.color === 'red' ? 'rgba(239,68,68,0.1)' :
-                    step.color === 'cyan' ? 'rgba(6,182,212,0.1)' : 'rgba(59,130,246,0.1)',
+                      step.color === 'red' ? 'rgba(239,68,68,0.1)' :
+                        step.color === 'cyan' ? 'rgba(6,182,212,0.1)' : 'rgba(59,130,246,0.1)',
                 }}
               >
                 <p className="text-xs font-medium text-[var(--text-primary)]">
@@ -287,11 +294,10 @@ export default function Documentation() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-              activeTab === tab.id
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${activeTab === tab.id
                 ? 'bg-blue-500 text-white shadow-sm'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)]'
-            }`}
+              }`}
           >
             <tab.icon size={14} />
             {tab.label}

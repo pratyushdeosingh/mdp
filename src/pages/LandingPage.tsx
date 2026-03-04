@@ -39,20 +39,20 @@ export default function LandingPage() {
 
         {/* Title */}
         <h1 className="text-4xl md:text-6xl font-extrabold text-[var(--text-primary)] mb-4 leading-tight">
-          GPS & Motion
+          Smart Safety
           <br />
           <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            Tracking System
+            Helmet
           </span>
         </h1>
 
         {/* Subtitle */}
         <p className="text-lg md:text-xl text-[var(--text-secondary)] mb-3 max-w-xl mx-auto">
-          Basic Multidisciplinary Project — Review III
+          Multidisciplinary Project (MDP) — Review III
         </p>
         <p className="text-sm text-[var(--text-muted)] mb-8 max-w-lg mx-auto">
-          Real-time IoT dashboard integrating GPS (NEO-6M), accelerometer (MPU6050),
-          and accident detection with Arduino Uno for vehicle tracking, motion sensing, and safety alerting.
+          IoT-based accident detection and emergency alert system integrating GPS (NEO-6M),
+          accelerometer (MPU6050), and Arduino Uno — designed to improve rider safety and reduce emergency response time.
         </p>
 
         {/* Execution badge */}

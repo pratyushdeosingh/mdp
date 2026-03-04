@@ -60,9 +60,8 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
 
   return (
     <aside
-      className={`fixed top-0 left-0 h-screen z-40 flex flex-col transition-all duration-300 ${
-        collapsed ? 'w-16' : 'w-60'
-      }`}
+      className={`fixed top-0 left-0 h-screen z-40 flex flex-col transition-all duration-300 ${collapsed ? 'w-16' : 'w-60'
+        }`}
       style={{
         background: 'var(--glass-bg)',
         backdropFilter: 'blur(20px)',
@@ -76,7 +75,7 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <h2 className="text-sm font-bold text-[var(--text-primary)] truncate">MDP IoT</h2>
+            <h2 className="text-sm font-bold text-[var(--text-primary)] truncate">Smart Helmet</h2>
             <p className="text-[10px] text-[var(--text-muted)]">Review III</p>
           </div>
         )}
@@ -88,21 +87,19 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
           <div className="flex rounded-lg overflow-hidden border border-[var(--border-color)]">
             <button
               onClick={() => setDataMode('simulation')}
-              className={`flex-1 text-[10px] font-medium py-1.5 transition-all ${
-                dataMode === 'simulation'
+              className={`flex-1 text-[10px] font-medium py-1.5 transition-all ${dataMode === 'simulation'
                   ? 'bg-blue-500 text-white'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
+                }`}
             >
               Simulation
             </button>
             <button
               onClick={() => setDataMode('hardware')}
-              className={`flex-1 text-[10px] font-medium py-1.5 transition-all ${
-                dataMode === 'hardware'
+              className={`flex-1 text-[10px] font-medium py-1.5 transition-all ${dataMode === 'hardware'
                   ? 'bg-emerald-500 text-white'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
+                }`}
             >
               Hardware
             </button>
@@ -118,15 +115,14 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
         )}
         {dataMode === 'hardware' && !collapsed && (
           <div className="flex items-center gap-1.5 mt-2 px-1">
-            <span className={`w-1.5 h-1.5 rounded-full ${
-              connectionStatus === 'connected' ? 'bg-emerald-400 pulse-live' :
-              connectionStatus === 'connecting' ? 'bg-amber-400 animate-pulse' :
-              'bg-red-400'
-            }`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${connectionStatus === 'connected' ? 'bg-emerald-400 pulse-live' :
+                connectionStatus === 'connecting' ? 'bg-amber-400 animate-pulse' :
+                  'bg-red-400'
+              }`} />
             <span className="text-[9px] text-[var(--text-muted)]">
               {connectionStatus === 'connected' ? 'Device connected' :
-               connectionStatus === 'connecting' ? 'Connecting...' :
-               'No device'}
+                connectionStatus === 'connecting' ? 'Connecting...' :
+                  'No device'}
             </span>
           </div>
         )}
@@ -139,10 +135,9 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-blue-500/15 text-blue-400'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
+                ? 'bg-blue-500/15 text-blue-400'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
               } ${collapsed ? 'justify-center' : ''}`
             }
             title={item.label}

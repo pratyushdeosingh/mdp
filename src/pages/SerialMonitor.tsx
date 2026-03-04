@@ -79,7 +79,7 @@ export default function SerialMonitor() {
           {/* Initial boot sequence */}
           <div className="text-[var(--text-muted)] mb-2 opacity-50">
             <p>═══════════════════════════════════════════</p>
-            <p>  MDP IoT System — Serial Monitor v1.0</p>
+            <p>  Smart Safety Helmet — Serial Monitor v1.0</p>
             <p>  GPS & Accident Detection System</p>
             <p>  Baud Rate: 9600 | Mode: {dataMode.toUpperCase()}</p>
             <p>═══════════════════════════════════════════</p>
