@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useAppContext } from '../context/AppContext';
 import GlassCard from '../components/GlassCard';
 import { MapPin, Navigation, Gauge } from 'lucide-react';
+import 'leaflet/dist/leaflet.css';
 
 // Custom marker icon
 const markerIcon = new L.Icon({
@@ -28,7 +29,6 @@ function MapUpdater({ lat, lng }: { lat: number; lng: number }) {
 
 export default function LiveMap() {
   const { sensorData, sensorHistory } = useAppContext();
-  const mapRef = useRef<L.Map | null>(null);
 
   if (!sensorData) {
     return (
@@ -62,7 +62,6 @@ export default function LiveMap() {
           center={[latitude, longitude]}
           zoom={15}
           style={{ height: '100%', width: '100%', borderRadius: '16px' }}
-          ref={mapRef}
           zoomControl={true}
         >
           <TileLayer

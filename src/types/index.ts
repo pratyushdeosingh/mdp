@@ -48,6 +48,7 @@ export interface ArduinoRawData {
   az: number;
   ta: number;
   ad: number;
+  bat?: number;
   tmp: number;
 }
 

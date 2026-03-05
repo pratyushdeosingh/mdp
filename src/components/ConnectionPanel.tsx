@@ -25,15 +25,15 @@ export default function ConnectionPanel() {
 
   const statusColor =
     connectionStatus === 'connected' ? 'bg-emerald-400' :
-    connectionStatus === 'connecting' ? 'bg-amber-400 animate-pulse' :
-    connectionStatus === 'error' ? 'bg-red-400' :
-    'bg-gray-400';
+      connectionStatus === 'connecting' ? 'bg-amber-400 animate-pulse' :
+        connectionStatus === 'error' ? 'bg-red-400' :
+          'bg-gray-400';
 
   const statusLabel =
     connectionStatus === 'connected' ? 'Connected' :
-    connectionStatus === 'connecting' ? 'Connecting...' :
-    connectionStatus === 'error' ? 'Error' :
-    'Disconnected';
+      connectionStatus === 'connecting' ? 'Connecting...' :
+        connectionStatus === 'error' ? 'Error' :
+          'Disconnected';
 
   return (
     <GlassCard className="w-full max-w-lg">
@@ -56,6 +56,7 @@ export default function ConnectionPanel() {
       <div className="space-y-3">
         <div className="flex gap-2">
           <select
+            aria-label="Select Serial Port"
             value={selectedPort}
             onChange={(e) => setSelectedPort(e.target.value)}
             disabled={isConnected || isConnecting}
@@ -74,6 +75,7 @@ export default function ConnectionPanel() {
           <button
             onClick={refreshPorts}
             disabled={isConnected || isConnecting}
+            aria-label="Refresh available serial ports"
             className="p-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-blue-500 transition-all disabled:opacity-50"
             title="Refresh ports"
           >

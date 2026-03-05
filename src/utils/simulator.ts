@@ -7,6 +7,13 @@ let currentLat = BASE_LAT;
 let currentLng = BASE_LNG;
 let heading = Math.random() * 360;
 
+export function resetSimulatorState() {
+  currentLat = BASE_LAT;
+  currentLng = BASE_LNG;
+  heading = Math.random() * 360;
+  logCounter = 0;
+}
+
 function clamp(val: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, val));
 }

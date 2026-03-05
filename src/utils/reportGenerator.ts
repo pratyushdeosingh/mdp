@@ -30,6 +30,8 @@ export function generateSystemReport(
   doc.setFont('helvetica', 'bold');
   doc.text('Current Sensor Readings', 20, 48);
 
+  let finalY = 160;
+
   autoTable(doc, {
     startY: 52,
     head: [['Parameter', 'Value', 'Unit']],
@@ -49,10 +51,12 @@ export function generateSystemReport(
     ],
     theme: 'striped',
     headStyles: { fillColor: [59, 130, 246] },
+    didDrawPage: (data) => {
+      if (data.cursor) finalY = data.cursor.y;
+    }
   });
 
   // Hardware Status
-  const finalY = (doc as unknown as Record<string, number>).lastAutoTable?.finalY ?? 160;
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('Hardware Module Status', 20, finalY + 15);

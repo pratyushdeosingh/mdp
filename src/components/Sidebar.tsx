@@ -17,6 +17,7 @@ import {
 import { useAppContext } from '../context/AppContext';
 import { exportSensorDataCSV, downloadCSV } from '../utils/simulator';
 import { generateSystemReport } from '../utils/reportGenerator';
+import { hardwareModules } from '../constants/hardware';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -25,13 +26,6 @@ const navItems = [
   { path: '/serial', label: 'Serial Monitor', icon: Terminal },
   { path: '/hardware', label: 'Hardware', icon: Cpu },
   { path: '/docs', label: 'Documentation', icon: FileText },
-];
-
-const hardwareModules = [
-  { name: 'Arduino Uno R3', id: 'mcu', status: 'working' as const, description: 'Main microcontroller unit – firmware uploaded and running', nextAction: 'All modules integrated and operational', icon: 'cpu' },
-  { name: 'MPU6050 Accelerometer/Gyroscope', id: 'mpu', status: 'working' as const, description: '6-axis IMU for motion and accident detection – I2C interface active', nextAction: 'Calibrated and running accident detection', icon: 'activity' },
-  { name: 'NEO-6M GPS Module', id: 'gps', status: 'working' as const, description: 'GPS receiver for real-time location tracking – NMEA parsing active', nextAction: 'Tracking operational with satellite fix', icon: 'map-pin' },
-  { name: 'Buzzer Alert System', id: 'buzzer', status: 'working' as const, description: 'Piezo buzzer for accident alert – driven from pin 8', nextAction: 'Alert system tested and operational', icon: 'radio' },
 ];
 
 interface SidebarProps {
@@ -88,8 +82,8 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
             <button
               onClick={() => setDataMode('simulation')}
               className={`flex-1 text-[10px] font-medium py-1.5 transition-all ${dataMode === 'simulation'
-                  ? 'bg-blue-500 text-white'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                ? 'bg-blue-500 text-white'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                 }`}
             >
               Simulation
@@ -97,8 +91,8 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
             <button
               onClick={() => setDataMode('hardware')}
               className={`flex-1 text-[10px] font-medium py-1.5 transition-all ${dataMode === 'hardware'
-                  ? 'bg-emerald-500 text-white'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                ? 'bg-emerald-500 text-white'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                 }`}
             >
               Hardware
@@ -116,8 +110,8 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
         {dataMode === 'hardware' && !collapsed && (
           <div className="flex items-center gap-1.5 mt-2 px-1">
             <span className={`w-1.5 h-1.5 rounded-full ${connectionStatus === 'connected' ? 'bg-emerald-400 pulse-live' :
-                connectionStatus === 'connecting' ? 'bg-amber-400 animate-pulse' :
-                  'bg-red-400'
+              connectionStatus === 'connecting' ? 'bg-amber-400 animate-pulse' :
+                'bg-red-400'
               }`} />
             <span className="text-[9px] text-[var(--text-muted)]">
               {connectionStatus === 'connected' ? 'Device connected' :

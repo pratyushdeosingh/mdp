@@ -61,7 +61,7 @@ export default function Dashboard() {
           <StatusBadge status={d.systemStatus} size="md" />
           <button
             onClick={() => setIsStreaming(!isStreaming)}
-            className={`px-4 py-2 rounded-xl text-xs font-medium border transition-all ${isStreaming
+            className={`px-4 py-2 rounded-xl text-xs font-medium border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${isStreaming
               ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
               : 'bg-red-500/10 border-red-500/30 text-red-400'
               }`}
@@ -73,7 +73,7 @@ export default function Dashboard() {
 
       {/* Accident Detection Alert */}
       {d.accidentDetected && (
-        <div className="p-5 rounded-2xl bg-red-500/10 border-2 border-red-500/40 flex items-center gap-4 animate-pulse">
+        <div role="alert" aria-live="assertive" className="p-5 rounded-2xl bg-red-500/10 border-2 border-red-500/40 flex items-center gap-4 animate-pulse">
           <div className="p-3 rounded-xl bg-red-500/20">
             <AlertTriangle size={28} className="text-red-400" />
           </div>

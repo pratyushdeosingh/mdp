@@ -1,21 +1,29 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { SensorData, ConnectionStatus, SerialPortInfo, BridgeMessage } from '../types';
 
-const BRIDGE_URL = 'http://localhost:3001';
-const WS_URL = 'ws://localhost:3001/ws';
+const BRIDGE_URL = import.meta.env.VITE_BRIDGE_URL || 'http://localhost:3001';
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
 
 export function useSerialConnection(onData: (data: SensorData) => void) {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const [availablePorts, setAvailablePorts] = useState<SerialPortInfo[]>([]);
   const [selectedPort, setSelectedPort] = useState<string>('');
   const [lastError, setLastError] = useState<string | null>(null);
+
   const wsRef = useRef<WebSocket | null>(null);
   const onDataRef = useRef(onData);
+  const selectedPortRef = useRef(selectedPort);
+  const reconnectTimeoutRef = useRef<number | null>(null);
+  const isIntentionallyDisconnectedRef = useRef<boolean>(true);
 
-  // Keep callback ref fresh without re-triggering effects
+  // Keep refs fresh
   useEffect(() => {
     onDataRef.current = onData;
   }, [onData]);
+
+  useEffect(() => {
+    selectedPortRef.current = selectedPort;
+  }, [selectedPort]);
 
   const refreshPorts = useCallback(async () => {
     setLastError(null);
@@ -25,18 +33,24 @@ export function useSerialConnection(onData: (data: SensorData) => void) {
       const ports: SerialPortInfo[] = await res.json();
       setAvailablePorts(ports);
       // Auto-select first port if none selected
-      if (ports.length > 0 && !selectedPort) {
+      if (ports.length > 0 && !selectedPortRef.current) {
         setSelectedPort(ports[0].path);
       }
     } catch {
-      setLastError('Cannot reach bridge server. Is it running on localhost:3001?');
+      setLastError(`Cannot reach bridge server. Is it running on ${BRIDGE_URL}?`);
       setAvailablePorts([]);
     }
-  }, [selectedPort]);
+  }, []);
 
   const connect = useCallback(async (port: string) => {
     setConnectionStatus('connecting');
     setLastError(null);
+    isIntentionallyDisconnectedRef.current = false;
+
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
 
     try {
       // Tell the bridge to open the serial port
@@ -54,10 +68,6 @@ export function useSerialConnection(onData: (data: SensorData) => void) {
       // Open WebSocket to receive data stream
       const ws = new WebSocket(WS_URL);
       wsRef.current = ws;
-
-      ws.onopen = () => {
-        // Status will be confirmed by the bridge's status message
-      };
 
       ws.onmessage = (event) => {
         try {
@@ -77,6 +87,14 @@ export function useSerialConnection(onData: (data: SensorData) => void) {
 
       ws.onclose = () => {
         setConnectionStatus('disconnected');
+        // Auto-reconnect after 3 seconds if not intentionally disconnected
+        if (!isIntentionallyDisconnectedRef.current) {
+          reconnectTimeoutRef.current = window.setTimeout(() => {
+            if (!isIntentionallyDisconnectedRef.current) {
+              connect(port);
+            }
+          }, 3000);
+        }
       };
 
       ws.onerror = () => {
@@ -90,6 +108,12 @@ export function useSerialConnection(onData: (data: SensorData) => void) {
   }, []);
 
   const disconnect = useCallback(async () => {
+    isIntentionallyDisconnectedRef.current = true;
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
     // Close WebSocket first
     if (wsRef.current) {
       wsRef.current.close();
@@ -110,6 +134,10 @@ export function useSerialConnection(onData: (data: SensorData) => void) {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      isIntentionallyDisconnectedRef.current = true;
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;

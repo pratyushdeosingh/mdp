@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import GlassCard from '../components/GlassCard';
-import { FileText, GitBranch, Presentation, Lightbulb, BookOpen } from 'lucide-react';
+import { GitBranch, Presentation, Lightbulb, BookOpen } from 'lucide-react';
 
 const tabs = [
   { id: 'abstract', label: 'Abstract', icon: BookOpen },
@@ -68,8 +68,8 @@ function BlockDiagramTab() {
                 <div
                   key={b.label}
                   className={`p-3 rounded-xl border text-center ${b.color === 'blue'
-                      ? 'border-blue-500/30 bg-blue-500/10'
-                      : 'border-orange-500/30 bg-orange-500/10'
+                    ? 'border-blue-500/30 bg-blue-500/10'
+                    : 'border-orange-500/30 bg-orange-500/10'
                     }`}
                 >
                   <p className="text-xs font-semibold text-[var(--text-primary)]">{b.label}</p>
@@ -158,11 +158,14 @@ function FlowchartTab() {
               {i > 0 && <div className="text-[var(--text-muted)]">↓</div>}
               <div
                 className={`p-3 border text-center w-full max-w-xs ${step.diamond
-                    ? `border-${step.color}-500/30 bg-${step.color}-500/10 rounded-xl`
-                    : `border-${step.color}-500/30 bg-${step.color}-500/10 ${step.shape}`
+                  ? `rounded-xl`
+                  : `${step.shape}`
                   }`}
                 style={{
-                  borderColor: `var(--${step.color === 'emerald' ? 'success' : step.color === 'amber' ? 'warning' : 'accent'})`,
+                  borderColor: step.color === 'emerald' ? 'rgba(16,185,129,0.3)' :
+                    step.color === 'amber' ? 'rgba(245,158,11,0.3)' :
+                      step.color === 'red' ? 'rgba(239,68,68,0.3)' :
+                        step.color === 'cyan' ? 'rgba(6,182,212,0.3)' : 'rgba(59,130,246,0.3)',
                   background: step.color === 'emerald' ? 'rgba(16,185,129,0.1)' :
                     step.color === 'amber' ? 'rgba(245,158,11,0.1)' :
                       step.color === 'red' ? 'rgba(239,68,68,0.1)' :
@@ -176,8 +179,8 @@ function FlowchartTab() {
             </div>
           ))}
         </div>
-      </GlassCard>
-    </div>
+      </GlassCard >
+    </div >
   );
 }
 
@@ -188,6 +191,7 @@ function PPTViewerTab() {
       <GlassCard className="p-0 overflow-hidden">
         <div className="w-full" style={{ height: '600px' }}>
           <iframe
+            title="Project Design Presentation"
             src="https://docs.google.com/presentation/d/e/2PACX-1vQwzo7CsKPlFXdhLu8-7LbdzcO5w03hOFQE2GQqbht-PAisAy4cKKAMy98n7k-7eQ/embed?start=false&loop=false&delayms=3000"
             frameBorder="0"
             width="100%"
@@ -295,8 +299,8 @@ export default function Documentation() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${activeTab === tab.id
-                ? 'bg-blue-500 text-white shadow-sm'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)]'
+              ? 'bg-blue-500 text-white shadow-sm'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)]'
               }`}
           >
             <tab.icon size={14} />

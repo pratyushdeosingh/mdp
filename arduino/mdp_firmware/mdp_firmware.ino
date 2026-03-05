@@ -21,6 +21,7 @@
 #define GPS_RX_PIN   4
 #define GPS_TX_PIN   3
 #define BUZZER_PIN   8
+#define CANCEL_BTN_PIN 7
 const int MPU_ADDR = 0x68;
 
 // ── Accident Detection ─────────────────────────────────────
@@ -45,6 +46,7 @@ void setup() {
 
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);
+  pinMode(CANCEL_BTN_PIN, INPUT_PULLUP);
 
   Wire.begin();
 
@@ -82,8 +84,15 @@ void loop() {
   if (mpuAvailable) {
     Wire.beginTransmission(MPU_ADDR);
     Wire.write(0x3B);  // Start at ACCEL_XOUT_H
-    Wire.endTransmission(false);
+    byte err = Wire.endTransmission(false);
+    if (err != 0) {
+      // I2C bus may be stuck — attempt recovery
+      Wire.begin();
+      return; // skip this cycle
+    }
+
     Wire.requestFrom(MPU_ADDR, 6, true);
+    if (Wire.available() < 6) return; // incomplete read
 
     // Read and combine raw bytes
     int16_t raw_AcX = Wire.read() << 8 | Wire.read();  
@@ -106,8 +115,13 @@ void loop() {
 
   // Handle active accident alert
   if (accidentDetected) {
+    if (digitalRead(CANCEL_BTN_PIN) == LOW) {
+      // Manual cancel button pressed
+      accidentDetected = false;
+      digitalWrite(BUZZER_PIN, LOW);
+    }
     // Auto-clear after alert duration (10 seconds)
-    if (millis() - accidentTime > ALERT_DURATION) {
+    else if (millis() - accidentTime > ALERT_DURATION) {
       accidentDetected = false;
       digitalWrite(BUZZER_PIN, LOW);
     }

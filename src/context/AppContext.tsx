@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { SensorData, LogEntry, DataMode, ThemeMode, ConnectionStatus, SerialPortInfo } from '../types';
-import { generateSensorData, generateLogEntry } from '../utils/simulator';
+import { generateSensorData, generateLogEntry, resetSimulatorState } from '../utils/simulator';
 import { useSerialConnection } from '../hooks/useSerialConnection';
 
 interface AppContextType {
@@ -42,7 +42,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const handleHardwareData = useCallback((data: SensorData) => {
     setSensorData(data);
     setSensorHistory(prev => {
-      const updated = [...prev, data];
+      const updated = prev.concat(data);
       return updated.length > MAX_HISTORY ? updated.slice(-MAX_HISTORY) : updated;
     });
     setLogs(prev => {
@@ -51,7 +51,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         type: 'info',
         message: `[HW] GPS: ${data.gps.latitude.toFixed(4)},${data.gps.longitude.toFixed(4)} | Spd: ${data.gps.speed} km/h | Accel: ${data.totalAcceleration} m/s²${data.accidentDetected ? ' | !! ACCIDENT !!' : ''}`,
       };
-      const updated = [...prev, newLog];
+      const updated = prev.concat(newLog);
       return updated.length > MAX_LOGS ? updated.slice(-MAX_LOGS) : updated;
     });
   }, []);
@@ -75,6 +75,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Data simulation loop
   useEffect(() => {
     if (dataMode === 'simulation' && isStreaming) {
+      // Reset simulator state so we don't continue from old coordinates
+      resetSimulatorState();
+
       // Generate initial data immediately
       const initial = generateSensorData();
       setSensorData(initial);
@@ -84,7 +87,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newData = generateSensorData();
         setSensorData(newData);
         setSensorHistory(prev => {
-          const updated = [...prev, newData];
+          const updated = prev.concat(newData);
           return updated.length > MAX_HISTORY ? updated.slice(-MAX_HISTORY) : updated;
         });
 
@@ -93,7 +96,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         for (let i = 0; i < logCount; i++) {
           const newLog = generateLogEntry();
           setLogs(prev => {
-            const updated = [...prev, newLog];
+            const updated = prev.concat(newLog);
             return updated.length > MAX_LOGS ? updated.slice(-MAX_LOGS) : updated;
           });
         }
