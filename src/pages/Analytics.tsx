@@ -47,17 +47,17 @@ export default function Analytics() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">Sensor Analytics</h1>
-        <p className="text-sm text-[var(--text-muted)] mt-1">
+        <p className="text-sm text-[var(--text-muted)] mt-1.5">
           Last {sensorHistory.length} seconds of telemetry data
         </p>
       </div>
 
       {/* Accelerometer Chart */}
-      <GlassCard>
-        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+      <GlassCard className="p-6">
+        <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
           <Activity size={16} className="text-orange-400" />
           Accelerometer (X, Y, Z) vs Time
         </h3>
@@ -85,8 +85,8 @@ export default function Analytics() {
       </GlassCard>
 
       {/* Speed Chart */}
-      <GlassCard>
-        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+      <GlassCard className="p-6">
+        <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
           <Gauge size={16} className="text-emerald-400" />
           Speed vs Time
         </h3>
@@ -124,9 +124,9 @@ export default function Analytics() {
       </GlassCard>
 
       {/* Altitude + Total Acceleration side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <GlassCard>
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Altitude vs Time</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <GlassCard className="p-6">
+          <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5">Altitude vs Time</h3>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={chartData}>
               <defs>
@@ -144,8 +144,8 @@ export default function Analytics() {
           </ResponsiveContainer>
         </GlassCard>
 
-        <GlassCard>
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+        <GlassCard className="p-6">
+          <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
             <Shield size={14} className="text-red-400" />
             Total Acceleration vs Time
           </h3>
