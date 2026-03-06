@@ -52,33 +52,38 @@ function AbstractTab() {
 }
 
 function BlockDiagramTab() {
+  const colorMap: Record<string, string> = {
+    blue: 'border-blue-500/30 bg-blue-500/10',
+    orange: 'border-orange-500/30 bg-orange-500/10',
+    emerald: 'border-emerald-500/30 bg-emerald-500/10',
+    red: 'border-red-500/30 bg-red-500/10',
+    amber: 'border-amber-500/30 bg-amber-500/10',
+    purple: 'border-purple-500/30 bg-purple-500/10',
+    cyan: 'border-cyan-500/30 bg-cyan-500/10',
+  };
+
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-bold text-[var(--text-primary)]">System Block Diagram</h2>
       <GlassCard className="p-8">
-        <div className="max-w-2xl mx-auto">
-          {/* ASCII-style block diagram using styled divs */}
+        <div className="max-w-3xl mx-auto">
           <div className="flex flex-col items-center gap-3">
+            {/* HARDWARE LAYER label */}
+            <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--text-muted)]">Hardware Layer — Arduino Uno R3</p>
+
             {/* Sensors Row */}
             <div className="grid grid-cols-2 gap-4 w-full max-w-md">
               {[
-                { label: 'NEO-6M GPS', sub: 'UART (Pins 4,3)', color: 'blue' },
-                { label: 'MPU6050 IMU', sub: 'I2C (A4,A5)', color: 'orange' },
+                { label: '🛰️ NEO-6M GPS', sub: 'UART · D3 (TX), D4 (RX)', color: 'blue' },
+                { label: '📐 MPU6050 IMU', sub: 'I2C · SDA (A4), SCL (A5)', color: 'orange' },
               ].map(b => (
-                <div
-                  key={b.label}
-                  className={`p-3 rounded-xl border text-center ${b.color === 'blue'
-                    ? 'border-blue-500/30 bg-blue-500/10'
-                    : 'border-orange-500/30 bg-orange-500/10'
-                    }`}
-                >
+                <div key={b.label} className={`p-3 rounded-xl border text-center ${colorMap[b.color]}`}>
                   <p className="text-xs font-semibold text-[var(--text-primary)]">{b.label}</p>
                   <p className="text-[10px] text-[var(--text-muted)]">{b.sub}</p>
                 </div>
               ))}
             </div>
 
-            {/* Arrows down */}
             <div className="flex justify-center gap-32">
               {[0, 1].map(i => (
                 <div key={i} className="text-[var(--text-muted)] text-lg">↓</div>
@@ -86,48 +91,73 @@ function BlockDiagramTab() {
             </div>
 
             {/* MCU */}
-            <div className="p-4 rounded-xl border-2 border-blue-500/40 bg-blue-500/10 w-64 text-center">
-              <p className="text-sm font-bold text-[var(--text-primary)]">Arduino Uno R3</p>
-              <p className="text-[10px] text-[var(--text-muted)]">ATmega328P | 16MHz</p>
+            <div className={`p-4 rounded-xl border-2 border-blue-500/40 bg-blue-500/10 w-72 text-center`}>
+              <p className="text-sm font-bold text-[var(--text-primary)]">⚡ Arduino Uno R3</p>
+              <p className="text-[10px] text-[var(--text-muted)]">ATmega328P · 16 MHz · 2KB SRAM</p>
+              <p className="text-[10px] text-[var(--text-muted)] mt-1">Accident Detection · JSON Serialization</p>
             </div>
 
             {/* Arrows to outputs */}
-            <div className="flex justify-center gap-16">
+            <div className="flex justify-center gap-10">
               {[0, 1, 2].map(i => (
                 <div key={i} className="text-[var(--text-muted)] text-lg">↓</div>
               ))}
             </div>
 
             {/* Outputs Row */}
-            <div className="grid grid-cols-3 gap-4 w-full max-w-lg">
-              <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-center">
-                <p className="text-xs font-semibold text-[var(--text-primary)]">USB Serial</p>
-                <p className="text-[10px] text-[var(--text-muted)]">JSON @ 9600 baud</p>
+            <div className="grid grid-cols-3 gap-3 w-full max-w-lg">
+              <div className={`p-3 rounded-xl border text-center ${colorMap.emerald}`}>
+                <p className="text-xs font-semibold text-[var(--text-primary)]">📟 USB Serial</p>
+                <p className="text-[10px] text-[var(--text-muted)]">JSON @ 9600 baud · 1 Hz</p>
               </div>
-              <div className="p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-center">
-                <p className="text-xs font-semibold text-[var(--text-primary)]">Buzzer</p>
-                <p className="text-[10px] text-[var(--text-muted)]">Pin 8 | Alert</p>
+              <div className={`p-3 rounded-xl border text-center ${colorMap.red}`}>
+                <p className="text-xs font-semibold text-[var(--text-primary)]">🔊 Buzzer</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Pin 8 · 500ms beep</p>
               </div>
-              <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-center">
-                <p className="text-xs font-semibold text-[var(--text-primary)]">Button</p>
-                <p className="text-[10px] text-[var(--text-muted)]">Pin 7 | Cancel</p>
+              <div className={`p-3 rounded-xl border text-center ${colorMap.amber}`}>
+                <p className="text-xs font-semibold text-[var(--text-primary)]">🛑 Cancel Button</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Pin 7 · INPUT_PULLUP</p>
               </div>
             </div>
 
+            {/* JSON Fields Preview */}
+            <div className={`p-3 rounded-xl border text-center w-full max-w-lg ${colorMap.emerald}`}>
+              <p className="text-[10px] font-semibold text-[var(--text-primary)] mb-1">JSON Output Fields (14)</p>
+              <p className="text-[10px] text-[var(--text-muted)] font-mono">
+                gv · lat · lng · spd · alt · ax · ay · az · ta · ad · tmp · bat · mpu · ms
+              </p>
+            </div>
+
             <div className="text-[var(--text-muted)] text-lg">↓</div>
+
+            {/* BRIDGE LAYER label */}
+            <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--text-muted)]">Bridge Layer — Node.js</p>
 
             {/* Bridge Server */}
-            <div className="p-3 rounded-xl border border-purple-500/30 bg-purple-500/10 w-64 text-center">
-              <p className="text-xs font-semibold text-[var(--text-primary)]">Node.js Bridge Server</p>
-              <p className="text-[10px] text-[var(--text-muted)]">Serial → WebSocket | Port 3001</p>
+            <div className={`p-4 rounded-xl border w-80 text-center ${colorMap.purple}`}>
+              <p className="text-xs font-semibold text-[var(--text-primary)]">🖥️ Bridge Server · Port 3001</p>
+              <p className="text-[10px] text-[var(--text-muted)] mt-1">SerialPort → transformData() → WebSocket</p>
+              <div className="flex justify-center gap-2 mt-2 flex-wrap">
+                {['GET /api/ports', 'POST /api/connect', 'POST /api/disconnect', 'GET /api/status'].map(ep => (
+                  <span key={ep} className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono">{ep}</span>
+                ))}
+              </div>
             </div>
 
             <div className="text-[var(--text-muted)] text-lg">↓</div>
 
+            {/* DASHBOARD LAYER label */}
+            <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--text-muted)]">Dashboard Layer — React 19</p>
+
             {/* Dashboard */}
-            <div className="p-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 w-80 text-center">
-              <p className="text-sm font-bold text-[var(--text-primary)]">Web Dashboard</p>
-              <p className="text-[10px] text-[var(--text-muted)]">React + TypeScript | Real-time Visualization</p>
+            <div className={`p-4 rounded-xl border w-full max-w-lg text-center ${colorMap.cyan}`}>
+              <p className="text-sm font-bold text-[var(--text-primary)]">🖼️ Web Dashboard · Port 5173</p>
+              <p className="text-[10px] text-[var(--text-muted)] mt-1">React + TypeScript + Vite · Glass-Morphism UI</p>
+              <div className="flex justify-center gap-2 mt-2 flex-wrap">
+                {['Dashboard', 'Live Map', 'Analytics', 'Accidents', 'Serial', 'Hardware', 'Docs'].map(p => (
+                  <span key={p} className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300">{p}</span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -137,50 +167,105 @@ function BlockDiagramTab() {
 }
 
 function FlowchartTab() {
+  const boxStyle = (color: string) => ({
+    borderColor:
+      color === 'emerald' ? 'rgba(16,185,129,0.3)' :
+      color === 'amber'   ? 'rgba(245,158,11,0.3)' :
+      color === 'red'     ? 'rgba(239,68,68,0.3)' :
+      color === 'cyan'    ? 'rgba(6,182,212,0.3)' : 'rgba(59,130,246,0.3)',
+    background:
+      color === 'emerald' ? 'rgba(16,185,129,0.1)' :
+      color === 'amber'   ? 'rgba(245,158,11,0.1)' :
+      color === 'red'     ? 'rgba(239,68,68,0.1)' :
+      color === 'cyan'    ? 'rgba(6,182,212,0.1)' : 'rgba(59,130,246,0.1)',
+  });
+
+  const Box = ({ text, color, pill = false }: { text: string; color: string; pill?: boolean }) => (
+    <div className={`p-3 border text-center ${pill ? 'rounded-full' : 'rounded-xl'}`} style={boxStyle(color)}>
+      <p className="text-xs font-medium text-[var(--text-primary)]">{text}</p>
+    </div>
+  );
+
+  const Diamond = ({ text, color }: { text: string; color: string }) => (
+    <div className="p-3 border rounded-xl text-center" style={boxStyle(color)}>
+      <p className="text-xs font-medium text-[var(--text-primary)]">◇ {text}</p>
+    </div>
+  );
+
+  const Arrow = ({ label }: { label?: string }) => (
+    <div className="flex flex-col items-center">
+      <div className="text-[var(--text-muted)] text-lg">↓</div>
+      {label && <span className="text-[10px] text-[var(--text-muted)] -mt-1">{label}</span>}
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-bold text-[var(--text-primary)]">System Flowchart</h2>
       <GlassCard className="p-8">
-        <div className="max-w-md mx-auto flex flex-col items-center gap-2">
-          {[
-            { text: 'System Power ON', shape: 'rounded-full', color: 'emerald' },
-            { text: 'Initialize MCU, GPS, MPU6050', shape: 'rounded-xl', color: 'blue' },
-            { text: 'Feed GPS Parser (200ms window)', shape: 'rounded-xl', color: 'blue' },
-            { text: 'Read MPU6050 Accelerometer (X, Y, Z)', shape: 'rounded-xl', color: 'blue' },
-            { text: 'Calculate Total Acceleration', shape: 'rounded-xl', color: 'blue' },
-            { text: 'Total Accel > 25 m/s²?', shape: 'rotate-45', color: 'amber', diamond: true },
-            { text: 'Trigger Buzzer + Start 10s Timer', shape: 'rounded-xl', color: 'red' },
-            { text: 'Cancel Button Pressed?', shape: 'rotate-45', color: 'amber', diamond: true },
-            { text: 'Output JSON via Serial USB', shape: 'rounded-xl', color: 'cyan' },
-            { text: 'Wait 1s → Loop', shape: 'rounded-full', color: 'emerald' },
-          ].map((step, i) => (
-            <div key={i} className="flex flex-col items-center gap-2 w-full">
-              {i > 0 && <div className="text-[var(--text-muted)]">↓</div>}
-              <div
-                className={`p-3 border text-center w-full max-w-xs ${step.diamond
-                  ? `rounded-xl`
-                  : `${step.shape}`
-                  }`}
-                style={{
-                  borderColor: step.color === 'emerald' ? 'rgba(16,185,129,0.3)' :
-                    step.color === 'amber' ? 'rgba(245,158,11,0.3)' :
-                      step.color === 'red' ? 'rgba(239,68,68,0.3)' :
-                        step.color === 'cyan' ? 'rgba(6,182,212,0.3)' : 'rgba(59,130,246,0.3)',
-                  background: step.color === 'emerald' ? 'rgba(16,185,129,0.1)' :
-                    step.color === 'amber' ? 'rgba(245,158,11,0.1)' :
-                      step.color === 'red' ? 'rgba(239,68,68,0.1)' :
-                        step.color === 'cyan' ? 'rgba(6,182,212,0.1)' : 'rgba(59,130,246,0.1)',
-                }}
-              >
-                <p className="text-xs font-medium text-[var(--text-primary)]">
-                  {step.diamond ? `◇ ${step.text}` : step.text}
-                </p>
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-2">
+          {/* Start */}
+          <div className="w-full max-w-xs"><Box text="System Power ON" color="emerald" pill /></div>
+          <Arrow />
+          <div className="w-full max-w-xs"><Box text="Initialize MCU, GPS, MPU6050" color="blue" /></div>
+          <Arrow />
+          <div className="w-full max-w-xs"><Box text="Feed GPS Parser (200ms window)" color="blue" /></div>
+          <Arrow />
+          <div className="w-full max-w-xs"><Box text="Read MPU6050 via I2C (X, Y, Z)" color="blue" /></div>
+          <Arrow />
+          <div className="w-full max-w-xs"><Box text="Calculate √(ax² + ay² + az²)" color="blue" /></div>
+          <Arrow />
+
+          {/* Decision 1 — Accident threshold */}
+          <div className="w-full max-w-xs"><Diamond text="Total Accel > 25 m/s²?" color="amber" /></div>
+
+          {/* Branching */}
+          <div className="grid grid-cols-2 gap-6 w-full max-w-md">
+            {/* YES path */}
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[10px] font-semibold text-red-400">YES</span>
+              <div className="text-[var(--text-muted)]">↓</div>
+              <Box text="🔊 Trigger Buzzer (500ms on/off)" color="red" />
+              <div className="text-[var(--text-muted)]">↓</div>
+              <Diamond text="Cancel Pressed or 10s Elapsed?" color="amber" />
+              <div className="grid grid-cols-2 gap-3 w-full">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-[10px] font-semibold text-emerald-400">YES</span>
+                  <div className="text-[var(--text-muted)]">↓</div>
+                  <Box text="Silence Alert" color="emerald" />
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-[10px] font-semibold text-red-400">NO</span>
+                  <div className="text-[var(--text-muted)]">↓</div>
+                  <Box text="Keep Beeping" color="red" />
+                  <div className="text-[10px] text-[var(--text-muted)]">↻ loop</div>
+                </div>
               </div>
             </div>
-          ))}
+
+            {/* NO path */}
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[10px] font-semibold text-emerald-400">NO</span>
+              <div className="text-[var(--text-muted)]">↓</div>
+              <Box text="No accident — continue normally" color="emerald" />
+            </div>
+          </div>
+
+          {/* Merge back */}
+          <div className="flex justify-center gap-32 w-full max-w-md">
+            {[0, 1].map(i => (
+              <div key={i} className="text-[var(--text-muted)] text-lg">↓</div>
+            ))}
+          </div>
+
+          {/* Output JSON */}
+          <div className="w-full max-w-xs"><Box text="Output JSON via USB Serial (14 fields)" color="cyan" /></div>
+          <Arrow />
+          <div className="w-full max-w-xs"><Box text="Wait 1s → Loop" color="emerald" pill /></div>
+          <div className="text-[10px] text-[var(--text-muted)]">↻ Repeat forever at 1 Hz</div>
         </div>
-      </GlassCard >
-    </div >
+      </GlassCard>
+    </div>
   );
 }
 
