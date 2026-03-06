@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
-import type { SensorData, LogEntry, DataMode, ThemeMode, ConnectionStatus, SerialPortInfo } from '../types';
+import type { SensorData, LogEntry, DataMode, ThemeMode, ConnectionStatus, SerialPortInfo, AccidentEvent } from '../types';
 import { generateSensorData, generateLogEntry, resetSimulatorState } from '../utils/simulator';
 import { useSerialConnection } from '../hooks/useSerialConnection';
 
@@ -7,6 +7,7 @@ interface AppContextType {
   sensorData: SensorData | null;
   sensorHistory: SensorData[];
   logs: LogEntry[];
+  accidentEvents: AccidentEvent[];
   dataMode: DataMode;
   theme: ThemeMode;
   isStreaming: boolean;
@@ -33,14 +34,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
   const [sensorHistory, setSensorHistory] = useState<SensorData[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [accidentEvents, setAccidentEvents] = useState<AccidentEvent[]>([]);
   const [dataMode, setDataMode] = useState<DataMode>('simulation');
   const [theme, setTheme] = useState<ThemeMode>('dark');
   const [isStreaming, setIsStreaming] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const accidentIdRef = useRef(0);
+  const prevAccidentRef = useRef(false);
+
+  // Track accident transitions (false→true = new event, true→false = resolved)
+  const trackAccident = useCallback((data: SensorData) => {
+    const wasActive = prevAccidentRef.current;
+    const isActive = data.accidentDetected;
+    prevAccidentRef.current = isActive;
+
+    if (isActive && !wasActive) {
+      // New accident event
+      accidentIdRef.current += 1;
+      const event: AccidentEvent = {
+        id: accidentIdRef.current,
+        timestamp: data.timestamp,
+        gps: { ...data.gps },
+        accelerometer: { ...data.accelerometer },
+        totalAcceleration: data.totalAcceleration,
+        resolved: false,
+      };
+      setAccidentEvents(prev => [event, ...prev]);
+    } else if (!isActive && wasActive) {
+      // Resolve most recent active event
+      setAccidentEvents(prev =>
+        prev.map((e, i) => i === 0 && !e.resolved ? { ...e, resolved: true, resolvedAt: Date.now() } : e)
+      );
+    }
+  }, []);
 
   // Hardware data callback — receives SensorData from the WebSocket bridge
   const handleHardwareData = useCallback((data: SensorData) => {
     setSensorData(data);
+    trackAccident(data);
     setSensorHistory(prev => {
       const updated = prev.concat(data);
       return updated.length > MAX_HISTORY ? updated.slice(-MAX_HISTORY) : updated;
@@ -54,7 +85,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const updated = prev.concat(newLog);
       return updated.length > MAX_LOGS ? updated.slice(-MAX_LOGS) : updated;
     });
-  }, []);
+  }, [trackAccident]);
 
   // Serial connection hook
   const serial = useSerialConnection(handleHardwareData);
@@ -81,11 +112,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Generate initial data immediately
       const initial = generateSensorData();
       setSensorData(initial);
+      trackAccident(initial);
       setSensorHistory([initial]);
 
       intervalRef.current = setInterval(() => {
         const newData = generateSensorData();
         setSensorData(newData);
+        trackAccident(newData);
         setSensorHistory(prev => {
           const updated = prev.concat(newData);
           return updated.length > MAX_HISTORY ? updated.slice(-MAX_HISTORY) : updated;
@@ -117,7 +150,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         message: '[SYS] Switched to HARDWARE mode – Use the connection panel to connect your Arduino.',
       }]);
     }
-  }, [dataMode, isStreaming]);
+  }, [dataMode, isStreaming, trackAccident]);
 
   return (
     <AppContext.Provider
@@ -125,6 +158,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         sensorData,
         sensorHistory,
         logs,
+        accidentEvents,
         dataMode,
         theme,
         isStreaming,

@@ -13,6 +13,7 @@ import {
   Download,
   ChevronLeft,
   ChevronRight,
+  AlertTriangle,
 } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { exportSensorDataCSV, downloadCSV } from '../utils/simulator';
@@ -24,6 +25,7 @@ const navItems = [
   { path: '/map', label: 'Live Map', icon: Map },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/serial', label: 'Serial Monitor', icon: Terminal },
+  { path: '/accidents', label: 'Accidents', icon: AlertTriangle },
   { path: '/hardware', label: 'Hardware', icon: Cpu },
   { path: '/docs', label: 'Documentation', icon: FileText },
 ];

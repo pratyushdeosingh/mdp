@@ -11,6 +11,7 @@ import HardwareStatus from './pages/HardwareStatus';
 const LiveMap = lazy(() => import('./pages/LiveMap'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const Documentation = lazy(() => import('./pages/Documentation'));
+const AccidentHistory = lazy(() => import('./pages/AccidentHistory'));
 
 function PageLoader() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
               <Route path="/map" element={<Suspense fallback={<PageLoader />}><LiveMap /></Suspense>} />
               <Route path="/analytics" element={<Suspense fallback={<PageLoader />}><Analytics /></Suspense>} />
               <Route path="/serial" element={<SerialMonitor />} />
+              <Route path="/accidents" element={<Suspense fallback={<PageLoader />}><AccidentHistory /></Suspense>} />
               <Route path="/hardware" element={<HardwareStatus />} />
               <Route path="/docs" element={<Suspense fallback={<PageLoader />}><Documentation /></Suspense>} />
             </Route>

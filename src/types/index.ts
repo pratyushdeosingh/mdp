@@ -33,6 +33,21 @@ export interface LogEntry {
   message: string;
 }
 
+export interface AccidentEvent {
+  id: number;
+  timestamp: number;
+  gps: {
+    latitude: number;
+    longitude: number;
+    speed: number;
+    altitude: number;
+  };
+  accelerometer: { x: number; y: number; z: number };
+  totalAcceleration: number;
+  resolved: boolean;
+  resolvedAt?: number;
+}
+
 export type DataMode = 'simulation' | 'hardware';
 export type ThemeMode = 'dark' | 'light';
 
