@@ -57,7 +57,7 @@ export default function LiveMap() {
       </div>
 
       {/* Map */}
-      <GlassCard className="p-0 overflow-hidden" style={{ height: '500px' }}>
+      <GlassCard className="p-0 overflow-hidden" style={{ height: 'min(500px, 65vh)' }}>
         <MapContainer
           center={[latitude, longitude]}
           zoom={15}

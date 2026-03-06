@@ -61,7 +61,11 @@ export default function HardwareStatus() {
         {hardwareModules.map(mod => (
           <GlassCard key={mod.id} className="p-6">
             <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl shrink-0 bg-emerald-500/10 text-emerald-400 border border-emerald-500/15">
+              <div className={`p-3 rounded-xl shrink-0 border ${mod.status === 'working'
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/15'
+                    : mod.status === 'damaged' ? 'bg-red-500/10 text-red-400 border-red-500/15'
+                    : 'bg-amber-500/10 text-amber-400 border-amber-500/15'
+                  }`}>
                 {iconMap[mod.icon]}
               </div>
               <div className="flex-1 min-w-0">

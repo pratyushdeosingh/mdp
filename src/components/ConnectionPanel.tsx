@@ -60,7 +60,7 @@ export default function ConnectionPanel() {
             value={selectedPort}
             onChange={(e) => setSelectedPort(e.target.value)}
             disabled={isConnected || isConnecting}
-            className="flex-1 px-3 py-2 rounded-lg text-sm bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
+            className="flex-1 px-3 py-2 rounded-lg text-sm bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] outline-none focus:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500/50 transition-colors disabled:opacity-50"
           >
             {availablePorts.length === 0 ? (
               <option value="">No ports found</option>

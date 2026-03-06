@@ -90,7 +90,7 @@ export default function AccidentHistory() {
                 key={event.id}
                 className={`${!event.resolved ? 'border-red-500/30' : ''}`}
               >
-                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
                   {/* Status + ID */}
                   <div className="flex items-center gap-3 shrink-0">
                     <div className={`p-2.5 rounded-xl ${event.resolved ? 'bg-emerald-500/10' : 'bg-red-500/10 animate-pulse'}`}>
@@ -113,7 +113,7 @@ export default function AccidentHistory() {
                   </div>
 
                   {/* Sensor Readings */}
-                  <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div className="flex items-center gap-2">
                       <MapPin size={14} className="text-blue-400 shrink-0" />
                       <div>

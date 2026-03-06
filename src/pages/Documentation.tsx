@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import GlassCard from '../components/GlassCard';
-import { GitBranch, Presentation, Lightbulb, BookOpen } from 'lucide-react';
+import { GitBranch, Presentation, Lightbulb, BookOpen, Workflow } from 'lucide-react';
 
 const tabs = [
   { id: 'abstract', label: 'Abstract', icon: BookOpen },
   { id: 'block-diagram', label: 'Block Diagram', icon: GitBranch },
-  { id: 'flowchart', label: 'Flowchart', icon: GitBranch },
+  { id: 'flowchart', label: 'Flowchart', icon: Workflow },
   { id: 'ppt', label: 'PPT Viewer', icon: Presentation },
   { id: 'future', label: 'Future Work', icon: Lightbulb },
 ];

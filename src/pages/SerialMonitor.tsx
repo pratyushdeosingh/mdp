@@ -20,7 +20,7 @@ function LogLine({ entry }: { entry: LogEntry }) {
   });
 
   return (
-    <div className="flex gap-2 py-0.5 hover:bg-white/5 px-2 rounded transition-colors">
+    <div className="flex gap-2 py-0.5 hover:bg-[var(--bg-secondary)] px-2 rounded transition-colors">
       <span className="text-[var(--text-muted)] shrink-0 w-20">{time}</span>
       <span className={`${colorMap[entry.type] || 'text-gray-400'}`}>{entry.message}</span>
     </div>

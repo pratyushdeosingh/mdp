@@ -111,7 +111,7 @@ export default function LandingPage() {
           </button>
           <button
             onClick={() => navigate('/docs')}
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-base font-medium border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] hover:bg-[var(--bg-secondary)] transition-all duration-300"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-base font-medium border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] hover:bg-[var(--bg-secondary)] active:scale-[0.98] transition-all duration-300"
           >
             <BarChart3 size={18} />
             View Documentation
