@@ -15,26 +15,30 @@
     --success: #10b981;
     --warning: #f59e0b;
     --danger: #ef4444;
-    --glass-bg: rgba(255, 255, 255, 0.6);
-    --glass-border: rgba(148, 163, 184, 0.2);
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-border: rgba(148, 163, 184, 0.15);
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
   }
 
   .dark {
-    --bg-primary: #0a0f1a;
-    --bg-secondary: #111827;
-    --bg-card: rgba(17, 24, 39, 0.7);
-    --bg-card-hover: rgba(17, 24, 39, 0.9);
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --border-color: rgba(71, 85, 105, 0.4);
-    --accent: #3b82f6;
-    --accent-glow: rgba(59, 130, 246, 0.2);
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --glass-bg: rgba(15, 23, 42, 0.6);
-    --glass-border: rgba(51, 65, 85, 0.4);
+    --bg-primary: #070b14;
+    --bg-secondary: #0f1629;
+    --bg-card: rgba(15, 22, 41, 0.65);
+    --bg-card-hover: rgba(15, 22, 41, 0.85);
+    --text-primary: #e8ecf4;
+    --text-secondary: #8b95a8;
+    --text-muted: #4b5563;
+    --border-color: rgba(55, 65, 88, 0.45);
+    --accent: #4f8dff;
+    --accent-glow: rgba(79, 141, 255, 0.15);
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --glass-bg: rgba(10, 15, 26, 0.55);
+    --glass-border: rgba(55, 65, 88, 0.3);
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.14);
+    --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
   }
 }
 
@@ -75,16 +79,17 @@ body {
 
 .glass-card {
   background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  transition: all 0.3s ease;
+  border-radius: 20px;
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  border-color: var(--accent);
-  box-shadow: 0 0 20px var(--accent-glow);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow: var(--card-shadow-hover);
 }
 
 @keyframes pulse-glow {

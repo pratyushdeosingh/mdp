@@ -9,12 +9,12 @@ export default function AccidentHistory() {
   const resolvedCount = accidentEvents.filter(e => e.resolved).length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Accident History</h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="text-sm text-[var(--text-muted)] mt-1.5">
             All detected accident events with timestamps and sensor readings
           </p>
         </div>
@@ -31,8 +31,8 @@ export default function AccidentHistory() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <GlassCard className="flex items-center gap-3 p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <GlassCard className="flex items-center gap-4 p-5">
           <div className="p-2.5 rounded-xl bg-red-500/10">
             <AlertTriangle size={20} className="text-red-400" />
           </div>
@@ -41,7 +41,7 @@ export default function AccidentHistory() {
             <p className="text-xl font-bold text-[var(--text-primary)]">{accidentEvents.length}</p>
           </div>
         </GlassCard>
-        <GlassCard className="flex items-center gap-3 p-4">
+        <GlassCard className="flex items-center gap-4 p-5">
           <div className="p-2.5 rounded-xl bg-amber-500/10">
             <Activity size={20} className="text-amber-400" />
           </div>
@@ -54,7 +54,7 @@ export default function AccidentHistory() {
             </p>
           </div>
         </GlassCard>
-        <GlassCard className="flex items-center gap-3 p-4">
+        <GlassCard className="flex items-center gap-4 p-5">
           <div className="p-2.5 rounded-xl bg-blue-500/10">
             <Clock size={20} className="text-blue-400" />
           </div>
@@ -77,7 +77,7 @@ export default function AccidentHistory() {
           </p>
         </GlassCard>
       ) : (
-        <div className="space-y-3 stagger-children">
+        <div className="space-y-4 stagger-children">
           {accidentEvents.map(event => {
             const time = new Date(event.timestamp);
             const resolvedTime = event.resolvedAt ? new Date(event.resolvedAt) : null;

@@ -11,18 +11,18 @@ interface MetricCardProps {
 
 export default function MetricCard({ label, value, unit, icon, color = 'text-blue-400', pulse }: MetricCardProps) {
   return (
-    <div className="glass-card p-6 flex flex-col justify-between min-w-0 relative overflow-hidden">
+    <div className="glass-card p-5 flex flex-col gap-4 min-w-0 relative overflow-hidden group">
       <div className="flex items-center gap-3">
-        <div className={`p-2.5 rounded-xl bg-[var(--bg-secondary)] ${color} shrink-0`}>
+        <div className={`p-2.5 rounded-xl bg-[var(--bg-secondary)] ${color} shrink-0 group-hover:scale-110 transition-transform duration-300`}>
           {icon}
         </div>
-        <p className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-wider truncate">{label}</p>
-      </div>
-      <div className="flex items-baseline gap-2 mt-2">
+        <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-widest truncate">{label}</p>
         {pulse && (
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 pulse-live shrink-0 mt-1" />
+          <span className="ml-auto inline-block w-2 h-2 rounded-full bg-emerald-400 pulse-live shrink-0" />
         )}
-        <span className="text-xl leading-tight font-bold text-[var(--text-primary)] truncate">{value}</span>
+      </div>
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-2xl leading-tight font-bold text-[var(--text-primary)] truncate">{value}</span>
         {unit && <span className="text-xs font-medium text-[var(--text-muted)]">{unit}</span>}
       </div>
     </div>

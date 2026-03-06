@@ -48,12 +48,12 @@ export default function Dashboard() {
   const d = sensorData;
 
   return (
-    <div className="grid h-full min-h-full grid-rows-[auto_auto_1fr_auto] gap-6">
+    <div className="grid h-full min-h-full grid-rows-[auto_auto_1fr_auto] gap-8">
       {/* Header */}
       <div className="relative flex flex-col items-center justify-center text-center">
         <div>
-          <h1 className="text-xl font-bold text-[var(--text-primary)]">System Dashboard</h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1 mb-6">
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">System Dashboard</h1>
+          <p className="text-sm text-[var(--text-muted)] mt-1.5 mb-6">
             Real-time telemetry from Smart Safety Helmet sensors
           </p>
         </div>
@@ -85,7 +85,7 @@ export default function Dashboard() {
       )}
 
       {/* Metrics Grid — GPS & Motion */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children mb-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 stagger-children">
         <MetricCard
           label="Latitude"
           value={d.gps.latitude}
@@ -119,23 +119,23 @@ export default function Dashboard() {
       </div>
 
       {/* Accelerometer + System — Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         {/* Accelerometer Card */}
-        <GlassCard className="p-8 flex flex-col">
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] tracking-wider mb-6 flex items-center gap-2 shrink-0">
-            <Activity size={18} className="text-orange-400" />
+        <GlassCard className="p-7 flex flex-col">
+          <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2 shrink-0">
+            <Activity size={16} className="text-orange-400" />
             ACCELEROMETER READINGS
           </h3>
 
           {/* Axis Values */}
-          <div className="grid grid-cols-3 gap-6 mb-8 shrink-0">
+          <div className="grid grid-cols-3 gap-4 mb-6 shrink-0">
             {(['x', 'y', 'z'] as const).map(axis => (
-              <div key={axis} className="text-center p-5 rounded-2xl bg-[var(--bg-secondary)]">
-                <p className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-2">Axis {axis.toUpperCase()}</p>
-                <div className="flex items-baseline justify-center gap-1.5">
-                  <span className="text-2xl font-bold text-[var(--text-primary)] leading-tight">{d.accelerometer[axis]}</span>
-                  <span className="text-xs font-medium text-[var(--text-muted)]">m/s²</span>
+              <div key={axis} className="text-center p-4 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-color)]">
+                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mb-1.5">Axis {axis.toUpperCase()}</p>
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-xl font-bold text-[var(--text-primary)] leading-tight">{d.accelerometer[axis]}</span>
+                  <span className="text-[10px] font-medium text-[var(--text-muted)]">m/s²</span>
                 </div>
               </div>
             ))}
@@ -157,14 +157,14 @@ export default function Dashboard() {
         </GlassCard>
 
         {/* System Vitals Card */}
-        <GlassCard className="p-8 flex flex-col">
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] tracking-wider mb-6 flex items-center gap-2 shrink-0">
-            <Radio size={18} className="text-blue-400" />
+        <GlassCard className="p-7 flex flex-col">
+          <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2 shrink-0">
+            <Radio size={16} className="text-blue-400" />
             SYSTEM VITALS
           </h3>
-          <div className="flex-1 flex flex-col justify-center gap-5">
+          <div className="flex-1 flex flex-col justify-center gap-3.5">
             {/* Accident Detection */}
-            <div className="flex items-center justify-between py-4 px-5 rounded-2xl bg-[var(--bg-secondary)]">
+            <div className="flex items-center justify-between py-3.5 px-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)]">
               <div className="flex items-center gap-3 min-w-0">
                 <div className={`p-2 rounded-lg shrink-0 ${d.accidentDetected ? 'bg-red-500/15' : 'bg-blue-500/15'}`}>
                   <Activity size={18} className={d.accidentDetected ? 'text-red-400' : 'text-blue-400'} />
@@ -180,7 +180,7 @@ export default function Dashboard() {
             </div>
 
             {/* Battery Level */}
-            <div className="flex items-center justify-between py-4 px-5 rounded-2xl bg-[var(--bg-secondary)]">
+            <div className="flex items-center justify-between py-3.5 px-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)]">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="p-2 rounded-lg bg-emerald-500/15 shrink-0">
                   <Battery size={18} className="text-emerald-400" />
@@ -199,7 +199,7 @@ export default function Dashboard() {
             </div>
 
             {/* Temperature */}
-            <div className="flex items-center justify-between py-4 px-5 rounded-2xl bg-[var(--bg-secondary)]">
+            <div className="flex items-center justify-between py-3.5 px-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)]">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="p-2 rounded-lg bg-red-500/15 shrink-0">
                   <Thermometer size={18} className="text-red-400" />
@@ -210,7 +210,7 @@ export default function Dashboard() {
             </div>
 
             {/* System Status */}
-            <div className="flex items-center justify-between py-4 px-5 rounded-2xl bg-[var(--bg-secondary)]">
+            <div className="flex items-center justify-between py-3.5 px-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)]">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="p-2 rounded-lg bg-purple-500/15 shrink-0">
                   <Satellite size={18} className="text-purple-400" />
