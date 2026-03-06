@@ -98,10 +98,14 @@ void loop() {
     Wire.requestFrom((uint8_t)MPU_ADDR, (uint8_t)6, (uint8_t)true);
     if (Wire.available() < 6) return; // incomplete read
 
-    // Read and combine raw bytes
-    int16_t raw_AcX = Wire.read() << 8 | Wire.read();  
-    int16_t raw_AcY = Wire.read() << 8 | Wire.read();  
-    int16_t raw_AcZ = Wire.read() << 8 | Wire.read();  
+    // Read bytes into temporaries to avoid undefined evaluation order
+    uint8_t axH = Wire.read(), axL = Wire.read();
+    uint8_t ayH = Wire.read(), ayL = Wire.read();
+    uint8_t azH = Wire.read(), azL = Wire.read();
+
+    int16_t raw_AcX = (int16_t)(axH << 8 | axL);
+    int16_t raw_AcY = (int16_t)(ayH << 8 | ayL);
+    int16_t raw_AcZ = (int16_t)(azH << 8 | azL);
 
     // Convert to m/s^2 (Assuming default +/- 2g scale)
     ax = (raw_AcX / 16384.0) * 9.81;
@@ -141,31 +145,40 @@ void loop() {
   lastSend = millis();
 
   StaticJsonDocument<256> doc;
+  char buf[16]; // Reusable stack buffer for dtostrf (avoids String heap fragmentation)
 
   if (gps.location.isValid()) {
-    doc["lat"] = serialized(String(gps.location.lat(), 6));
-    doc["lng"] = serialized(String(gps.location.lng(), 6));
+    dtostrf(gps.location.lat(), 1, 6, buf);
+    doc["lat"] = serialized(buf);
+    dtostrf(gps.location.lng(), 1, 6, buf);
+    doc["lng"] = serialized(buf);
   } else {
     doc["lat"] = 0;
     doc["lng"] = 0;
   }
 
   if (gps.speed.isValid()) {
-    doc["spd"] = serialized(String(gps.speed.kmph(), 1));
+    dtostrf(gps.speed.kmph(), 1, 1, buf);
+    doc["spd"] = serialized(buf);
   } else {
     doc["spd"] = 0;
   }
 
   if (gps.altitude.isValid()) {
-    doc["alt"] = serialized(String(gps.altitude.meters(), 1));
+    dtostrf(gps.altitude.meters(), 1, 1, buf);
+    doc["alt"] = serialized(buf);
   } else {
     doc["alt"] = 0;
   }
 
-  doc["ax"] = serialized(String(ax, 3));
-  doc["ay"] = serialized(String(ay, 3));
-  doc["az"] = serialized(String(az, 3));
-  doc["ta"] = serialized(String(totalAccel, 2));
+  dtostrf(ax, 1, 3, buf);
+  doc["ax"] = serialized(buf);
+  dtostrf(ay, 1, 3, buf);
+  doc["ay"] = serialized(buf);
+  dtostrf(az, 1, 3, buf);
+  doc["az"] = serialized(buf);
+  dtostrf(totalAccel, 1, 2, buf);
+  doc["ta"] = serialized(buf);
   doc["ad"] = accidentDetected ? 1 : 0;
   doc["tmp"] = 0;  // Placeholder for temp
 
