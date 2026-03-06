@@ -221,3 +221,54 @@ body {
 .gauge-status-pulse {
   animation: statusPulse 1.5s ease-in-out infinite;
 }
+
+/* Toast slide-in animation */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast-slide-in {
+  animation: toastSlideIn 0.3s ease-out;
+}
+
+/* Page transition animation */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: pageEnter 0.3s ease-out;
+}
+
+/* Mobile sidebar overlay */
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.sidebar-overlay {
+  animation: overlayFadeIn 0.2s ease-out;
+}
+
+@keyframes sidebarSlideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.sidebar-mobile-enter {
+  animation: sidebarSlideIn 0.3s ease-out;
+}

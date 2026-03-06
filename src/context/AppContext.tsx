@@ -36,7 +36,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [accidentEvents, setAccidentEvents] = useState<AccidentEvent[]>([]);
   const [dataMode, setDataMode] = useState<DataMode>('simulation');
-  const [theme, setTheme] = useState<ThemeMode>('dark');
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    const saved = localStorage.getItem('helmet-theme');
+    return saved === 'light' ? 'light' : 'dark';
+  });
   const [isStreaming, setIsStreaming] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const accidentIdRef = useRef(0);
@@ -94,13 +97,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTheme(prev => {
       const next = prev === 'dark' ? 'light' : 'dark';
       document.documentElement.classList.toggle('dark', next === 'dark');
+      localStorage.setItem('helmet-theme', next);
       return next;
     });
   }, []);
 
-  // Initialize dark mode
+  // Initialize theme from saved preference
   useEffect(() => {
-    document.documentElement.classList.add('dark');
+    document.documentElement.classList.toggle('dark', theme === 'dark');
   }, []);
 
   // Data simulation loop

@@ -14,8 +14,10 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertTriangle,
+  X,
 } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
+import { useToast } from '../context/ToastContext';
 import { exportSensorDataCSV, downloadCSV } from '../utils/simulator';
 import { generateSystemReport } from '../utils/reportGenerator';
 import { hardwareModules } from '../constants/hardware';
@@ -33,10 +35,12 @@ const navItems = [
 interface SidebarProps {
   collapsed: boolean;
   setCollapsed: (v: boolean) => void;
+  onMobileClose?: () => void;
 }
 
-export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
+export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: SidebarProps) {
   const { theme, toggleTheme, dataMode, setDataMode, sensorData, sensorHistory, connectionStatus } = useAppContext();
+  const { toast } = useToast();
   const location = useLocation();
 
   const isLanding = location.pathname === '/';
@@ -44,14 +48,22 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   if (isLanding) return null;
 
   const handleExportCSV = () => {
-    if (sensorHistory.length === 0) return;
+    if (sensorHistory.length === 0) {
+      toast('warning', 'No sensor data to export');
+      return;
+    }
     const csv = exportSensorDataCSV(sensorHistory);
     downloadCSV(csv, `sensor_data_${new Date().toISOString().split('T')[0]}.csv`);
+    toast('success', `Exported ${sensorHistory.length} data points as CSV`);
   };
 
   const handleExportPDF = () => {
-    if (!sensorData) return;
+    if (!sensorData) {
+      toast('warning', 'No sensor data available for report');
+      return;
+    }
     generateSystemReport(sensorData, sensorHistory, hardwareModules);
+    toast('success', 'System report PDF generated');
   };
 
   return (
@@ -70,10 +82,19 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
           <Radio size={16} className="text-white" />
         </div>
         {!collapsed && (
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h2 className="text-sm font-bold text-[var(--text-primary)] truncate">Smart Helmet</h2>
             <p className="text-[10px] text-[var(--text-muted)]">Review III</p>
           </div>
+        )}
+        {onMobileClose && (
+          <button
+            onClick={onMobileClose}
+            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors"
+            aria-label="Close menu"
+          >
+            <X size={18} />
+          </button>
         )}
       </div>
 
