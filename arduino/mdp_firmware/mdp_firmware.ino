@@ -7,7 +7,7 @@
  * Outputs one JSON line per second to Serial (USB) at 9600 baud
  *
  * Wiring:
- * NEO-6M GPS    — TX → pin 4, RX → pin 3
+ * NEO-6M GPS    — GPS TX → Arduino RX (pin 4), GPS RX → Arduino TX (pin 3)
  * MPU6050       — SDA → A4, SCL → A5
  * Buzzer        — pin 8
  */
@@ -157,22 +157,22 @@ void loop() {
     dtostrf(gps.location.lng(), 1, 6, buf);
     doc["lng"] = serialized(buf);
   } else {
-    doc["lat"] = 0;
-    doc["lng"] = 0;
+    doc["lat"] = 0.0;
+    doc["lng"] = 0.0;
   }
 
   if (gps.speed.isValid()) {
     dtostrf(gps.speed.kmph(), 1, 1, buf);
     doc["spd"] = serialized(buf);
   } else {
-    doc["spd"] = 0;
+    doc["spd"] = 0.0;
   }
 
   if (gps.altitude.isValid()) {
     dtostrf(gps.altitude.meters(), 1, 1, buf);
     doc["alt"] = serialized(buf);
   } else {
-    doc["alt"] = 0;
+    doc["alt"] = 0.0;
   }
 
   dtostrf(ax, 1, 3, buf);

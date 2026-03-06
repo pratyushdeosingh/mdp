@@ -308,7 +308,7 @@ wss.on('connection', (ws) => {
 
   // Send current status to newly connected client
   try {
-    ws.send(JSON.stringify({ type: 'status', ...connectionState }));
+    ws.send(JSON.stringify({ type: 'status', connected: connectionState.connected, port: connectionState.port }));
   } catch (err) {
     console.warn(`[WS] Failed to send initial status: ${err.message}`);
   }
