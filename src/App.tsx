@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, Component } from 'react';
+import type { ReactNode, ErrorInfo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { ToastProvider } from './context/ToastContext';
@@ -25,10 +26,54 @@ function PageLoader() {
   );
 }
 
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
+  state: ErrorBoundaryState = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('[ErrorBoundary]', error, info.componentStack);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-[var(--bg-primary)] p-8">
+          <div className="max-w-md text-center space-y-4">
+            <div className="text-4xl">⚠️</div>
+            <h1 className="text-xl font-bold text-[var(--text-primary)]">Something went wrong</h1>
+            <p className="text-sm text-[var(--text-secondary)]">
+              {this.state.error?.message || 'An unexpected error occurred.'}
+            </p>
+            <button
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                window.location.href = '/';
+              }}
+              className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-medium transition-colors"
+            >
+              Return to Home
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   return (
     <div className="flex flex-col w-full min-h-screen h-full">
-      <BrowserRouter>
+      <ErrorBoundary>
+        <BrowserRouter>
         <AppProvider>
           <ToastProvider>
             <Routes>
@@ -47,6 +92,7 @@ export default function App() {
           </ToastProvider>
         </AppProvider>
       </BrowserRouter>
+      </ErrorBoundary>
     </div>
   );
 }

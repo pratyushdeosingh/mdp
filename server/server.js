@@ -89,7 +89,11 @@ function broadcast(message) {
   const data = JSON.stringify(message);
   wss.clients.forEach((client) => {
     if (client.readyState === 1) { // WebSocket.OPEN
-      client.send(data);
+      try {
+        client.send(data);
+      } catch (err) {
+        console.warn(`[WS] Send failed for client: ${err.message}`);
+      }
     }
   });
 }
@@ -109,6 +113,12 @@ function openSerialPort(portPath, baudRate) {
     });
 
     parser = serialPort.pipe(new ReadlineParser({ delimiter: '\n' }));
+
+    // Handle parser errors (buffer overflow, encoding issues)
+    parser.on('error', (err) => {
+      console.error(`[Parser] Error: ${err.message}`);
+      broadcast({ type: 'error', message: `Serial parser error: ${err.message}` });
+    });
 
     // On each complete line from Arduino
     parser.on('data', (line) => {
@@ -143,6 +153,9 @@ function openSerialPort(portPath, baudRate) {
       console.error(`[Serial] Error: ${err.message}`);
       connectionState = { connected: false, port: null, baudRate };
       broadcast({ type: 'error', message: err.message });
+      // Clean up references to prevent stale state
+      serialPort = null;
+      parser = null;
     });
 
     serialPort.open((err) => {
@@ -278,6 +291,12 @@ app.get('/api/status', (req, res) => {
   res.json(connectionState);
 });
 
+// ── Express error handler (must be last middleware) ─────────
+app.use((err, _req, res, _next) => {
+  console.error(`[Express] Unhandled error: ${err.message}`);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 // ── WebSocket events ───────────────────────────────────────
 wss.on('connection', (ws) => {
   console.log('[WS] Client connected');
@@ -288,10 +307,18 @@ wss.on('connection', (ws) => {
   });
 
   // Send current status to newly connected client
-  ws.send(JSON.stringify({ type: 'status', ...connectionState }));
+  try {
+    ws.send(JSON.stringify({ type: 'status', ...connectionState }));
+  } catch (err) {
+    console.warn(`[WS] Failed to send initial status: ${err.message}`);
+  }
 
   ws.on('close', () => {
     console.log('[WS] Client disconnected');
+  });
+
+  ws.on('error', (err) => {
+    console.warn(`[WS] Client error: ${err.message}`);
   });
 });
 
@@ -326,8 +353,25 @@ server.listen(PORT, () => {
   process.on(signal, async () => {
     console.log(`\n[Server] Received ${signal}, shutting down...`);
     if (heartbeatInterval) clearInterval(heartbeatInterval);
+    // Notify all clients before closing
+    broadcast({ type: 'status', connected: false, port: null, message: 'Server shutting down' });
     await closeSerialPort();
-    server.close();
-    process.exit(0);
+    wss.close();
+    server.close(() => {
+      console.log('[Server] Closed.');
+      process.exit(0);
+    });
+    // Force exit after 5s if graceful close hangs
+    setTimeout(() => process.exit(0), 5000);
   });
+});
+
+// Catch unhandled errors to prevent crash
+process.on('uncaughtException', (err) => {
+  console.error(`[FATAL] Uncaught exception: ${err.message}`);
+  console.error(err.stack);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error(`[FATAL] Unhandled promise rejection:`, reason);
 });
