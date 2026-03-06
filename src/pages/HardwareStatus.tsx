@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react';
 import { Cpu, Radio, MapPin, Activity, Wrench, CheckCircle, Volume2, ToggleRight } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 import StatusBadge from '../components/StatusBadge';
 import { hardwareModules } from '../constants/hardware';
 
-const iconMap: Record<string, React.ReactNode> = {
+const iconMap: Record<string, ReactNode> = {
   cpu: <Cpu size={24} />,
   radio: <Radio size={24} />,
   'map-pin': <MapPin size={24} />,

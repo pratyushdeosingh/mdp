@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import type { SensorData, LogEntry, DataMode, ThemeMode, ConnectionStatus, SerialPortInfo } from '../types';
 import { generateSensorData, generateLogEntry, resetSimulatorState } from '../utils/simulator';
 import { useSerialConnection } from '../hooks/useSerialConnection';
@@ -29,7 +29,7 @@ const AppContext = createContext<AppContextType | null>(null);
 const MAX_HISTORY = 60;
 const MAX_LOGS = 200;
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
+export function AppProvider({ children }: { children: ReactNode }) {
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
   const [sensorHistory, setSensorHistory] = useState<SensorData[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);

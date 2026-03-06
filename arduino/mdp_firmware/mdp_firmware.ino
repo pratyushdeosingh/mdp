@@ -39,6 +39,10 @@ unsigned long lastSend = 0;
 const unsigned long SEND_INTERVAL = 1000;  // 1 second
 bool mpuAvailable = false;
 
+// Button debounce state
+unsigned long lastButtonPress = 0;
+const unsigned long DEBOUNCE_MS = 200;
+
 // ── Setup ──────────────────────────────────────────────────
 void setup() {
   Serial.begin(9600);
@@ -91,7 +95,7 @@ void loop() {
       return; // skip this cycle
     }
 
-    Wire.requestFrom(MPU_ADDR, 6, true);
+    Wire.requestFrom((uint8_t)MPU_ADDR, (uint8_t)6, (uint8_t)true);
     if (Wire.available() < 6) return; // incomplete read
 
     // Read and combine raw bytes
@@ -115,8 +119,9 @@ void loop() {
 
   // Handle active accident alert
   if (accidentDetected) {
-    if (digitalRead(CANCEL_BTN_PIN) == LOW) {
-      // Manual cancel button pressed
+    if (digitalRead(CANCEL_BTN_PIN) == LOW && (millis() - lastButtonPress > DEBOUNCE_MS)) {
+      // Manual cancel button pressed (debounced)
+      lastButtonPress = millis();
       accidentDetected = false;
       digitalWrite(BUZZER_PIN, LOW);
     }

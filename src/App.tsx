@@ -1,13 +1,27 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import DashboardLayout from './components/DashboardLayout';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
-import LiveMap from './pages/LiveMap';
-import Analytics from './pages/Analytics';
 import SerialMonitor from './pages/SerialMonitor';
 import HardwareStatus from './pages/HardwareStatus';
-import Documentation from './pages/Documentation';
+
+// Lazy-load heavy pages (leaflet, recharts, jspdf-embedded iframe)
+const LiveMap = lazy(() => import('./pages/LiveMap'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Documentation = lazy(() => import('./pages/Documentation'));
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center gap-3">
+        <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+        <span className="text-sm text-[var(--text-muted)]">Loading...</span>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   return (
@@ -18,11 +32,11 @@ export default function App() {
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<LandingPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/map" element={<LiveMap />} />
-              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/map" element={<Suspense fallback={<PageLoader />}><LiveMap /></Suspense>} />
+              <Route path="/analytics" element={<Suspense fallback={<PageLoader />}><Analytics /></Suspense>} />
               <Route path="/serial" element={<SerialMonitor />} />
               <Route path="/hardware" element={<HardwareStatus />} />
-              <Route path="/docs" element={<Documentation />} />
+              <Route path="/docs" element={<Suspense fallback={<PageLoader />}><Documentation /></Suspense>} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

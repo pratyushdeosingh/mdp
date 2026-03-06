@@ -53,6 +53,13 @@ export function useSerialConnection(onData: (data: SensorData) => void) {
     }
 
     try {
+      // Close any existing WebSocket before opening a new one
+      if (wsRef.current) {
+        wsRef.current.onclose = null; // Prevent reconnect logic from old socket
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+
       // Tell the bridge to open the serial port
       const res = await fetch(`${BRIDGE_URL}/api/connect`, {
         method: 'POST',

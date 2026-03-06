@@ -181,6 +181,17 @@ function closeSerialPort() {
 
 // Basic inline rate limiting middleware for /api/ routes
 const rateLimitMap = new Map();
+
+// Periodically clean up expired rate-limit entries to prevent memory leak
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, record] of rateLimitMap) {
+    if (now > record.resetTime) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, 5 * 60 * 1000); // Every 5 minutes
+
 app.use('/api/', (req, res, next) => {
   const ip = req.ip || req.socket.remoteAddress || 'unknown';
   const now = Date.now();
