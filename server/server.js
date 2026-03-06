@@ -52,7 +52,13 @@ let connectionState = {
 
 // ── Transform Arduino short-key JSON → full SensorData ─────
 function transformArduinoData(raw) {
-  const hasGPS = raw.lat !== 0 || raw.lng !== 0;
+  // Use explicit GPS valid flag if available, fall back to lat/lng check
+  const hasGPS = raw.gv === 1 || (raw.gv === undefined && (raw.lat !== 0 || raw.lng !== 0));
+  const mpuOk = raw.mpu === undefined || raw.mpu === 1;
+
+  let systemStatus = 'online';
+  if (!hasGPS && !mpuOk) systemStatus = 'offline';
+  else if (!hasGPS || !mpuOk) systemStatus = 'warning';
 
   return {
     type: 'data',
@@ -69,12 +75,10 @@ function transformArduinoData(raw) {
         y: raw.ay ?? 0,
         z: raw.az ?? 0,
       },
-      systemStatus: hasGPS ? 'online' : 'warning',
+      systemStatus,
       totalAcceleration: raw.ta ?? 0,
       accidentDetected: (raw.ad ?? 0) === 1,
-      // NOTE: Arduino firmware does not send a 'bat' field — no battery sensor
-      // exists in the current hardware. This will always be 0 in hardware mode.
-      batteryLevel: raw.bat ?? 0,
+      batteryLevel: raw.bat ?? 100, // Default to 100 when no battery sensor
       temperature: raw.tmp ?? 0,
     },
   };

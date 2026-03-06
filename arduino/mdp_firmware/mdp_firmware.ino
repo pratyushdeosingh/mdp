@@ -144,10 +144,14 @@ void loop() {
   if (millis() - lastSend < SEND_INTERVAL) return;
   lastSend = millis();
 
-  StaticJsonDocument<256> doc;
+  StaticJsonDocument<300> doc;
   char buf[16]; // Reusable stack buffer for dtostrf (avoids String heap fragmentation)
 
-  if (gps.location.isValid()) {
+  // GPS valid flag — explicit boolean so server doesn't rely on lat/lng==0 check
+  bool gpsValid = gps.location.isValid();
+  doc["gv"] = gpsValid ? 1 : 0;
+
+  if (gpsValid) {
     dtostrf(gps.location.lat(), 1, 6, buf);
     doc["lat"] = serialized(buf);
     dtostrf(gps.location.lng(), 1, 6, buf);
@@ -180,7 +184,10 @@ void loop() {
   dtostrf(totalAccel, 1, 2, buf);
   doc["ta"] = serialized(buf);
   doc["ad"] = accidentDetected ? 1 : 0;
-  doc["tmp"] = 0;  // Placeholder for temp
+  doc["tmp"] = 0;       // Placeholder — no temp sensor in current hardware
+  doc["bat"] = 100;     // Placeholder — no battery sensor; report full
+  doc["mpu"] = mpuAvailable ? 1 : 0;  // MPU6050 status for dashboard
+  doc["ms"] = millis();               // Arduino uptime for timing/gap detection
 
   serializeJson(doc, Serial);
   Serial.println();  // Newline delimiter
