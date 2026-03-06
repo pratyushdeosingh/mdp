@@ -100,55 +100,77 @@ Two operating modes are supported:
 
 ## 🏗️ System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  HARDWARE LAYER (Arduino Uno R3)                            │
-│                                                             │
-│  ┌──────────┐  ┌──────────┐  ┌────────┐  ┌──────────────┐  │
-│  │ NEO-6M   │  │ MPU6050  │  │ Buzzer │  │ Cancel Btn   │  │
-│  │ GPS      │  │ IMU      │  │ (D8)   │  │ (D7, PULLUP) │  │
-│  │ (D3,D4)  │  │ (A4,A5)  │  │        │  │              │  │
-│  └────┬─────┘  └────┬─────┘  └───┬────┘  └──────┬───────┘  │
-│       │              │            │               │          │
-│       └──────┬───────┘            │               │          │
-│              ▼                    │               │          │
-│     ┌─────────────────┐          │               │          │
-│     │  Arduino Loop   │──────────┘───────────────┘          │
-│     │  (1 Hz JSON)    │                                     │
-│     └────────┬────────┘                                     │
-│              │ USB Serial (9600 baud)                        │
-└──────────────┼──────────────────────────────────────────────┘
-               │
-               ▼
-┌──────────────────────────────────────────────────────────────┐
-│  BRIDGE SERVER (Node.js, port 3001)                          │
-│                                                              │
-│  ┌──────────────┐    ┌─────────────────┐    ┌────────────┐  │
-│  │ SerialPort   │───▶│ transformData() │───▶│ WebSocket  │  │
-│  │ ReadlineParse│    │ Short→Full keys │    │ Broadcast  │  │
-│  └──────────────┘    └─────────────────┘    └─────┬──────┘  │
-│                                                    │         │
-│  REST: GET /api/ports  |  POST /api/connect        │         │
-│        POST /api/disconnect  |  GET /api/status     │         │
-└──────────────────────────────┼──────────────────────┘
-                               │ ws://localhost:3001/ws
-                               ▼
-┌──────────────────────────────────────────────────────────────┐
-│  DASHBOARD (React 19, port 5173)                             │
-│                                                              │
-│  ┌────────────────┐  ┌───────────────┐  ┌────────────────┐  │
-│  │ AppContext      │  │ Toast Context │  │ Serial Hook    │  │
-│  │ (Global State)  │  │ (Notifs)      │  │ (WS Client)   │  │
-│  └───────┬────────┘  └───────────────┘  └────────────────┘  │
-│          │                                                    │
-│  ┌───────▼──────────────────────────────────────────────┐    │
-│  │  Pages: Dashboard | Map | Analytics | Accidents      │    │
-│  │         Serial Monitor | Hardware | Docs             │    │
-│  └──────────────────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────────────────┘
+### Hardware Mode — Full Data Flow
+
+```mermaid
+graph TD
+    subgraph Hardware["🔧 Hardware Layer — Arduino Uno R3"]
+        GPS["🛰️ NEO-6M GPS<br/><i>UART · D3, D4</i>"]
+        MPU["📐 MPU6050 IMU<br/><i>I2C · A4, A5</i>"]
+        BUZ["🔊 Buzzer<br/><i>Digital · D8</i>"]
+        BTN["🛑 Cancel Button<br/><i>INPUT_PULLUP · D7</i>"]
+        MCU["⚡ Arduino Loop<br/><i>1 Hz JSON Output</i>"]
+    end
+
+    subgraph Server["🖥️ Bridge Server — Node.js, port 3001"]
+        SER["📟 SerialPort<br/><i>ReadlineParser</i>"]
+        TRN["🔄 transformData()<br/><i>Short → Full Keys</i>"]
+        WSS["📡 WebSocket<br/><i>Broadcast</i>"]
+        REST["🌐 REST API<br/><i>/api/ports · /api/connect<br/>/api/disconnect · /api/status</i>"]
+    end
+
+    subgraph Dashboard["🖼️ Dashboard — React 19, port 5173"]
+        CTX["📊 AppContext<br/><i>Global State</i>"]
+        TOAST["🔔 ToastContext<br/><i>Notifications</i>"]
+        HOOK["🔌 useSerialConnection<br/><i>WebSocket Client</i>"]
+        PAGES["📄 Pages<br/><i>Dashboard · Map · Analytics<br/>Accidents · Serial · Hardware · Docs</i>"]
+    end
+
+    GPS --> MCU
+    MPU --> MCU
+    MCU --> BUZ
+    BTN --> MCU
+    MCU -->|"USB Serial · 9600 baud"| SER
+    SER --> TRN
+    TRN --> WSS
+    WSS -->|"ws://localhost:3001/ws"| HOOK
+    HOOK --> CTX
+    CTX --> PAGES
+    TOAST --> PAGES
+    REST -.->|"HTTP"| HOOK
 ```
 
-**Simulation Mode** bypasses the bridge server entirely — `simulator.ts` generates data directly into `AppContext`.
+### Simulation Mode
+
+```mermaid
+graph LR
+    SIM["🧪 simulator.ts<br/><i>In-Memory Generator</i>"]
+    CTX2["📊 AppContext<br/><i>React State</i>"]
+    UI["🖼️ Dashboard<br/><i>All Pages</i>"]
+
+    SIM -->|"1 Hz Ticks"| CTX2 --> UI
+```
+
+### Accident Detection Flow
+
+```mermaid
+flowchart TD
+    A([System Power ON]) --> B[Initialize MCU, GPS, MPU6050]
+    B --> C[Feed GPS Parser<br/><i>200ms window</i>]
+    C --> D[Read MPU6050<br/><i>Raw I2C · 3-axis</i>]
+    D --> E[Calculate Total Accel<br/><i>√ ax² + ay² + az²</i>]
+    E --> F{Total Accel<br/>> 25 m/s²?}
+    F -->|No| H[Output JSON via Serial]
+    F -->|Yes| G[🔊 Trigger Buzzer<br/><i>500ms on/off · 10s timer</i>]
+    G --> I{Cancel Button<br/>Pressed?}
+    I -->|Yes| J[Silence Alert]
+    I -->|No| K{10s Elapsed?}
+    K -->|Yes| J
+    K -->|No| G
+    J --> H
+    H --> L([Wait 1s → Loop])
+    L --> C
+```
 
 ---
 
