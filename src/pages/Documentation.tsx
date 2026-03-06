@@ -208,41 +208,53 @@ function PPTViewerTab() {
 function FutureWorkTab() {
   const items = [
     {
-      phase: 'Completed — Current Implementation',
+      phase: '✅ Completed — Current Implementation',
       tasks: [
-        'Arduino Uno R3 with firmware outputting JSON via USB serial',
-        'MPU6050 accelerometer/gyroscope for 6-axis motion sensing',
-        'NEO-6M GPS for real-time location tracking',
-        'Accident detection with buzzer alert (10s timer + cancel button)',
-        'Node.js bridge server (Serial → WebSocket)',
-        'Full web dashboard with real-time data visualization',
+        'Arduino Uno R3 firmware with JSON output via USB serial at 1 Hz',
+        'MPU6050 accelerometer/gyroscope — raw I2C reads with memory-safe dtostrf() buffers',
+        'NEO-6M GPS with explicit validity flag (gv field) for equator edge-case safety',
+        'Accident detection (>25 m/s²) with 10s buzzer alert + debounced cancel button',
+        'MPU6050 health reporting (mpu field) and Arduino uptime (ms field)',
+        'Node.js bridge server — Serial→WebSocket with 30 req/min rate limiting',
+        'React 19 + TypeScript dashboard with glass-morphism UI and dark/light theme',
+        'Real-time dashboard with acceleration gauge, GPS metrics, and accident alerts',
+        'Interactive Leaflet map with live position marker and movement trail',
+        'Analytics page with 60-second rolling charts (acceleration, speed, altitude)',
+        'Accident history log with GPS coordinates, peak acceleration, and duration',
+        'Serial monitor with macOS-style terminal and color-coded messages',
+        'PDF system reports and CSV data exports',
+        'Code-split bundle — 81% smaller initial load via lazy routes and vendor chunks',
+        'Toast notification system with auto-dismiss',
+        'Mobile responsive layout with hamburger menu overlay',
       ],
     },
     {
-      phase: 'Phase 1 — Enhanced Safety Features',
+      phase: '🔴 Phase 1 — Enhanced Communication',
       tasks: [
-        'Add SMS notification via GSM module when accident is confirmed',
-        'Implement geofencing alerts for restricted area monitoring',
-        'Add emergency contact auto-dial on confirmed accidents',
-        'Integrate temperature sensor (LM35) for environmental monitoring',
+        'GSM/SIM module integration — send automated SOS with GPS coordinates to emergency contacts',
+        'Emergency contact auto-dial when accident is confirmed after 10-second window',
+        'Cloud push notifications via Firebase Cloud Messaging',
+        'Companion mobile app (React Native) with real-time helmet monitoring',
       ],
     },
     {
-      phase: 'Phase 2 — Data & Analytics',
+      phase: '🟡 Phase 2 — Intelligence & Storage',
       tasks: [
-        'Implement historical data storage (IndexedDB or cloud backend)',
-        'Add trip recording with start/stop and route replay',
-        'Export trip reports with route maps and acceleration graphs',
-        'Machine learning-based driving behavior analysis',
+        'Cloud IoT platform integration (AWS IoT Core / Azure IoT Hub) for persistent data logging',
+        'Machine learning model for driving behavior analysis and false-positive reduction',
+        'Trip recording with start/stop, route replay, and exportable trip reports',
+        'Geofencing alerts when rider leaves designated safe zones',
+        'DHT22 temperature sensor integration for environmental monitoring',
       ],
     },
     {
-      phase: 'Phase 3 — Deployment & Scaling',
+      phase: '🟢 Phase 3 — Production & Scaling',
       tasks: [
-        'PCB design for compact final form factor',
-        'Power management with battery and sleep modes',
-        'Mobile app companion with push notifications',
-        'Multi-vehicle fleet tracking support',
+        'Custom PCB design for compact form factor inside production helmets',
+        'Rechargeable LiPo battery with INA219 current sensor and deep sleep modes',
+        'Multi-helmet fleet tracking with rider identification on a single dashboard',
+        'FOTA (Firmware Over-The-Air) updates via WiFi module (ESP32 upgrade)',
+        'CE/FCC certification preparation for commercial deployment',
       ],
     },
   ];
@@ -257,7 +269,7 @@ function FutureWorkTab() {
             <ul className="space-y-2">
               {section.tasks.map((task, j) => (
                 <li key={j} className="flex items-start gap-2 text-xs text-[var(--text-secondary)]">
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${i === 0 ? 'bg-emerald-400' : 'bg-blue-400'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${i === 0 ? 'bg-emerald-400' : i === 1 ? 'bg-red-400' : i === 2 ? 'bg-amber-400' : 'bg-blue-400'}`} />
                   {task}
                 </li>
               ))}
