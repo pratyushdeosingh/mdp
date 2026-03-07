@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import GlassCard from '../components/GlassCard';
-import { GitBranch, Presentation, Lightbulb, BookOpen, Workflow } from 'lucide-react';
+import { GitBranch, Presentation, Lightbulb, BookOpen, Workflow, Cpu } from 'lucide-react';
 
 const tabs = [
   { id: 'abstract', label: 'Abstract', icon: BookOpen },
+  { id: 'circuit', label: 'Circuit Diagram', icon: Cpu },
   { id: 'block-diagram', label: 'Block Diagram', icon: GitBranch },
   { id: 'flowchart', label: 'Flowchart', icon: Workflow },
   { id: 'ppt', label: 'PPT Viewer', icon: Presentation },
@@ -47,6 +48,165 @@ function AbstractTab() {
         to improve road safety. By enabling automatic accident detection and faster emergency response, the system has the
         potential to reduce response time, increase rider safety, and contribute to smarter transportation systems.
       </p>
+    </div>
+  );
+}
+
+const wireColors: Record<string, string> = {
+  uart: 'var(--color-cyan)',
+  i2c: 'var(--color-orange)',
+  digital: 'var(--color-blue)',
+  power: 'var(--color-red)',
+  ground: 'var(--color-gray)',
+};
+
+const connections = [
+  { from: 'NEO-6M GPS', fromPin: 'TX', to: 'Arduino Uno', toPin: 'D4', type: 'uart', label: 'SoftwareSerial RX · 9600 baud' },
+  { from: 'Arduino Uno', fromPin: 'D3', to: 'NEO-6M GPS', toPin: 'RX', type: 'uart', label: 'SoftwareSerial TX · 9600 baud' },
+  { from: 'MPU6050', fromPin: 'SDA', to: 'Arduino Uno', toPin: 'A4', type: 'i2c', label: 'I2C Data · Addr 0x68' },
+  { from: 'MPU6050', fromPin: 'SCL', to: 'Arduino Uno', toPin: 'A5', type: 'i2c', label: 'I2C Clock' },
+  { from: 'Arduino Uno', fromPin: 'D8', to: 'Piezo Buzzer', toPin: '(+)', type: 'digital', label: 'Digital Out · 500ms beep' },
+  { from: 'Cancel Button', fromPin: 'Pin 1', to: 'Arduino Uno', toPin: 'D7', type: 'digital', label: 'INPUT_PULLUP · Active LOW' },
+  { from: 'Arduino Uno', fromPin: '5V', to: 'NEO-6M GPS', toPin: 'VCC', type: 'power', label: '5V Power' },
+  { from: 'Arduino Uno', fromPin: '5V', to: 'MPU6050', toPin: 'VCC', type: 'power', label: '5V Power' },
+  { from: 'Arduino Uno', fromPin: 'GND', to: 'All Modules', toPin: 'GND', type: 'ground', label: 'Common Ground' },
+];
+
+const modules = [
+  {
+    name: '⚡ Arduino Uno R3',
+    sub: 'ATmega328P · 16 MHz · 2KB SRAM',
+    pins: ['D3', 'D4', 'D7', 'D8', 'A4', 'A5', '5V', 'GND'],
+    color: 'blue',
+  },
+  {
+    name: '🛰️ NEO-6M GPS',
+    sub: 'UART · 9600 baud · NMEA',
+    pins: ['TX', 'RX', 'VCC', 'GND'],
+    color: 'cyan',
+  },
+  {
+    name: '📐 MPU6050 IMU',
+    sub: 'I2C · Addr 0x68 · ±2g default',
+    pins: ['SDA', 'SCL', 'VCC', 'GND'],
+    color: 'orange',
+  },
+  {
+    name: '🔊 Piezo Buzzer',
+    sub: 'Active buzzer · 500ms on/off',
+    pins: ['(+)', '(−) → GND'],
+    color: 'red',
+  },
+  {
+    name: '🛑 Cancel Button',
+    sub: 'Momentary N.O. · 200ms debounce',
+    pins: ['Pin 1 → D7', 'Pin 2 → GND'],
+    color: 'emerald',
+  },
+];
+
+function CircuitDiagramTab() {
+  const moduleColors: Record<string, { border: string; bg: string }> = {
+    blue: { border: 'border-blue-500/40', bg: 'bg-blue-500/10' },
+    cyan: { border: 'border-cyan-500/40', bg: 'bg-cyan-500/10' },
+    orange: { border: 'border-orange-500/40', bg: 'bg-orange-500/10' },
+    red: { border: 'border-red-500/40', bg: 'bg-red-500/10' },
+    emerald: { border: 'border-emerald-500/40', bg: 'bg-emerald-500/10' },
+  };
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-lg font-bold text-[var(--text-primary)]">Circuit Wiring Diagram</h2>
+
+      {/* Visual module layout */}
+      <GlassCard className="p-6">
+        <p className="text-xs font-bold tracking-widest uppercase text-[var(--text-muted)] mb-4">Hardware Modules</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {modules.map(mod => {
+            const c = moduleColors[mod.color];
+            return (
+              <div key={mod.name} className={`p-4 rounded-xl border-2 ${c.border} ${c.bg}`}>
+                <p className="text-sm font-bold text-[var(--text-primary)]">{mod.name}</p>
+                <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{mod.sub}</p>
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {mod.pins.map(pin => (
+                    <span
+                      key={pin}
+                      className="text-[10px] px-2 py-0.5 rounded-md font-mono bg-[var(--bg-primary)] text-[var(--text-secondary)] border border-[var(--border-color)]"
+                    >
+                      {pin}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </GlassCard>
+
+      {/* Connection table */}
+      <GlassCard className="p-6">
+        <p className="text-xs font-bold tracking-widest uppercase text-[var(--text-muted)] mb-4">Wire Connections</p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-[var(--border-color)]">
+                <th className="text-left py-2 pr-3 font-semibold text-[var(--text-primary)]">From</th>
+                <th className="text-left py-2 pr-3 font-semibold text-[var(--text-primary)]">Pin</th>
+                <th className="text-center py-2 pr-3 font-semibold text-[var(--text-primary)]">→</th>
+                <th className="text-left py-2 pr-3 font-semibold text-[var(--text-primary)]">To</th>
+                <th className="text-left py-2 pr-3 font-semibold text-[var(--text-primary)]">Pin</th>
+                <th className="text-left py-2 pr-3 font-semibold text-[var(--text-primary)]">Type</th>
+                <th className="text-left py-2 font-semibold text-[var(--text-primary)]">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {connections.map((c, i) => (
+                <tr key={i} className="border-b border-[var(--border-color)]/50">
+                  <td className="py-2 pr-3 text-[var(--text-secondary)]">{c.from}</td>
+                  <td className="py-2 pr-3 font-mono font-semibold text-[var(--text-primary)]">{c.fromPin}</td>
+                  <td className="py-2 pr-3 text-center">
+                    <span
+                      className="inline-block w-6 h-0.5 rounded-full"
+                      style={{ background: wireColors[c.type] }}
+                    />
+                  </td>
+                  <td className="py-2 pr-3 text-[var(--text-secondary)]">{c.to}</td>
+                  <td className="py-2 pr-3 font-mono font-semibold text-[var(--text-primary)]">{c.toPin}</td>
+                  <td className="py-2 pr-3">
+                    <span
+                      className="px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider"
+                      style={{
+                        color: wireColors[c.type],
+                        background: `color-mix(in srgb, ${wireColors[c.type]} 15%, transparent)`,
+                      }}
+                    >
+                      {c.type}
+                    </span>
+                  </td>
+                  <td className="py-2 text-[var(--text-muted)]">{c.label}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </GlassCard>
+
+      {/* Color legend */}
+      <GlassCard className="p-4">
+        <p className="text-xs font-bold tracking-widest uppercase text-[var(--text-muted)] mb-3">Wire Color Legend</p>
+        <div className="flex flex-wrap gap-4">
+          {Object.entries(wireColors).map(([type, color]) => (
+            <div key={type} className="flex items-center gap-2">
+              <span className="w-6 h-1 rounded-full" style={{ background: color }} />
+              <span className="text-xs uppercase tracking-wide font-medium text-[var(--text-secondary)]">{type}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] text-[var(--text-muted)] mt-3">
+          ⚡ Power MPU6050 and NEO-6M from Arduino <strong>3.3V or 5V</strong> depending on your module variant. Cancel button uses internal pull-up resistor (no external resistor needed).
+        </p>
+      </GlassCard>
     </div>
   );
 }
@@ -372,6 +532,7 @@ export default function Documentation() {
   const renderContent = () => {
     switch (activeTab) {
       case 'abstract': return <AbstractTab />;
+      case 'circuit': return <CircuitDiagramTab />;
       case 'block-diagram': return <BlockDiagramTab />;
       case 'flowchart': return <FlowchartTab />;
       case 'ppt': return <PPTViewerTab />;

@@ -314,16 +314,84 @@ node server.js
 
 ## 🔌 Hardware Wiring
 
-| Component | Arduino Pin | Interface | Notes |
-|-----------|-------------|-----------|-------|
-| NEO-6M GPS TX | **D4** | SoftwareSerial RX | 9600 baud |
-| NEO-6M GPS RX | **D3** | SoftwareSerial TX | 9600 baud |
-| MPU6050 SDA | **A4** | I2C Data | Address: `0x68` |
-| MPU6050 SCL | **A5** | I2C Clock | |
-| Piezo Buzzer (+) | **D8** | Digital Out | 500ms on/off pattern |
-| Cancel Button | **D7** | Digital In | `INPUT_PULLUP`, active LOW |
+### Circuit Diagram
 
-> ⚡ Power MPU6050 and NEO-6M from Arduino **3.3V or 5V** depending on your module variant.
+```mermaid
+graph LR
+    subgraph ARDUINO["⚡ Arduino Uno R3"]
+        D3["D3 — SoftwareSerial TX"]
+        D4["D4 — SoftwareSerial RX"]
+        A4["A4 — I2C SDA"]
+        A5["A5 — I2C SCL"]
+        D7["D7 — Digital In (PULLUP)"]
+        D8["D8 — Digital Out"]
+        V5["5V Power"]
+        GND["GND"]
+    end
+
+    subgraph GPS["🛰️ NEO-6M GPS Module"]
+        GPS_TX["TX"]
+        GPS_RX["RX"]
+        GPS_VCC["VCC"]
+        GPS_GND["GND"]
+    end
+
+    subgraph MPU["📐 MPU6050 (I2C Addr: 0x68)"]
+        MPU_SDA["SDA"]
+        MPU_SCL["SCL"]
+        MPU_VCC["VCC"]
+        MPU_GND["GND"]
+    end
+
+    subgraph BUZZ["🔊 Piezo Buzzer"]
+        BUZ_P["(+)"]
+        BUZ_N["(−)"]
+    end
+
+    subgraph BTN["🛑 Cancel Button"]
+        BTN_1["Pin 1"]
+        BTN_2["Pin 2"]
+    end
+
+    GPS_TX -->|"9600 baud"| D4
+    D3 -->|"9600 baud"| GPS_RX
+    V5 --> GPS_VCC
+    GND --> GPS_GND
+
+    A4 <-->|"I2C Data"| MPU_SDA
+    A5 <-->|"I2C Clock"| MPU_SCL
+    V5 --> MPU_VCC
+    GND --> MPU_GND
+
+    D8 --> BUZ_P
+    GND --> BUZ_N
+
+    D7 --- BTN_1
+    GND --- BTN_2
+
+    style ARDUINO fill:#1a2744,stroke:#3b82f6,color:#e8ecf4
+    style GPS fill:#0c2e3e,stroke:#06b6d4,color:#e8ecf4
+    style MPU fill:#2e1f0a,stroke:#f59e0b,color:#e8ecf4
+    style BUZZ fill:#2e0a0a,stroke:#ef4444,color:#e8ecf4
+    style BTN fill:#1a2e1a,stroke:#10b981,color:#e8ecf4
+```
+
+### Pin Mapping Table
+
+| Component | Arduino Pin | Interface | Direction | Notes |
+|-----------|-------------|-----------|-----------|-------|
+| NEO-6M GPS TX | **D4** | SoftwareSerial RX | GPS → Arduino | 9600 baud UART |
+| NEO-6M GPS RX | **D3** | SoftwareSerial TX | Arduino → GPS | 9600 baud UART |
+| MPU6050 SDA | **A4** | I2C Data | Bidirectional | Address: `0x68` |
+| MPU6050 SCL | **A5** | I2C Clock | Bidirectional | |
+| Piezo Buzzer (+) | **D8** | Digital Out | Arduino → Buzzer | 500ms on/off pattern |
+| Piezo Buzzer (−) | **GND** | Ground | — | |
+| Cancel Button Pin 1 | **D7** | Digital In | Button → Arduino | `INPUT_PULLUP`, active LOW |
+| Cancel Button Pin 2 | **GND** | Ground | — | Connect other leg to GND |
+| NEO-6M VCC | **5V** | Power | Arduino → GPS | 3.3V or 5V depending on module |
+| MPU6050 VCC | **5V** | Power | Arduino → MPU | 3.3V or 5V depending on module |
+
+> ⚡ Power MPU6050 and NEO-6M from Arduino **3.3V or 5V** depending on your module variant. Both share the same power rail.
 
 ---
 
