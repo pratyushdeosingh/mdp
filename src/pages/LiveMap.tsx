@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, memo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useAppContext } from '../context/AppContext';
@@ -6,7 +6,7 @@ import GlassCard from '../components/GlassCard';
 import { MapPin, Navigation, Gauge } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
-// Custom marker icon
+// Custom marker icon — created once at module scope
 const markerIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;base64,' + btoa(`
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#3b82f6" stroke="white" stroke-width="1.5">
@@ -27,7 +27,7 @@ function MapUpdater({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
-export default function LiveMap() {
+const LiveMap = memo(function LiveMap() {
   const { sensorData, sensorHistory } = useAppContext();
 
   if (!sensorData) {
@@ -40,8 +40,11 @@ export default function LiveMap() {
 
   const { latitude, longitude, speed } = sensorData.gps;
 
-  // Trail from history
-  const trail: [number, number][] = sensorHistory.map(d => [d.gps.latitude, d.gps.longitude]);
+  // Trail from history — memoized to avoid recalculating on every render
+  const trail = useMemo<[number, number][]>(
+    () => sensorHistory.map(d => [d.gps.latitude, d.gps.longitude]),
+    [sensorHistory]
+  );
 
   return (
     <div className="space-y-4">
@@ -114,4 +117,6 @@ export default function LiveMap() {
       </div>
     </div>
   );
-}
+});
+
+export default LiveMap;

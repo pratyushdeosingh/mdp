@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   MapPin,
   Navigation,
@@ -18,7 +19,7 @@ import ConnectionPanel from '../components/ConnectionPanel';
 import AccelerationGauge from '../components/AccelerationGauge';
 import { useAppContext } from '../context/AppContext';
 
-export default function Dashboard() {
+const Dashboard = memo(function Dashboard() {
   const { sensorData, dataMode, isStreaming, setIsStreaming, connectionStatus } = useAppContext();
 
   // Hardware mode with no data yet — show connection panel
@@ -257,4 +258,6 @@ export default function Dashboard() {
       </GlassCard>
     </div>
   );
-}
+});
+
+export default Dashboard;

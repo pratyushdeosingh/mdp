@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo, type ReactNode } from 'react';
 import type { SensorData, LogEntry, DataMode, ThemeMode, ConnectionStatus, SerialPortInfo, AccidentEvent } from '../types';
 import { generateSensorData, generateLogEntry, resetSimulatorState } from '../utils/simulator';
 import { useSerialConnection } from '../hooks/useSerialConnection';
@@ -62,7 +62,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         totalAcceleration: data.totalAcceleration,
         resolved: false,
       };
-      setAccidentEvents(prev => [event, ...prev]);
+      setAccidentEvents(prev => {
+        const updated = [event, ...prev];
+        return updated.length > 500 ? updated.slice(0, 500) : updated;
+      });
     } else if (!isActive && wasActive) {
       // Resolve most recent active event
       setAccidentEvents(prev =>
@@ -156,30 +159,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [dataMode, isStreaming, trackAccident]);
 
+  const contextValue = useMemo<AppContextType>(() => ({
+    sensorData,
+    sensorHistory,
+    logs,
+    accidentEvents,
+    dataMode,
+    theme,
+    isStreaming,
+    setDataMode,
+    toggleTheme,
+    setIsStreaming,
+    connectionStatus: serial.connectionStatus,
+    availablePorts: serial.availablePorts,
+    selectedPort: serial.selectedPort,
+    setSelectedPort: serial.setSelectedPort,
+    lastConnectionError: serial.lastError,
+    refreshPorts: serial.refreshPorts,
+    connectSerial: serial.connect,
+    disconnectSerial: serial.disconnect,
+  }), [
+    sensorData, sensorHistory, logs, accidentEvents,
+    dataMode, theme, isStreaming,
+    setDataMode, toggleTheme, setIsStreaming,
+    serial.connectionStatus, serial.availablePorts, serial.selectedPort,
+    serial.setSelectedPort, serial.lastError, serial.refreshPorts,
+    serial.connect, serial.disconnect,
+  ]);
+
   return (
-    <AppContext.Provider
-      value={{
-        sensorData,
-        sensorHistory,
-        logs,
-        accidentEvents,
-        dataMode,
-        theme,
-        isStreaming,
-        setDataMode,
-        toggleTheme,
-        setIsStreaming,
-        // Hardware connection state
-        connectionStatus: serial.connectionStatus,
-        availablePorts: serial.availablePorts,
-        selectedPort: serial.selectedPort,
-        setSelectedPort: serial.setSelectedPort,
-        lastConnectionError: serial.lastError,
-        refreshPorts: serial.refreshPorts,
-        connectSerial: serial.connect,
-        disconnectSerial: serial.disconnect,
-      }}
-    >
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );

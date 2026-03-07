@@ -14,8 +14,24 @@ import GlassCard from '../components/GlassCard';
 import { useAppContext } from '../context/AppContext';
 import { Activity, Gauge, Shield } from 'lucide-react';
 
-export default function Analytics() {
+import { useMemo, memo } from 'react';
+
+const Analytics = memo(function Analytics() {
   const { sensorHistory } = useAppContext();
+
+  const chartData = useMemo(() =>
+    sensorHistory.map((d, i) => ({
+      time: new Date(d.timestamp).toLocaleTimeString([], { minute: '2-digit', second: '2-digit' }),
+      index: i,
+      accX: d.accelerometer.x,
+      accY: d.accelerometer.y,
+      accZ: d.accelerometer.z,
+      speed: d.gps.speed,
+      altitude: d.gps.altitude,
+      totalAccel: d.totalAcceleration,
+    })),
+    [sensorHistory]
+  );
 
   if (sensorHistory.length === 0) {
     return (
@@ -24,17 +40,6 @@ export default function Analytics() {
       </div>
     );
   }
-
-  const chartData = sensorHistory.map((d, i) => ({
-    time: new Date(d.timestamp).toLocaleTimeString([], { minute: '2-digit', second: '2-digit' }),
-    index: i,
-    accX: d.accelerometer.x,
-    accY: d.accelerometer.y,
-    accZ: d.accelerometer.z,
-    speed: d.gps.speed,
-    altitude: d.gps.altitude,
-    totalAccel: d.totalAcceleration,
-  }));
 
   const tooltipStyle = {
     contentStyle: {
@@ -168,4 +173,6 @@ export default function Analytics() {
       </div>
     </div>
   );
-}
+});
+
+export default Analytics;
