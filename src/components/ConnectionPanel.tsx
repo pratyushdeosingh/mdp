@@ -48,7 +48,7 @@ export default function ConnectionPanel() {
         </div>
         <div className="ml-auto flex items-center gap-2">
           <span
-            className={`w-2 h-2 rounded-full ${connectionStatus === 'connecting' ? 'animate-pulse' : ''}`}
+            className={`w-2 h-2 rounded-full ${connectionStatus === 'connecting' ? 'pulse-live' : connectionStatus === 'connected' ? 'pulse-live' : ''}`}
             style={{ background: statusColor }}
           />
           <span className="text-xs text-[var(--text-muted)]">{statusLabel}</span>

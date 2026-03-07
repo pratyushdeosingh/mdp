@@ -15,6 +15,7 @@ import {
 import MetricCard from '../components/MetricCard';
 import StatusBadge from '../components/StatusBadge';
 import GlassCard from '../components/GlassCard';
+import EmptyState from '../components/EmptyState';
 import ConnectionPanel from '../components/ConnectionPanel';
 import AccelerationGauge from '../components/AccelerationGauge';
 import { useAppContext } from '../context/AppContext';
@@ -29,7 +30,7 @@ const Dashboard = memo(function Dashboard() {
         <ConnectionPanel />
         {connectionStatus === 'connected' && (
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-emerald)' }} />
+            <span className="w-2 h-2 rounded-full pulse-live" style={{ background: 'var(--color-emerald)' }} />
             <span className="text-sm font-medium" style={{ color: 'var(--color-emerald)' }}>Connected — waiting for first data packet...</span>
           </div>
         )}
@@ -40,9 +41,11 @@ const Dashboard = memo(function Dashboard() {
   // Simulation mode still loading
   if (!sensorData) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[var(--text-muted)]">Initializing sensors...</p>
-      </div>
+      <EmptyState
+        icon={<Radio size={32} style={{ color: 'var(--color-blue)' }} />}
+        title="Initializing Sensors"
+        message="Waiting for the first data packet from the simulation engine..."
+      />
     );
   }
 
@@ -77,8 +80,8 @@ const Dashboard = memo(function Dashboard() {
 
       {/* Accident Detection Alert */}
       {d.accidentDetected && (
-        <div role="alert" aria-live="assertive" aria-atomic="true"
-          className="p-5 rounded-2xl border-2 flex items-center gap-4 animate-pulse"
+        <div role="alert" aria-live="polite" aria-atomic="true"
+          className="p-5 rounded-2xl border-2 flex items-center gap-4 animate-slow-pulse"
           style={{ background: 'var(--status-red-bg)', borderColor: 'var(--color-red)', borderWidth: '2px' }}
         >
           <div className="p-3 rounded-xl" style={{ background: 'var(--status-red-bg)' }}>
@@ -92,7 +95,7 @@ const Dashboard = memo(function Dashboard() {
       )}
 
       {/* Metrics Grid — GPS & Motion */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 stagger-children">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 stagger-children">
         <MetricCard
           label="Latitude"
           value={d.gps.latitude}

@@ -104,7 +104,8 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
           <div className="flex rounded-lg overflow-hidden border border-[var(--border-color)]">
             <button
               onClick={() => setDataMode('simulation')}
-              className={`flex-1 text-[10px] font-medium py-1.5 transition-all ${dataMode === 'simulation'
+              aria-label="Switch to simulation mode"
+              className={`flex-1 text-[10px] font-medium py-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${dataMode === 'simulation'
                 ? 'bg-blue-500 text-white'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                 }`}
@@ -113,7 +114,8 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
             </button>
             <button
               onClick={() => setDataMode('hardware')}
-              className={`flex-1 text-[10px] font-medium py-1.5 transition-all ${dataMode === 'hardware'
+              aria-label="Switch to hardware mode"
+              className={`flex-1 text-[10px] font-medium py-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${dataMode === 'hardware'
                 ? 'bg-emerald-500 text-white'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                 }`}
@@ -134,7 +136,7 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
           <div className="flex items-center gap-1.5 mt-2 px-1">
             <span
               className={`w-1.5 h-1.5 rounded-full ${connectionStatus === 'connected' ? 'pulse-live' :
-                connectionStatus === 'connecting' ? 'animate-pulse' : ''
+                connectionStatus === 'connecting' ? 'pulse-live' : ''
               }`}
               style={{
                 background: connectionStatus === 'connected' ? 'var(--color-emerald)' :
@@ -158,7 +160,7 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive
                 ? 'text-[var(--nav-active-text)]'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
               } ${collapsed ? 'justify-center' : ''}`
@@ -175,7 +177,8 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
       <div className="p-3 space-y-1 border-t border-[var(--glass-border)]">
         <button
           onClick={handleExportCSV}
-          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all ${collapsed ? 'justify-center' : ''}`}
+          aria-label="Export sensor data as CSV file"
+          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${collapsed ? 'justify-center' : ''}`}
           title="Export CSV"
         >
           <Download size={14} />
@@ -183,7 +186,8 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
         </button>
         <button
           onClick={handleExportPDF}
-          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all ${collapsed ? 'justify-center' : ''}`}
+          aria-label="Download system report as PDF"
+          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${collapsed ? 'justify-center' : ''}`}
           title="Download Report"
         >
           <FileText size={14} />
@@ -191,7 +195,8 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
         </button>
         <button
           onClick={toggleTheme}
-          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all ${collapsed ? 'justify-center' : ''}`}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${collapsed ? 'justify-center' : ''}`}
           title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         >
           {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}

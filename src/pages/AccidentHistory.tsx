@@ -19,13 +19,13 @@ export default function AccidentHistory() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20">
-            <XCircle size={14} className="text-red-400" />
-            <span className="text-xs font-medium text-red-400">{activeCount} Active</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border" style={{ background: 'var(--status-red-bg)', borderColor: 'color-mix(in srgb, var(--color-red) 20%, transparent)' }}>
+            <XCircle size={14} style={{ color: 'var(--color-red)' }} />
+            <span className="text-xs font-medium" style={{ color: 'var(--color-red)' }}>{activeCount} Active</span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-            <CheckCircle size={14} className="text-emerald-400" />
-            <span className="text-xs font-medium text-emerald-400">{resolvedCount} Resolved</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border" style={{ background: 'var(--status-emerald-bg)', borderColor: 'color-mix(in srgb, var(--color-emerald) 20%, transparent)' }}>
+            <CheckCircle size={14} style={{ color: 'var(--color-emerald)' }} />
+            <span className="text-xs font-medium" style={{ color: 'var(--color-emerald)' }}>{resolvedCount} Resolved</span>
           </div>
         </div>
       </div>
@@ -93,16 +93,17 @@ export default function AccidentHistory() {
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   {/* Status + ID */}
                   <div className="flex items-center gap-3 shrink-0">
-                    <div className={`p-2.5 rounded-xl ${event.resolved ? 'bg-emerald-500/10' : 'bg-red-500/10 animate-pulse'}`}>
-                      <AlertTriangle size={20} className={event.resolved ? 'text-emerald-400' : 'text-red-400'} />
+                    <div className={`p-2.5 rounded-xl ${event.resolved ? 'bg-emerald-500/10' : 'bg-red-500/10 animate-slow-pulse'}`}>
+                      <AlertTriangle size={20} style={{ color: event.resolved ? 'var(--color-emerald)' : 'var(--color-red)' }} />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-[var(--text-primary)]">Event #{event.id}</span>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${event.resolved
-                          ? 'bg-emerald-500/15 text-emerald-400'
-                          : 'bg-red-500/15 text-red-400'
-                        }`}>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                          style={{
+                            background: event.resolved ? 'var(--status-emerald-bg)' : 'var(--status-red-bg)',
+                            color: event.resolved ? 'var(--color-emerald)' : 'var(--color-red)'
+                          }}>
                           {event.resolved ? 'RESOLVED' : 'ACTIVE'}
                         </span>
                       </div>
@@ -115,7 +116,7 @@ export default function AccidentHistory() {
                   {/* Sensor Readings */}
                   <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div className="flex items-center gap-2">
-                      <MapPin size={14} className="text-blue-400 shrink-0" />
+                      <MapPin size={14} className="shrink-0" style={{ color: 'var(--color-blue)' }} />
                       <div>
                         <p className="text-[10px] text-[var(--text-muted)]">Location</p>
                         <p className="text-xs font-medium text-[var(--text-primary)]">
@@ -124,21 +125,21 @@ export default function AccidentHistory() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Gauge size={14} className="text-emerald-400 shrink-0" />
+                      <Gauge size={14} className="shrink-0" style={{ color: 'var(--color-emerald)' }} />
                       <div>
                         <p className="text-[10px] text-[var(--text-muted)]">Speed</p>
                         <p className="text-xs font-medium text-[var(--text-primary)]">{event.gps.speed.toFixed(1)} km/h</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Activity size={14} className="text-red-400 shrink-0" />
+                      <Activity size={14} className="shrink-0" style={{ color: 'var(--color-red)' }} />
                       <div>
                         <p className="text-[10px] text-[var(--text-muted)]">Total Accel</p>
-                        <p className="text-xs font-bold text-red-400">{event.totalAcceleration.toFixed(2)} m/s²</p>
+                        <p className="text-xs font-bold" style={{ color: 'var(--color-red)' }}>{event.totalAcceleration.toFixed(2)} m/s²</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock size={14} className="text-amber-400 shrink-0" />
+                      <Clock size={14} className="shrink-0" style={{ color: 'var(--color-amber)' }} />
                       <div>
                         <p className="text-[10px] text-[var(--text-muted)]">Duration</p>
                         <p className="text-xs font-medium text-[var(--text-primary)]">

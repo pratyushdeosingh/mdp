@@ -11,6 +11,7 @@ import {
   Area,
 } from 'recharts';
 import GlassCard from '../components/GlassCard';
+import EmptyState from '../components/EmptyState';
 import { useAppContext } from '../context/AppContext';
 import { Activity, Gauge, Shield } from 'lucide-react';
 
@@ -35,8 +36,25 @@ const Analytics = memo(function Analytics() {
 
   if (sensorHistory.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[var(--text-muted)]">Collecting sensor data...</p>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Analytics</h1>
+          <p className="text-sm text-[var(--text-muted)] mt-1.5">60-second rolling charts</p>
+        </div>
+        {/* Skeleton chart placeholders */}
+        <div className="grid grid-cols-1 gap-6">
+          {[1, 2, 3].map(i => (
+            <GlassCard key={i} className="p-6">
+              <div className="skeleton h-5 w-48 mb-4" />
+              <div className="skeleton h-[250px] w-full" />
+            </GlassCard>
+          ))}
+        </div>
+        <EmptyState
+          icon={<Activity size={32} style={{ color: 'var(--color-cyan)' }} />}
+          title="Collecting Sensor Data"
+          message="Charts will appear once the first data packet arrives. Start streaming to begin."
+        />
       </div>
     );
   }
