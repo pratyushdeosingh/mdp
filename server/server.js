@@ -29,11 +29,14 @@ const PORT = 3001;
 
 const app = express();
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'http://localhost:4173',
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, Postman) or any localhost port
+    if (!origin || /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
 }));
 app.use(express.json());
 
