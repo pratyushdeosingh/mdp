@@ -63,7 +63,7 @@ const Analytics = memo(function Analytics() {
       {/* Accelerometer Chart */}
       <GlassCard className="p-6">
         <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
-          <Activity size={16} className="text-orange-400" />
+          <Activity size={16} style={{ color: 'var(--color-orange)' }} />
           Accelerometer (X, Y, Z) vs Time
         </h3>
         <ResponsiveContainer width="100%" height={300}>
@@ -92,7 +92,7 @@ const Analytics = memo(function Analytics() {
       {/* Speed Chart */}
       <GlassCard className="p-6">
         <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
-          <Gauge size={16} className="text-emerald-400" />
+          <Gauge size={16} style={{ color: 'var(--color-emerald)' }} />
           Speed vs Time
         </h3>
         <ResponsiveContainer width="100%" height={250}>
@@ -151,7 +151,7 @@ const Analytics = memo(function Analytics() {
 
         <GlassCard className="p-6">
           <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
-            <Shield size={14} className="text-red-400" />
+            <Shield size={14} style={{ color: 'var(--color-red)' }} />
             Total Acceleration vs Time
           </h3>
           <ResponsiveContainer width="100%" height={200}>

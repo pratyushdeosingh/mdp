@@ -17,11 +17,11 @@ interface ToastContextType {
 const ToastContext = createContext<ToastContextType | null>(null);
 
 const ICONS = { success: CheckCircle, error: XCircle, warning: AlertTriangle, info: Info };
-const COLORS: Record<ToastType, string> = {
-  success: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400',
-  error: 'border-red-500/40 bg-red-500/10 text-red-400',
-  warning: 'border-amber-500/40 bg-amber-500/10 text-amber-400',
-  info: 'border-blue-500/40 bg-blue-500/10 text-blue-400',
+const COLORS: Record<ToastType, { bg: string; border: string; text: string }> = {
+  success: { bg: 'var(--status-emerald-bg)', border: 'var(--color-emerald)', text: 'var(--color-emerald)' },
+  error:   { bg: 'var(--status-red-bg)',     border: 'var(--color-red)',     text: 'var(--color-red)' },
+  warning: { bg: 'var(--status-amber-bg)',   border: 'var(--color-amber)',   text: 'var(--color-amber)' },
+  info:    { bg: 'var(--status-blue-bg)',     border: 'var(--color-blue)',    text: 'var(--color-blue)' },
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -58,10 +58,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none max-w-sm">
         {toasts.map(t => {
           const Icon = ICONS[t.type];
+          const color = COLORS[t.type];
           return (
             <div
               key={t.id}
-              className={`pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl border backdrop-blur-xl shadow-lg transition-all duration-300 ${COLORS[t.type]} ${t.exiting ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0 toast-slide-in'}`}
+              className={`pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl border backdrop-blur-xl shadow-lg transition-all duration-300 ${t.exiting ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0 toast-slide-in'}`}
+              style={{
+                background: color.bg,
+                borderColor: color.border,
+                color: color.text,
+              }}
             >
               <Icon size={18} className="shrink-0 mt-0.5" />
               <span className="text-sm font-medium text-[var(--text-primary)] flex-1">{t.message}</span>

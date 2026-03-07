@@ -18,7 +18,7 @@ export default function MetricCard({ label, value, unit, icon, color = 'text-blu
         </div>
         <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-widest truncate">{label}</p>
         {pulse && (
-          <span className="ml-auto inline-block w-2 h-2 rounded-full bg-emerald-400 pulse-live shrink-0" />
+          <span className="ml-auto inline-block w-2 h-2 rounded-full pulse-live shrink-0" style={{ background: 'var(--color-emerald)' }} />
         )}
       </div>
       <div className="flex items-baseline gap-1.5">

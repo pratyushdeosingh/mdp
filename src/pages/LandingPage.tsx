@@ -6,29 +6,29 @@ const features = [
     icon: MapPin,
     title: 'GPS Tracking',
     desc: 'Real-time NEO-6M GPS module with live map visualization and coordinate logging.',
-    color: 'text-cyan-400',
-    bg: 'bg-cyan-500/10 border-cyan-500/20',
+    colorVar: 'var(--color-cyan)',
+    bgVar: 'var(--status-blue-bg)',
   },
   {
     icon: Activity,
     title: 'Motion Detection',
     desc: 'MPU6050 accelerometer monitors 3-axis motion at 100Hz with g-force analysis.',
-    color: 'text-orange-400',
-    bg: 'bg-orange-500/10 border-orange-500/20',
+    colorVar: 'var(--color-orange)',
+    bgVar: 'var(--status-amber-bg)',
   },
   {
     icon: Shield,
     title: 'Accident Detection',
     desc: 'Intelligent threshold-based algorithm detects impacts and triggers emergency alerts.',
-    color: 'text-red-400',
-    bg: 'bg-red-500/10 border-red-500/20',
+    colorVar: 'var(--color-red)',
+    bgVar: 'var(--status-red-bg)',
   },
   {
     icon: Wifi,
     title: 'Live Dashboard',
     desc: 'WebSocket bridge streams data in real-time from Arduino to React dashboard.',
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/10 border-blue-500/20',
+    colorVar: 'var(--color-blue)',
+    bgVar: 'var(--status-blue-bg)',
   },
 ];
 
@@ -65,14 +65,14 @@ export default function LandingPage() {
       <section className="relative z-10 text-center max-w-4xl px-6 pt-20 md:pt-32 pb-16 animate-fade-in-up">
         {/* Icon cluster */}
         <div className="flex items-center justify-center gap-4 mb-8">
-          <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 hover:scale-110 transition-transform">
-            <Cpu size={28} className="text-blue-400" />
+          <div className="p-3 rounded-2xl border border-[var(--border-color)] hover:scale-110 transition-transform" style={{ background: 'var(--status-blue-bg)' }}>
+            <Cpu size={28} style={{ color: 'var(--color-blue)' }} />
           </div>
-          <div className="p-4 rounded-2xl bg-blue-500/15 border border-blue-500/25 scale-110 hover:scale-125 transition-transform">
-            <Radio size={36} className="text-blue-400" />
+          <div className="p-4 rounded-2xl border border-[var(--border-color)] scale-110 hover:scale-125 transition-transform" style={{ background: 'var(--status-blue-bg)' }}>
+            <Radio size={36} style={{ color: 'var(--color-blue)' }} />
           </div>
-          <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 hover:scale-110 transition-transform">
-            <MapPin size={28} className="text-blue-400" />
+          <div className="p-3 rounded-2xl border border-[var(--border-color)] hover:scale-110 transition-transform" style={{ background: 'var(--status-blue-bg)' }}>
+            <MapPin size={28} style={{ color: 'var(--color-blue)' }} />
           </div>
         </div>
 
@@ -95,9 +95,9 @@ export default function LandingPage() {
         </p>
 
         {/* Status badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/25 mb-10">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 pulse-live" />
-          <span className="text-sm font-semibold text-emerald-400">100% Execution Achieved</span>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--border-color)] mb-10" style={{ background: 'var(--status-emerald-bg)' }}>
+          <span className="w-2 h-2 rounded-full pulse-live" style={{ background: 'var(--color-emerald)' }} />
+          <span className="text-sm font-semibold" style={{ color: 'var(--color-emerald)' }}>100% Execution Achieved</span>
         </div>
 
         {/* CTA buttons */}
@@ -149,8 +149,11 @@ export default function LandingPage() {
               className="glass-card p-5 flex items-start gap-4 group hover:scale-[1.02] transition-transform duration-300"
               style={{ animationDelay: `${0.2 + i * 0.1}s` }}
             >
-              <div className={`p-3 rounded-xl border ${feat.bg} shrink-0 group-hover:scale-110 transition-transform`}>
-                <feat.icon size={22} className={feat.color} />
+              <div
+                className="p-3 rounded-xl border border-[var(--border-color)] shrink-0 group-hover:scale-110 transition-transform"
+                style={{ background: feat.bgVar }}
+              >
+                <feat.icon size={22} style={{ color: feat.colorVar }} />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">{feat.title}</h3>

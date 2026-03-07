@@ -127,15 +127,21 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
             className="w-full flex justify-center"
             title={`Mode: ${dataMode}`}
           >
-            <Wifi size={16} className={dataMode === 'simulation' ? 'text-blue-400' : 'text-emerald-400'} />
+            <Wifi size={16} style={{ color: dataMode === 'simulation' ? 'var(--color-blue)' : 'var(--color-emerald)' }} />
           </button>
         )}
         {dataMode === 'hardware' && !collapsed && (
           <div className="flex items-center gap-1.5 mt-2 px-1">
-            <span className={`w-1.5 h-1.5 rounded-full ${connectionStatus === 'connected' ? 'bg-emerald-400 pulse-live' :
-              connectionStatus === 'connecting' ? 'bg-amber-400 animate-pulse' :
-                'bg-red-400'
-              }`} />
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${connectionStatus === 'connected' ? 'pulse-live' :
+                connectionStatus === 'connecting' ? 'animate-pulse' : ''
+              }`}
+              style={{
+                background: connectionStatus === 'connected' ? 'var(--color-emerald)' :
+                  connectionStatus === 'connecting' ? 'var(--color-amber)' :
+                    'var(--color-red)',
+              }}
+            />
             <span className="text-[9px] text-[var(--text-muted)]">
               {connectionStatus === 'connected' ? 'Device connected' :
                 connectionStatus === 'connecting' ? 'Connecting...' :
@@ -153,7 +159,7 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
             to={item.path}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
-                ? 'bg-blue-500/15 text-blue-400'
+                ? 'text-[var(--nav-active-text)]'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
               } ${collapsed ? 'justify-center' : ''}`
             }

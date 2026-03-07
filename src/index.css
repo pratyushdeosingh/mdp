@@ -8,17 +8,35 @@
     --bg-card-hover: rgba(255, 255, 255, 0.95);
     --text-primary: #0f172a;
     --text-secondary: #475569;
-    --text-muted: #94a3b8;
+    --text-muted: #64748b;
     --border-color: rgba(148, 163, 184, 0.3);
     --accent: #3b82f6;
     --accent-glow: rgba(59, 130, 246, 0.3);
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --glass-bg: rgba(255, 255, 255, 0.65);
-    --glass-border: rgba(148, 163, 184, 0.15);
-    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-    --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(148, 163, 184, 0.25);
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.08);
+    --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+    /* Semantic status colors — contrast-safe for light backgrounds */
+    --color-emerald: #059669;
+    --color-red: #dc2626;
+    --color-amber: #b45309;
+    --color-blue: #2563eb;
+    --color-cyan: #0891b2;
+    --color-orange: #c2410c;
+    --color-purple: #7c3aed;
+    --color-gray: #4b5563;
+    /* Status backgrounds */
+    --status-emerald-bg: rgba(5, 150, 105, 0.1);
+    --status-red-bg: rgba(220, 38, 38, 0.1);
+    --status-amber-bg: rgba(180, 83, 9, 0.1);
+    --status-blue-bg: rgba(37, 99, 235, 0.1);
+    --status-gray-bg: rgba(75, 85, 99, 0.1);
+    /* Sidebar active */
+    --nav-active-bg: rgba(37, 99, 235, 0.1);
+    --nav-active-text: #2563eb;
   }
 
   .dark {
@@ -39,6 +57,24 @@
     --glass-border: rgba(55, 65, 88, 0.3);
     --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.14);
     --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
+    /* Semantic status colors — high contrast on dark backgrounds */
+    --color-emerald: #34d399;
+    --color-red: #f87171;
+    --color-amber: #fbbf24;
+    --color-blue: #60a5fa;
+    --color-cyan: #22d3ee;
+    --color-orange: #fb923c;
+    --color-purple: #c084fc;
+    --color-gray: #9ca3af;
+    /* Status backgrounds */
+    --status-emerald-bg: rgba(52, 211, 153, 0.15);
+    --status-red-bg: rgba(248, 113, 113, 0.15);
+    --status-amber-bg: rgba(251, 191, 36, 0.15);
+    --status-blue-bg: rgba(96, 165, 250, 0.15);
+    --status-gray-bg: rgba(156, 163, 175, 0.15);
+    /* Sidebar active */
+    --nav-active-bg: rgba(96, 165, 250, 0.15);
+    --nav-active-text: #60a5fa;
   }
 }
 

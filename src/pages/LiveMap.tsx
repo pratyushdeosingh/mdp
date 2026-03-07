@@ -54,8 +54,8 @@ const LiveMap = memo(function LiveMap() {
           <p className="text-sm text-[var(--text-muted)]">Real-time GPS position tracking with trail history</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 pulse-live" />
-          <span className="text-xs text-emerald-400 font-medium">Live Tracking</span>
+          <span className="w-2 h-2 rounded-full pulse-live" style={{ background: 'var(--color-emerald)' }} />
+          <span className="text-xs font-medium" style={{ color: 'var(--color-emerald)' }}>Live Tracking</span>
         </div>
       </div>
 
@@ -94,21 +94,21 @@ const LiveMap = memo(function LiveMap() {
       {/* Stats bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <GlassCard className="flex items-center gap-3 p-4">
-          <MapPin size={20} className="text-blue-400" />
+          <MapPin size={20} style={{ color: 'var(--color-blue)' }} />
           <div>
             <p className="text-xs text-[var(--text-muted)]">Latitude</p>
             <p className="text-lg font-bold text-[var(--text-primary)]">{latitude}</p>
           </div>
         </GlassCard>
         <GlassCard className="flex items-center gap-3 p-4">
-          <Navigation size={20} className="text-cyan-400" />
+          <Navigation size={20} style={{ color: 'var(--color-cyan)' }} />
           <div>
             <p className="text-xs text-[var(--text-muted)]">Longitude</p>
             <p className="text-lg font-bold text-[var(--text-primary)]">{longitude}</p>
           </div>
         </GlassCard>
         <GlassCard className="flex items-center gap-3 p-4">
-          <Gauge size={20} className="text-emerald-400" />
+          <Gauge size={20} style={{ color: 'var(--color-emerald)' }} />
           <div>
             <p className="text-xs text-[var(--text-muted)]">Current Speed</p>
             <p className="text-lg font-bold text-[var(--text-primary)]">{speed} km/h</p>

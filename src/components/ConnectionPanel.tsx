@@ -24,10 +24,10 @@ export default function ConnectionPanel() {
   const isConnecting = connectionStatus === 'connecting';
 
   const statusColor =
-    connectionStatus === 'connected' ? 'bg-emerald-400' :
-      connectionStatus === 'connecting' ? 'bg-amber-400 animate-pulse' :
-        connectionStatus === 'error' ? 'bg-red-400' :
-          'bg-gray-400';
+    connectionStatus === 'connected' ? 'var(--color-emerald)' :
+      connectionStatus === 'connecting' ? 'var(--color-amber)' :
+        connectionStatus === 'error' ? 'var(--color-red)' :
+          'var(--color-gray)';
 
   const statusLabel =
     connectionStatus === 'connected' ? 'Connected' :
@@ -39,15 +39,18 @@ export default function ConnectionPanel() {
     <GlassCard className="w-full max-w-lg">
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2.5 rounded-xl bg-blue-500/10">
-          <Usb size={20} className="text-blue-400" />
+        <div className="p-2.5 rounded-xl" style={{ background: 'var(--status-blue-bg)' }}>
+          <Usb size={20} style={{ color: 'var(--color-blue)' }} />
         </div>
         <div>
           <h3 className="text-sm font-semibold text-[var(--text-primary)]">Serial Connection</h3>
           <p className="text-[10px] text-[var(--text-muted)]">Connect to Arduino via USB</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${statusColor}`} />
+          <span
+            className={`w-2 h-2 rounded-full ${connectionStatus === 'connecting' ? 'animate-pulse' : ''}`}
+            style={{ background: statusColor }}
+          />
           <span className="text-xs text-[var(--text-muted)]">{statusLabel}</span>
         </div>
       </div>
@@ -120,9 +123,9 @@ export default function ConnectionPanel() {
 
         {/* Error message */}
         {lastConnectionError && (
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-            <AlertCircle size={14} className="text-red-400 shrink-0 mt-0.5" />
-            <p className="text-xs text-red-400">{lastConnectionError}</p>
+          <div className="flex items-start gap-2 p-3 rounded-lg" style={{ background: 'var(--status-red-bg)', border: '1px solid var(--color-red)', borderColor: 'color-mix(in srgb, var(--color-red) 30%, transparent)' }}>
+            <AlertCircle size={14} style={{ color: 'var(--color-red)' }} className="shrink-0 mt-0.5" />
+            <p className="text-xs" style={{ color: 'var(--color-red)' }}>{lastConnectionError}</p>
           </div>
         )}
 

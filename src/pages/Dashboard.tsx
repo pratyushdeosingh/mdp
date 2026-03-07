@@ -29,8 +29,8 @@ const Dashboard = memo(function Dashboard() {
         <ConnectionPanel />
         {connectionStatus === 'connected' && (
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-sm text-emerald-400 font-medium">Connected — waiting for first data packet...</span>
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-emerald)' }} />
+            <span className="text-sm font-medium" style={{ color: 'var(--color-emerald)' }}>Connected — waiting for first data packet...</span>
           </div>
         )}
       </div>
@@ -63,10 +63,12 @@ const Dashboard = memo(function Dashboard() {
           <button
             onClick={() => setIsStreaming(!isStreaming)}
             aria-label={isStreaming ? 'Pause streaming' : 'Resume streaming'}
-            className={`px-4 py-2 rounded-xl text-xs font-medium border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${isStreaming
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-              : 'bg-red-500/10 border-red-500/30 text-red-400'
-              }`}
+            className="px-4 py-2 rounded-xl text-xs font-medium border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            style={{
+              background: isStreaming ? 'var(--status-emerald-bg)' : 'var(--status-red-bg)',
+              borderColor: isStreaming ? 'var(--color-emerald)' : 'var(--color-red)',
+              color: isStreaming ? 'var(--color-emerald)' : 'var(--color-red)',
+            }}
           >
             {isStreaming ? 'Streaming' : 'Paused'}
           </button>
@@ -75,13 +77,16 @@ const Dashboard = memo(function Dashboard() {
 
       {/* Accident Detection Alert */}
       {d.accidentDetected && (
-        <div role="alert" aria-live="assertive" aria-atomic="true" className="p-5 rounded-2xl bg-red-500/10 border-2 border-red-500/40 flex items-center gap-4 animate-pulse">
-          <div className="p-3 rounded-xl bg-red-500/20">
-            <AlertTriangle size={28} className="text-red-400" />
+        <div role="alert" aria-live="assertive" aria-atomic="true"
+          className="p-5 rounded-2xl border-2 flex items-center gap-4 animate-pulse"
+          style={{ background: 'var(--status-red-bg)', borderColor: 'var(--color-red)', borderWidth: '2px' }}
+        >
+          <div className="p-3 rounded-xl" style={{ background: 'var(--status-red-bg)' }}>
+            <AlertTriangle size={28} style={{ color: 'var(--color-red)' }} />
           </div>
           <div>
-            <p className="text-base font-bold text-red-400">⚠ ACCIDENT DETECTED</p>
-            <p className="text-sm text-red-400/80 mt-0.5">Total acceleration exceeded threshold (25 m/s²). Buzzer alert active.</p>
+            <p className="text-base font-bold" style={{ color: 'var(--color-red)' }}>⚠ ACCIDENT DETECTED</p>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--color-red)', opacity: 0.8 }}>Total acceleration exceeded threshold (25 m/s²). Buzzer alert active.</p>
           </div>
         </div>
       )}
@@ -126,7 +131,7 @@ const Dashboard = memo(function Dashboard() {
         {/* Accelerometer Card */}
         <GlassCard className="p-7 flex flex-col">
           <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2 shrink-0">
-            <Activity size={16} className="text-orange-400" />
+            <Activity size={16} style={{ color: 'var(--color-orange)' }} />
             ACCELEROMETER READINGS
           </h3>
 
@@ -161,22 +166,25 @@ const Dashboard = memo(function Dashboard() {
         {/* System Vitals Card */}
         <GlassCard className="p-7 flex flex-col">
           <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2 shrink-0">
-            <Radio size={16} className="text-blue-400" />
+            <Radio size={16} style={{ color: 'var(--color-blue)' }} />
             SYSTEM VITALS
           </h3>
           <div className="flex-1 flex flex-col justify-center gap-3.5">
             {/* Accident Detection */}
             <div className="flex items-center justify-between py-3.5 px-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)]">
               <div className="flex items-center gap-3 min-w-0">
-                <div className={`p-2 rounded-lg shrink-0 ${d.accidentDetected ? 'bg-red-500/15' : 'bg-blue-500/15'}`}>
-                  <Activity size={18} className={d.accidentDetected ? 'text-red-400' : 'text-blue-400'} />
+                <div className="p-2 rounded-lg shrink-0" style={{ background: d.accidentDetected ? 'var(--status-red-bg)' : 'var(--status-blue-bg)' }}>
+                  <Activity size={18} style={{ color: d.accidentDetected ? 'var(--color-red)' : 'var(--color-blue)' }} />
                 </div>
                 <span className="text-sm font-medium text-[var(--text-secondary)]">Accident Detection</span>
               </div>
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ${d.accidentDetected
-                ? 'bg-red-500/15 text-red-400'
-                : 'bg-emerald-500/15 text-emerald-400'
-                }`}>
+              <span
+                className="text-xs font-semibold px-3 py-1 rounded-full shrink-0"
+                style={{
+                  background: d.accidentDetected ? 'var(--status-red-bg)' : 'var(--status-emerald-bg)',
+                  color: d.accidentDetected ? 'var(--color-red)' : 'var(--color-emerald)',
+                }}
+              >
                 {d.accidentDetected ? 'TRIGGERED' : 'Normal'}
               </span>
             </div>
@@ -184,16 +192,16 @@ const Dashboard = memo(function Dashboard() {
             {/* Battery Level */}
             <div className="flex items-center justify-between py-3.5 px-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)]">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg bg-emerald-500/15 shrink-0">
-                  <Battery size={18} className="text-emerald-400" />
+                <div className="p-2 rounded-lg shrink-0" style={{ background: 'var(--status-emerald-bg)' }}>
+                  <Battery size={18} style={{ color: 'var(--color-emerald)' }} />
                 </div>
                 <span className="text-sm font-medium text-[var(--text-secondary)]">Battery</span>
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 <div className="w-24 h-3 rounded-full bg-[var(--border-color)] overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-emerald-400 transition-all duration-500"
-                    style={{ width: `${d.batteryLevel}%` }}
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${d.batteryLevel}%`, background: 'var(--color-emerald)' }}
                   />
                 </div>
                 <span className="text-sm font-bold text-[var(--text-primary)]">{d.batteryLevel}%</span>
@@ -203,8 +211,8 @@ const Dashboard = memo(function Dashboard() {
             {/* Temperature */}
             <div className="flex items-center justify-between py-3.5 px-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)]">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg bg-red-500/15 shrink-0">
-                  <Thermometer size={18} className="text-red-400" />
+                <div className="p-2 rounded-lg shrink-0" style={{ background: 'var(--status-red-bg)' }}>
+                  <Thermometer size={18} style={{ color: 'var(--color-red)' }} />
                 </div>
                 <span className="text-sm font-medium text-[var(--text-secondary)]">Temperature</span>
               </div>
@@ -214,8 +222,8 @@ const Dashboard = memo(function Dashboard() {
             {/* System Status */}
             <div className="flex items-center justify-between py-3.5 px-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)]">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg bg-purple-500/15 shrink-0">
-                  <Satellite size={18} className="text-purple-400" />
+                <div className="p-2 rounded-lg shrink-0" style={{ background: 'var(--status-blue-bg)' }}>
+                  <Satellite size={18} style={{ color: 'var(--color-purple)' }} />
                 </div>
                 <span className="text-sm font-medium text-[var(--text-secondary)]">System Status</span>
               </div>
@@ -230,19 +238,19 @@ const Dashboard = memo(function Dashboard() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2.5">
-              <Satellite size={16} className="text-blue-400" />
+              <Satellite size={16} style={{ color: 'var(--color-blue)' }} />
               <span className="text-sm text-[var(--text-muted)]">GPS</span>
-              <span className="text-sm font-semibold text-emerald-400">Active</span>
+              <span className="text-sm font-semibold" style={{ color: 'var(--color-emerald)' }}>Active</span>
             </div>
             <div className="flex items-center gap-2.5">
-              <MapPin size={16} className="text-cyan-400" />
+              <MapPin size={16} style={{ color: 'var(--color-cyan)' }} />
               <span className="text-sm text-[var(--text-muted)]">Position</span>
               <span className="text-sm font-medium text-[var(--text-primary)]">
                 {d.gps.latitude}°, {d.gps.longitude}°
               </span>
             </div>
             <div className="flex items-center gap-2.5">
-              <Gauge size={16} className="text-emerald-400" />
+              <Gauge size={16} style={{ color: 'var(--color-emerald)' }} />
               <span className="text-sm text-[var(--text-muted)]">Velocity</span>
               <span className="text-sm font-medium text-[var(--text-primary)]">{d.gps.speed} km/h</span>
             </div>
