@@ -1,225 +1,303 @@
 /**
- * Textbook-style SVG circuit schematic for the Smart Safety Helmet.
- * Clean layout: Arduino center, sensors left, outputs right.
- * Buzzer is 3-pin module: S (signal) → D8, (+) → 5V, (−) → GND.
+ * Breadboard-style SVG circuit schematic for the Smart Safety Helmet.
+ * Shows Arduino Uno + half-size breadboard with realistic wiring.
+ * Buzzer: 3-pin (S -> D8, + -> 5V rail, - -> GND rail)
  */
 export default function CircuitSchematic() {
-  const W = 960;
-  const H = 620;
+  const W = 1040;
+  const H = 720;
 
   // Colors
   const C = {
-    bg: '#060b14',
-    grid: '#111d33',
-    board: '#0f2040',
-    boardBorder: '#2563eb',
-    modBg: '#0b1a30',
+    bg: '#050a12',
+    gridDot: '#0e1a2e',
+    // Board colors
+    ardFill: '#0c2744',
+    ardStroke: '#2563eb',
+    bbFill: '#f5f0e8',
+    bbStroke: '#c8bfa8',
+    bbHole: '#d4cbb8',
+    bbHoleInner: '#8b8070',
+    bbRailRed: '#dc2626',
+    bbRailBlue: '#2563eb',
+    bbRailStripe: 'rgba(0,0,0,0.08)',
+    // Wires
+    uart: '#06b6d4',
+    i2c: '#f59e0b',
+    dig: '#3b82f6',
+    pwr: '#ef4444',
+    gnd: '#374151',
+    grn: '#10b981',
+    // Text
     text: '#e8ecf4',
     dim: '#5d6b82',
     muted: '#8b95a8',
-    uart: '#22d3ee',
-    i2c: '#fbbf24',
-    dig: '#60a5fa',
-    pwr: '#f87171',
-    gnd: '#6b7280',
-    grn: '#34d399',
+    dark: '#1f2937',
   };
+
+  // Breadboard geometry
+  const BB = { x: 380, y: 190, w: 620, h: 420 };
+  const COL_START = BB.x + 40;
+  const COL_GAP = 18;
+  const ROW_GAP = 18;
+  const cols = (n: number) => COL_START + n * COL_GAP;
+  const RAIL_TOP = BB.y + 22;
+  const RAIL_BOT = BB.y + BB.h - 22;
+  const ROW_A = BB.y + 75;
+  const rowY = (r: number) => ROW_A + r * ROW_GAP;
+
+  // Wire helper
+  const Wire = ({ points, color, width = 3, dashed = false }: {
+    points: string; color: string; width?: number; dashed?: boolean;
+  }) => (
+    <polyline
+      points={points}
+      fill="none"
+      stroke={color}
+      strokeWidth={width}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeDasharray={dashed ? '6,4' : undefined}
+    />
+  );
+
+  // Breadboard hole
+  const Hole = ({ x, y, active, color }: { x: number; y: number; active?: boolean; color?: string }) => (
+    <>
+      <rect x={x - 4} y={y - 4} width={8} height={8} rx={1.5} fill={active ? (color || C.dig) : C.bbHole} stroke={active ? 'rgba(255,255,255,0.3)' : C.bbHoleInner} strokeWidth={active ? 1.2 : 0.5} />
+      {active && <circle cx={x} cy={y} r={2} fill="white" opacity={0.6} />}
+    </>
+  );
+
+  // Module label on breadboard
+  const ModuleChip = ({ x, y, w, h, label, sub, color }: {
+    x: number; y: number; w: number; h: number; label: string; sub: string; color: string;
+  }) => (
+    <g>
+      <rect x={x} y={y} width={w} height={h} rx={6} fill="#1a1a2e" stroke={color} strokeWidth={1.8} />
+      <text x={x + w / 2} y={y + h / 2 - 5} textAnchor="middle" fill={C.text} fontSize={10} fontWeight="700">{label}</text>
+      <text x={x + w / 2} y={y + h / 2 + 8} textAnchor="middle" fill={C.muted} fontSize={7}>{sub}</text>
+    </g>
+  );
 
   return (
     <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full min-w-[700px]" style={{ maxHeight: '640px' }}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full min-w-[760px]" style={{ maxHeight: '720px' }}>
         {/* Background */}
         <rect width={W} height={H} rx={14} fill={C.bg} />
         <defs>
-          <pattern id="dots" width={24} height={24} patternUnits="userSpaceOnUse">
-            <circle cx={12} cy={12} r={0.6} fill={C.grid} />
+          <pattern id="bgdots" width={20} height={20} patternUnits="userSpaceOnUse">
+            <circle cx={10} cy={10} r={0.5} fill={C.gridDot} />
           </pattern>
         </defs>
-        <rect width={W} height={H} rx={14} fill="url(#dots)" />
+        <rect width={W} height={H} rx={14} fill="url(#bgdots)" />
 
         {/* Title */}
-        <text x={W / 2} y={28} textAnchor="middle" fill={C.text} fontSize={13} fontWeight="700" letterSpacing={0.5}>
-          Smart Safety Helmet — Circuit Wiring Schematic
+        <text x={W / 2} y={30} textAnchor="middle" fill={C.text} fontSize={14} fontWeight="700" letterSpacing={0.5}>
+          Smart Safety Helmet — Breadboard Wiring Diagram
+        </text>
+        <text x={W / 2} y={48} textAnchor="middle" fill={C.dim} fontSize={10}>
+          Arduino Uno R3 + Half-Size Breadboard · Actual Connection Layout
         </text>
 
-        {/* ═══════════ ARDUINO UNO (center) ═══════════ */}
-        <rect x={340} y={170} width={280} height={260} rx={14} fill={C.board} stroke={C.boardBorder} strokeWidth={2.5} />
-        {/* USB port stub */}
-        <rect x={606} y={270} width={24} height={40} rx={5} fill="#162a46" stroke={C.boardBorder} strokeWidth={1.5} />
-        <text x={480} y={262} textAnchor="middle" fill={C.text} fontSize={16} fontWeight="800">Arduino Uno R3</text>
-        <text x={480} y={282} textAnchor="middle" fill={C.muted} fontSize={9}>ATmega328P · 16 MHz · 2KB SRAM</text>
-        <text x={622} y={294} fill={C.dim} fontSize={7}>USB</text>
+        {/* ═══════ ARDUINO UNO (left side) ═══════ */}
+        <rect x={30} y={140} width={310} height={470} rx={14} fill={C.ardFill} stroke={C.ardStroke} strokeWidth={2.5} />
+        {/* USB port */}
+        <rect x={140} y={128} width={60} height={20} rx={4} fill="#162a46" stroke={C.ardStroke} strokeWidth={1.5} />
+        <text x={170} y={143} textAnchor="middle" fill={C.dim} fontSize={7}>USB</text>
+        {/* Board label */}
+        <text x={185} y={200} textAnchor="middle" fill={C.text} fontSize={18} fontWeight="800">Arduino</text>
+        <text x={185} y={222} textAnchor="middle" fill={C.text} fontSize={18} fontWeight="800">Uno R3</text>
+        <text x={185} y={244} textAnchor="middle" fill={C.muted} fontSize={9}>ATmega328P</text>
+        <text x={185} y={258} textAnchor="middle" fill={C.muted} fontSize={9}>16 MHz · 2KB SRAM</text>
 
-        {/* Left pins */}
+        {/* Arduino RIGHT-side pins (facing breadboard) */}
         {[
-          { pin: 'D4', y: 210, color: C.uart },
-          { pin: 'D3', y: 245, color: C.uart },
-          { pin: 'A4', y: 320, color: C.i2c },
-          { pin: 'A5', y: 355, color: C.i2c },
-          { pin: '5V', y: 395, color: C.pwr },
-          { pin: 'GND', y: 415, color: C.gnd },
+          { pin: '5V',  y: 300, color: C.pwr },
+          { pin: 'GND', y: 330, color: C.gnd },
+          { pin: 'D3',  y: 380, color: C.uart },
+          { pin: 'D4',  y: 410, color: C.uart },
+          { pin: 'D7',  y: 450, color: C.dig },
+          { pin: 'D8',  y: 480, color: C.dig },
+          { pin: 'A4',  y: 520, color: C.i2c },
+          { pin: 'A5',  y: 550, color: C.i2c },
         ].map(p => (
-          <g key={`L${p.pin}`}>
-            <line x1={340} y1={p.y} x2={328} y2={p.y} stroke={p.color} strokeWidth={2} />
-            <circle cx={328} cy={p.y} r={4} fill={p.color} />
-            <rect x={344} y={p.y - 9} width={38} height={18} rx={4} fill="#0a1628" stroke={C.dim} strokeWidth={0.8} />
-            <text x={363} y={p.y + 4} textAnchor="middle" fill={C.text} fontSize={9} fontWeight="700" fontFamily="monospace">{p.pin}</text>
+          <g key={p.pin}>
+            {/* Pin housing */}
+            <rect x={306} y={p.y - 10} width={34} height={20} rx={3} fill="#0a1628" stroke={p.color} strokeWidth={1.2} />
+            <text x={323} y={p.y + 4} textAnchor="middle" fill={p.color} fontSize={9} fontWeight="700" fontFamily="monospace">{p.pin}</text>
+            {/* Connector dot */}
+            <circle cx={348} cy={p.y} r={4} fill={p.color} stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
           </g>
         ))}
 
-        {/* Right pins */}
-        {[
-          { pin: 'D8', y: 220, color: C.dig },
-          { pin: 'D7', y: 260, color: C.dig },
-        ].map(p => (
-          <g key={`R${p.pin}`}>
-            <line x1={620} y1={p.y} x2={632} y2={p.y} stroke={p.color} strokeWidth={2} />
-            <circle cx={632} cy={p.y} r={4} fill={p.color} />
-            <rect x={578} y={p.y - 9} width={38} height={18} rx={4} fill="#0a1628" stroke={C.dim} strokeWidth={0.8} />
-            <text x={597} y={p.y + 4} textAnchor="middle" fill={C.text} fontSize={9} fontWeight="700" fontFamily="monospace">{p.pin}</text>
+        {/* ═══════ BREADBOARD ═══════ */}
+        {/* Main body */}
+        <rect x={BB.x} y={BB.y} width={BB.w} height={BB.h} rx={10} fill={C.bbFill} stroke={C.bbStroke} strokeWidth={2} />
+
+        {/* Power rails - top */}
+        <line x1={BB.x + 20} y1={RAIL_TOP - 6} x2={BB.x + BB.w - 20} y2={RAIL_TOP - 6} stroke={C.bbRailRed} strokeWidth={1.5} />
+        <line x1={BB.x + 20} y1={RAIL_TOP + 12} x2={BB.x + BB.w - 20} y2={RAIL_TOP + 12} stroke={C.bbRailBlue} strokeWidth={1.5} />
+        <text x={BB.x + 12} y={RAIL_TOP - 2} fill={C.pwr} fontSize={10} fontWeight="700">+</text>
+        <text x={BB.x + 12} y={RAIL_TOP + 16} fill={C.dig} fontSize={10} fontWeight="700">−</text>
+
+        {/* Power rails - bottom */}
+        <line x1={BB.x + 20} y1={RAIL_BOT - 6} x2={BB.x + BB.w - 20} y2={RAIL_BOT - 6} stroke={C.bbRailRed} strokeWidth={1.5} />
+        <line x1={BB.x + 20} y1={RAIL_BOT + 12} x2={BB.x + BB.w - 20} y2={RAIL_BOT + 12} stroke={C.bbRailBlue} strokeWidth={1.5} />
+        <text x={BB.x + 12} y={RAIL_BOT - 2} fill={C.pwr} fontSize={10} fontWeight="700">+</text>
+        <text x={BB.x + 12} y={RAIL_BOT + 16} fill={C.dig} fontSize={10} fontWeight="700">−</text>
+
+        {/* Rail labels */}
+        <text x={BB.x + BB.w - 14} y={RAIL_TOP - 2} fill={C.pwr} fontSize={7} textAnchor="end">5V</text>
+        <text x={BB.x + BB.w - 14} y={RAIL_TOP + 16} fill={C.gnd} fontSize={7} textAnchor="end">GND</text>
+
+        {/* Center divider */}
+        <rect x={BB.x + 20} y={BB.y + BB.h / 2 - 4} width={BB.w - 40} height={8} rx={4} fill="#e0d8c8" />
+
+        {/* Row labels */}
+        {['a', 'b', 'c', 'd', 'e', '', 'f', 'g', 'h', 'i', 'j'].map((label, i) => (
+          label && <text key={label} x={BB.x + 28} y={ROW_A + i * ROW_GAP + 4} fill="#9b9080" fontSize={8} fontWeight="600" textAnchor="middle">{label}</text>
+        ))}
+
+        {/* Column numbers (every 5th) */}
+        {[0, 5, 10, 15, 20, 25, 30].map(n => (
+          <text key={n} x={cols(n)} y={ROW_A - 16} fill="#9b9080" fontSize={7} textAnchor="middle">{n + 1}</text>
+        ))}
+
+        {/* Background holes (subset for visual) */}
+        {Array.from({ length: 30 }, (_, col) => (
+          <g key={`holes${col}`}>
+            {[0, 1, 2, 3, 4, 6, 7, 8, 9, 10].map(row => (
+              <Hole key={`h${col}${row}`} x={cols(col)} y={rowY(row)} />
+            ))}
+            {/* Rail holes */}
+            <Hole x={cols(col)} y={RAIL_TOP} />
+            <Hole x={cols(col)} y={RAIL_TOP + 14} />
+            <Hole x={cols(col)} y={RAIL_BOT} />
+            <Hole x={cols(col)} y={RAIL_BOT + 14} />
           </g>
         ))}
 
-        {/* ═══════════ MODULES ═══════════ */}
+        {/* ═══════ MODULE PLACEMENTS ON BREADBOARD ═══════ */}
 
-        {/* — NEO-6M GPS (top-left) — */}
-        <rect x={40} y={170} width={200} height={100} rx={12} fill={C.modBg} stroke={C.uart} strokeWidth={2} />
-        <text x={140} y={206} textAnchor="middle" fill={C.text} fontSize={13} fontWeight="700">🛰️ NEO-6M GPS</text>
-        <text x={140} y={222} textAnchor="middle" fill={C.muted} fontSize={9}>UART · 9600 baud · NMEA</text>
-        {/* Pin labels inside */}
+        {/* NEO-6M GPS — columns 2-5, rows a-d */}
+        <ModuleChip x={cols(1) - 8} y={rowY(0) - 10} w={COL_GAP * 5} h={ROW_GAP * 4} label="🛰️ NEO-6M" sub="GPS Module" color={C.uart} />
+        {/* GPS pins in row e (row 4): TX=col2, RX=col3, VCC=col4, GND=col5 */}
+        <Hole x={cols(2)} y={rowY(4)} active color={C.uart} />
+        <Hole x={cols(3)} y={rowY(4)} active color={C.uart} />
+        <Hole x={cols(4)} y={rowY(4)} active color={C.pwr} />
+        <Hole x={cols(5)} y={rowY(4)} active color={C.gnd} />
+        {/* Pin labels */}
+        <text x={cols(2)} y={rowY(4) + 14} textAnchor="middle" fill={C.dark} fontSize={6} fontWeight="700">TX</text>
+        <text x={cols(3)} y={rowY(4) + 14} textAnchor="middle" fill={C.dark} fontSize={6} fontWeight="700">RX</text>
+        <text x={cols(4)} y={rowY(4) + 14} textAnchor="middle" fill={C.dark} fontSize={6} fontWeight="700">VCC</text>
+        <text x={cols(5)} y={rowY(4) + 14} textAnchor="middle" fill={C.dark} fontSize={6} fontWeight="700">GND</text>
+
+        {/* MPU6050 — columns 10-14, rows a-d */}
+        <ModuleChip x={cols(9) - 8} y={rowY(0) - 10} w={COL_GAP * 5} h={ROW_GAP * 4} label="📐 MPU6050" sub="I2C 0x68" color={C.i2c} />
+        {/* MPU pins in row e: VCC=10, GND=11, SCL=12, SDA=13 */}
+        <Hole x={cols(10)} y={rowY(4)} active color={C.pwr} />
+        <Hole x={cols(11)} y={rowY(4)} active color={C.gnd} />
+        <Hole x={cols(12)} y={rowY(4)} active color={C.i2c} />
+        <Hole x={cols(13)} y={rowY(4)} active color={C.i2c} />
+        <text x={cols(10)} y={rowY(4) + 14} textAnchor="middle" fill={C.dark} fontSize={6} fontWeight="700">VCC</text>
+        <text x={cols(11)} y={rowY(4) + 14} textAnchor="middle" fill={C.dark} fontSize={6} fontWeight="700">GND</text>
+        <text x={cols(12)} y={rowY(4) + 14} textAnchor="middle" fill={C.dark} fontSize={6} fontWeight="700">SCL</text>
+        <text x={cols(13)} y={rowY(4) + 14} textAnchor="middle" fill={C.dark} fontSize={6} fontWeight="700">SDA</text>
+
+        {/* Buzzer Module — columns 20-23, rows f-i (bottom half) */}
+        <ModuleChip x={cols(19) - 8} y={rowY(6) - 10} w={COL_GAP * 5} h={ROW_GAP * 4} label="🔊 Buzzer" sub="3-Pin Active" color={C.dig} />
+        {/* Buzzer pins in row e (top side): S=col20, +=col21, -=col22 */}
+        <Hole x={cols(20)} y={rowY(4)} active color={C.dig} />
+        <Hole x={cols(21)} y={rowY(4)} active color={C.pwr} />
+        <Hole x={cols(22)} y={rowY(4)} active color={C.gnd} />
+        <text x={cols(20)} y={rowY(4) + 14} textAnchor="middle" fill={C.dark} fontSize={6} fontWeight="700">S</text>
+        <text x={cols(21)} y={rowY(4) + 14} textAnchor="middle" fill={C.dark} fontSize={6} fontWeight="700">+</text>
+        <text x={cols(22)} y={rowY(4) + 14} textAnchor="middle" fill={C.dark} fontSize={6} fontWeight="700">−</text>
+
+        {/* Cancel Button — columns 27-28, straddling center gap */}
+        <ModuleChip x={cols(26) - 8} y={rowY(3) - 4} w={COL_GAP * 3} h={ROW_GAP * 5} label="🛑 BTN" sub="N.O." color={C.grn} />
+        {/* Button pins: top=col27 row c, bottom=col27 row h */}
+        <Hole x={cols(27)} y={rowY(2)} active color={C.dig} />
+        <Hole x={cols(27)} y={rowY(8)} active color={C.gnd} />
+        <text x={cols(27) + 16} y={rowY(2) + 4} fill={C.dark} fontSize={6} fontWeight="700">→D7</text>
+        <text x={cols(27) + 16} y={rowY(8) + 4} fill={C.dark} fontSize={6} fontWeight="700">→GND</text>
+
+        {/* ═══════ WIRES ═══════ */}
+
+        {/* Arduino 5V → top power rail (red) */}
+        <Wire points={`348,300 370,300 370,${RAIL_TOP} ${cols(0)},${RAIL_TOP}`} color={C.pwr} />
+        <text x={360} y={296} fill={C.pwr} fontSize={7} fontWeight="700">5V</text>
+
+        {/* Arduino GND → top GND rail (gray) */}
+        <Wire points={`348,330 366,330 366,${RAIL_TOP + 14} ${cols(0)},${RAIL_TOP + 14}`} color={C.gnd} />
+        <text x={360} y={326} fill={C.gnd} fontSize={7} fontWeight="700">GND</text>
+
+        {/* Arduino D4 → GPS TX (col 2, row e→ jumped to row f via column) */}
+        <Wire points={`348,410 ${cols(2)},410 ${cols(2)},${rowY(4)}`} color={C.uart} />
+        <text x={cols(2) + 10} y={408} fill={C.uart} fontSize={7} fontWeight="600">D4←TX</text>
+
+        {/* Arduino D3 → GPS RX (col 3) */}
+        <Wire points={`348,380 ${cols(3)},380 ${cols(3)},${rowY(4)}`} color={C.uart} dashed />
+        <text x={cols(3) + 10} y={376} fill={C.uart} fontSize={7} fontWeight="600">D3→RX</text>
+
+        {/* GPS VCC (col 4) → top + rail */}
+        <Wire points={`${cols(4)},${rowY(4)} ${cols(4)},${RAIL_TOP}`} color={C.pwr} width={2} />
+        {/* GPS GND (col 5) → top - rail */}
+        <Wire points={`${cols(5)},${rowY(4)} ${cols(5)},${RAIL_TOP + 14}`} color={C.gnd} width={2} />
+
+        {/* Arduino A5 → MPU SCL (col 12) */}
+        <Wire points={`348,550 ${cols(12)},550 ${cols(12)},${rowY(4)}`} color={C.i2c} />
+        <text x={cols(12) + 10} y={548} fill={C.i2c} fontSize={7} fontWeight="600">A5→SCL</text>
+
+        {/* Arduino A4 → MPU SDA (col 13) */}
+        <Wire points={`348,520 ${cols(13)},520 ${cols(13)},${rowY(4)}`} color={C.i2c} dashed />
+        <text x={cols(13) + 10} y={518} fill={C.i2c} fontSize={7} fontWeight="600">A4→SDA</text>
+
+        {/* MPU VCC (col 10) → top + rail */}
+        <Wire points={`${cols(10)},${rowY(4)} ${cols(10)},${RAIL_TOP}`} color={C.pwr} width={2} />
+        {/* MPU GND (col 11) → top - rail */}
+        <Wire points={`${cols(11)},${rowY(4)} ${cols(11)},${RAIL_TOP + 14}`} color={C.gnd} width={2} />
+
+        {/* Arduino D8 → Buzzer S (col 20) */}
+        <Wire points={`348,480 ${cols(20)},480 ${cols(20)},${rowY(4)}`} color={C.dig} />
+        <text x={cols(20) + 10} y={478} fill={C.dig} fontSize={7} fontWeight="600">D8→S</text>
+
+        {/* Buzzer + (col 21) → top + rail */}
+        <Wire points={`${cols(21)},${rowY(4)} ${cols(21)},${RAIL_TOP}`} color={C.pwr} width={2} />
+        {/* Buzzer - (col 22) → top - rail */}
+        <Wire points={`${cols(22)},${rowY(4)} ${cols(22)},${RAIL_TOP + 14}`} color={C.gnd} width={2} />
+
+        {/* Arduino D7 → Button Pin1 (col 27, row c) */}
+        <Wire points={`348,450 ${cols(27)},450 ${cols(27)},${rowY(2)}`} color={C.dig} dashed />
+        <text x={cols(25)} y={448} fill={C.dig} fontSize={7} fontWeight="600">D7→BTN</text>
+
+        {/* Button Pin2 (col 27, row h) → bottom - rail */}
+        <Wire points={`${cols(27)},${rowY(8)} ${cols(27)},${RAIL_BOT + 14}`} color={C.gnd} width={2} />
+
+        {/* Connect top and bottom GND rails */}
+        <Wire points={`${cols(29)},${RAIL_TOP + 14} ${cols(29)},${RAIL_BOT + 14}`} color={C.gnd} width={2} dashed />
+        <text x={cols(29) + 8} y={BB.y + BB.h / 2} fill={C.gnd} fontSize={6} fontWeight="600" transform={`rotate(90, ${cols(29) + 8}, ${BB.y + BB.h / 2})`}>GND BRIDGE</text>
+
+        {/* ═══════ LEGEND ═══════ */}
+        <rect x={30} y={H - 70} width={W - 60} height={50} rx={10} fill="#0a1628" stroke={C.dim} strokeWidth={1} />
+        <text x={60} y={H - 48} fill={C.muted} fontSize={9} fontWeight="700" letterSpacing={1}>WIRE LEGEND:</text>
         {[
-          { label: 'TX', y: 243 },
-          { label: 'RX', y: 258 },
-        ].map(p => (
-          <g key={`gps${p.label}`}>
-            <rect x={195} y={p.y - 8} width={28} height={16} rx={3} fill="#0a2030" stroke={C.uart} strokeWidth={0.8} />
-            <text x={209} y={p.y + 4} textAnchor="middle" fill={C.uart} fontSize={8} fontFamily="monospace" fontWeight="600">{p.label}</text>
-            <circle cx={240} cy={p.y} r={3.5} fill={C.uart} />
-          </g>
-        ))}
-
-        {/* — MPU6050 (bottom-left) — */}
-        <rect x={40} y={320} width={200} height={100} rx={12} fill={C.modBg} stroke={C.i2c} strokeWidth={2} />
-        <text x={140} y={356} textAnchor="middle" fill={C.text} fontSize={13} fontWeight="700">📐 MPU6050</text>
-        <text x={140} y={372} textAnchor="middle" fill={C.muted} fontSize={9}>I2C · Address 0x68 · ±2g</text>
-        {[
-          { label: 'SDA', y: 393 },
-          { label: 'SCL', y: 408 },
-        ].map(p => (
-          <g key={`mpu${p.label}`}>
-            <rect x={191} y={p.y - 8} width={34} height={16} rx={3} fill="#1a1500" stroke={C.i2c} strokeWidth={0.8} />
-            <text x={208} y={p.y + 4} textAnchor="middle" fill={C.i2c} fontSize={8} fontFamily="monospace" fontWeight="600">{p.label}</text>
-            <circle cx={240} cy={p.y} r={3.5} fill={C.i2c} />
-          </g>
-        ))}
-
-        {/* — Buzzer (top-right) — 3-pin module */}
-        <rect x={720} y={140} width={190} height={130} rx={12} fill={C.modBg} stroke={C.dig} strokeWidth={2} />
-        <text x={815} y={172} textAnchor="middle" fill={C.text} fontSize={13} fontWeight="700">🔊 Buzzer Module</text>
-        <text x={815} y={188} textAnchor="middle" fill={C.muted} fontSize={9}>Active · 3-Pin · 500ms beep</text>
-        {[
-          { label: 'S', y: 210, color: C.dig, note: '← D8' },
-          { label: '+', y: 235, color: C.pwr, note: '← 5V' },
-          { label: '−', y: 258, color: C.gnd, note: '← GND' },
-        ].map(p => (
-          <g key={`buz${p.label}`}>
-            <rect x={734} y={p.y - 9} width={22} height={18} rx={3} fill="#0a1628" stroke={p.color} strokeWidth={0.8} />
-            <text x={745} y={p.y + 4} textAnchor="middle" fill={p.color} fontSize={9} fontFamily="monospace" fontWeight="700">{p.label}</text>
-            <circle cx={720} cy={p.y} r={3.5} fill={p.color} />
-            <text x={764} y={p.y + 3} fill={C.dim} fontSize={7} fontFamily="monospace">{p.note}</text>
-          </g>
-        ))}
-
-        {/* — Cancel Button (bottom-right) — */}
-        <rect x={720} y={320} width={190} height={100} rx={12} fill={C.modBg} stroke={C.grn} strokeWidth={2} />
-        <text x={815} y={356} textAnchor="middle" fill={C.text} fontSize={13} fontWeight="700">🛑 Cancel Button</text>
-        <text x={815} y={372} textAnchor="middle" fill={C.muted} fontSize={9}>Momentary N.O. · 200ms debounce</text>
-        {[
-          { label: 'Pin1', y: 393, color: C.dig, note: '← D7' },
-          { label: 'Pin2', y: 408, color: C.gnd, note: '← GND' },
-        ].map(p => (
-          <g key={`btn${p.label}`}>
-            <rect x={730} y={p.y - 9} width={34} height={18} rx={3} fill="#0a1628" stroke={p.color} strokeWidth={0.8} />
-            <text x={747} y={p.y + 4} textAnchor="middle" fill={p.color} fontSize={8} fontFamily="monospace" fontWeight="600">{p.label}</text>
-            <circle cx={720} cy={p.y} r={3.5} fill={p.color} />
-            <text x={770} y={p.y + 3} fill={C.dim} fontSize={7} fontFamily="monospace">{p.note}</text>
-          </g>
-        ))}
-
-        {/* ═══════════ WIRES ═══════════ */}
-
-        {/* GPS TX → D4 (cyan solid) */}
-        <path d="M 240 243 H 290 Q 304 243 304 229 V 210 Q 304 210 316 210 H 328" fill="none" stroke={C.uart} strokeWidth={2.5} strokeLinecap="round" />
-        {/* GPS RX ← D3 (cyan dashed) */}
-        <path d="M 240 258 H 280 Q 294 258 294 250 V 245 Q 294 245 314 245 H 328" fill="none" stroke={C.uart} strokeWidth={2.5} strokeDasharray="6,3" strokeLinecap="round" />
-
-        {/* MPU SDA → A4 (orange solid) */}
-        <path d="M 240 393 H 290 Q 308 393 308 374 V 320 Q 308 320 318 320 H 328" fill="none" stroke={C.i2c} strokeWidth={2.5} strokeLinecap="round" />
-        {/* MPU SCL → A5 (orange dashed) */}
-        <path d="M 240 408 H 278 Q 296 408 296 390 V 355 Q 296 355 314 355 H 328" fill="none" stroke={C.i2c} strokeWidth={2.5} strokeDasharray="6,3" strokeLinecap="round" />
-
-        {/* D8 → Buzzer S (blue solid) */}
-        <path d="M 632 220 H 670 Q 690 220 690 215 V 210 Q 690 210 710 210 H 720" fill="none" stroke={C.dig} strokeWidth={2.5} strokeLinecap="round" />
-        {/* 5V → Buzzer + (red) */}
-        <path d="M 328 395 H 310 Q 300 395 300 470 H 680 Q 700 470 700 235 H 720" fill="none" stroke={C.pwr} strokeWidth={2} strokeLinecap="round" />
-        {/* GND → Buzzer − */}
-        <path d="M 328 415 H 316 Q 306 415 306 480 H 688 Q 706 480 706 258 H 720" fill="none" stroke={C.gnd} strokeWidth={2} strokeDasharray="5,3" strokeLinecap="round" />
-
-        {/* D7 → Button Pin1 (blue dashed) */}
-        <path d="M 632 260 H 670 Q 686 260 686 330 V 393 Q 686 393 710 393 H 720" fill="none" stroke={C.dig} strokeWidth={2.5} strokeDasharray="6,3" strokeLinecap="round" />
-        {/* GND → Button Pin2 */}
-        <path d="M 306 480 H 676 Q 694 480 694 408 H 720" fill="none" stroke={C.gnd} strokeWidth={2} strokeDasharray="5,3" strokeLinecap="round" />
-
-        {/* 5V → GPS VCC (red, through top) */}
-        <path d="M 300 470 V 148 H 140 V 170" fill="none" stroke={C.pwr} strokeWidth={2} strokeLinecap="round" />
-        <text x={150} y={158} fill={C.pwr} fontSize={7} fontFamily="monospace">5V</text>
-
-        {/* 5V → MPU VCC (red, through bottom) */}
-        <path d="M 300 470 V 442 H 140 V 420" fill="none" stroke={C.pwr} strokeWidth={2} strokeLinecap="round" />
-        <text x={150} y={436} fill={C.pwr} fontSize={7} fontFamily="monospace">5V</text>
-
-        {/* GND bus line */}
-        <line x1={60} y1={540} x2={900} y2={540} stroke={C.gnd} strokeWidth={3} strokeLinecap="round" />
-        <text x={W / 2} y={558} textAnchor="middle" fill={C.gnd} fontSize={9} fontFamily="monospace">━━ GND Bus (Common Ground) ━━</text>
-
-        {/* GND drops */}
-        {[
-          { xv: 140, yv: 270 },
-          { xv: 140, yv: 420 },
-          { xv: 480, yv: 415 },
-          { xv: 815, yv: 258 },
-          { xv: 815, yv: 408 },
-        ].map((g, i) => (
-          <line key={i} x1={g.xv} y1={g.yv} x2={g.xv} y2={540} stroke={C.gnd} strokeWidth={1.5} strokeDasharray="4,4" opacity={0.5} />
-        ))}
-
-        {/* Wire labels on paths */}
-        <text x={264} y={236} fill={C.uart} fontSize={7.5} fontWeight="600" fontFamily="monospace">TX→RX</text>
-        <text x={264} y={264} fill={C.uart} fontSize={7.5} fontWeight="600" fontFamily="monospace">RX←TX</text>
-        <text x={264} y={315} fill={C.i2c} fontSize={7.5} fontWeight="600" fontFamily="monospace">SDA</text>
-        <text x={260} y={375} fill={C.i2c} fontSize={7.5} fontWeight="600" fontFamily="monospace">SCL</text>
-        <text x={650} y={212} fill={C.dig} fontSize={7.5} fontWeight="600" fontFamily="monospace">SIG</text>
-        <text x={650} y={332} fill={C.dig} fontSize={7.5} fontWeight="600" fontFamily="monospace">BTN</text>
-
-        {/* ═══════════ LEGEND ═══════════ */}
-        <rect x={W - 200} y={H - 108} width={180} height={90} rx={10} fill="#0a1628" stroke={C.dim} strokeWidth={1} />
-        <text x={W - 110} y={H - 90} textAnchor="middle" fill={C.muted} fontSize={8} fontWeight="700" letterSpacing={1}>WIRE LEGEND</text>
-        {[
-          { label: 'UART (Serial)', color: C.uart, y: H - 74 },
-          { label: 'I2C (Data/Clk)', color: C.i2c, y: H - 60 },
-          { label: 'Digital I/O', color: C.dig, y: H - 46 },
-          { label: 'Power (5V)', color: C.pwr, y: H - 32 },
+          { label: 'UART (Serial)', color: C.uart, x: 180 },
+          { label: 'I2C (SDA/SCL)', color: C.i2c, x: 340 },
+          { label: 'Digital I/O', color: C.dig, x: 500 },
+          { label: 'Power (5V)', color: C.pwr, x: 640 },
+          { label: 'Ground', color: C.gnd, x: 770 },
+          { label: '= return', color: C.uart, x: 880, dashed: true },
         ].map(l => (
           <g key={l.label}>
-            <line x1={W - 188} y1={l.y} x2={W - 160} y2={l.y} stroke={l.color} strokeWidth={2.5} strokeLinecap="round" />
-            <text x={W - 152} y={l.y + 3.5} fill={l.color} fontSize={8} fontFamily="monospace">{l.label}</text>
+            <line x1={l.x} y1={H - 48} x2={l.x + 28} y2={H - 48} stroke={l.color} strokeWidth={3} strokeLinecap="round" strokeDasharray={'dashed' in l ? '6,3' : undefined} />
+            <text x={l.x + 34} y={H - 44} fill={l.color} fontSize={8} fontFamily="monospace">{l.label}</text>
           </g>
         ))}
-
-        {/* Section labels */}
-        <text x={140} y={155} textAnchor="middle" fill={C.dim} fontSize={8} fontWeight="700" letterSpacing={1.5}>SENSORS</text>
-        <text x={815} y={128} textAnchor="middle" fill={C.dim} fontSize={8} fontWeight="700" letterSpacing={1.5}>OUTPUTS</text>
-        <text x={480} y={158} textAnchor="middle" fill={C.dim} fontSize={8} fontWeight="700" letterSpacing={1.5}>MICROCONTROLLER</text>
+        <text x={W / 2} y={H - 28} textAnchor="middle" fill={C.dim} fontSize={8}>
+          Breadboard + rail = 5V power; − rail = GND  •  Dashed wires = return/secondary lines  •  All components share common ground
+        </text>
       </svg>
     </div>
   );
