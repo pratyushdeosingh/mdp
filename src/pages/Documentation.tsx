@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import GlassCard from '../components/GlassCard';
+import CircuitSchematic from '../components/CircuitSchematic';
 import { GitBranch, Presentation, Lightbulb, BookOpen, Workflow, Cpu } from 'lucide-react';
 
 const tabs = [
@@ -117,6 +118,11 @@ function CircuitDiagramTab() {
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-bold text-[var(--text-primary)]">Circuit Wiring Diagram</h2>
+
+      {/* SVG Schematic — textbook style */}
+      <GlassCard className="p-4">
+        <CircuitSchematic />
+      </GlassCard>
 
       {/* Visual module layout */}
       <GlassCard className="p-6">
