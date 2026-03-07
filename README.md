@@ -78,23 +78,34 @@ Two operating modes are supported:
 - 🗺️ **Live Map** — Interactive Leaflet map with position marker and trail history
 - 📈 **Analytics** — 60-second rolling charts for accelerometer, speed, and altitude
 - 🚨 **Accident History** — Event log with GPS coordinates, peak acceleration, duration, resolution status
-- 📟 **Serial Monitor** — macOS-style terminal with color-coded log messages
+- 📟 **Serial Monitor** — macOS-style terminal with color-coded log messages and scroll-to-bottom indicator
 - 🔌 **Hardware Status** — Module connectivity and integration status panel
-- 📖 **Documentation** — In-app project docs, abstract, and roadmap
+- 📖 **Documentation** — In-app circuit diagrams, block diagram, flowchart, and roadmap
 
 ### UI/UX
-- 🌗 **Dark/Light Theme** — Persisted in `localStorage`, glass-morphism design system
+- 🌗 **Dark/Light Theme** — Persisted in `localStorage`, 16 semantic CSS variables, glass-morphism design
+- 🎨 **Theme-Aware Colors** — Automatic contrast adjustment (dark: `-400` variants, light: `-600` variants)
 - 📱 **Mobile Responsive** — Hamburger menu overlay, adaptive grid layouts
-- 🎬 **Smooth Animations** — Page transitions, staggered fade-ins, gauge easing, pulse indicators
+- 🎬 **Smooth Animations** — Page transitions, staggered fade-ins, gauge easing, skeleton loading states
 - 🔔 **Toast Notifications** — Success/error/warning/info toasts with 4-second auto-dismiss
+- ♿ **Accessibility** — ARIA labels, `focus-visible` rings, `aria-live` regions, keyboard navigation
 - 📤 **Data Export** — CSV sensor logs + PDF system reports (jsPDF + AutoTable)
 - ⚡ **Code-Split Bundle** — Lazy-loaded routes, vendor chunk splitting (81% smaller initial load)
+- 🧩 **Reusable Components** — EmptyState, StatusBadge, GlassCard, MetricCard, AccelerationGauge
 
 ### Server
-- 🔄 **Serial ↔ WebSocket Bridge** — Transparent data translation
-- 🛡️ **Rate Limiting** — 30 requests/minute per IP with auto-cleanup
+- 🔄 **Serial ↔ WebSocket Bridge** — Transparent data translation with payload validation
+- 🛡️ **Rate Limiting** — 30 requests/minute per IP with periodic auto-cleanup
 - 📡 **REST API** — Port listing, connect/disconnect, status endpoints
-- 🧹 **Resource Management** — Proper WebSocket cleanup, reconnection handling
+- 🧹 **Resource Management** — Proper WebSocket cleanup, heartbeat monitoring, graceful shutdown
+- ⚠️ **Error Handling** — Express error middleware, serial parser recovery, broadcast try-catch
+
+### Resilience
+- 🔁 **Auto-Reconnect** — Exponential backoff (1s → 16s, max 5 attempts) for WebSocket
+- 🛡️ **Error Boundary** — React ErrorBoundary catches render crashes with recovery UI
+- ✅ **Payload Validation** — Runtime type-checking on all incoming sensor data
+- ⏱️ **Fetch Timeout** — 10-second AbortController wrapper prevents hanging requests
+- 🚦 **Graceful Shutdown** — Server handles SIGINT/SIGTERM with resource cleanup + 5s force-exit
 
 ---
 
@@ -213,19 +224,21 @@ mdp/
 ├── src/
 │   ├── components/
 │   │   ├── AccelerationGauge.tsx   # SVG circular gauge (0-30 m/s², 3-zone colors)
+│   │   ├── CircuitSchematic.tsx    # Breadboard-style SVG wiring diagram
 │   │   ├── ConnectionPanel.tsx     # Serial port connection UI
 │   │   ├── DashboardLayout.tsx     # Responsive layout with sidebar + mobile menu
+│   │   ├── EmptyState.tsx          # Reusable loading/empty state with skeleton placeholders
 │   │   ├── GlassCard.tsx           # Glass-morphism container component
 │   │   ├── MetricCard.tsx          # Data display card with icon + pulse indicator
 │   │   ├── Sidebar.tsx             # Navigation, theme toggle, exports, mode switch
-│   │   └── StatusBadge.tsx         # Color-coded status indicators
+│   │   └── StatusBadge.tsx         # Theme-aware color-coded status indicators
 │   │
 │   ├── context/
 │   │   ├── AppContext.tsx           # Global state (sensors, theme, mode, accidents)
 │   │   └── ToastContext.tsx         # Toast notification system
 │   │
 │   ├── hooks/
-│   │   └── useSerialConnection.ts  # WebSocket client hook (auto-reconnect)
+│   │   └── useSerialConnection.ts  # WebSocket client hook (auto-reconnect, backoff)
 │   │
 │   ├── pages/
 │   │   ├── Dashboard.tsx           # Main metrics dashboard
@@ -233,9 +246,12 @@ mdp/
 │   │   ├── LiveMap.tsx             # GPS map with trail (lazy-loaded)
 │   │   ├── Analytics.tsx           # Rolling charts (lazy-loaded)
 │   │   ├── AccidentHistory.tsx     # Event log with stats (lazy-loaded)
-│   │   ├── SerialMonitor.tsx       # Terminal-style log viewer
+│   │   ├── SerialMonitor.tsx       # Terminal viewer with scroll-to-bottom
 │   │   ├── HardwareStatus.tsx      # Module status panel
-│   │   └── Documentation.tsx       # In-app docs (lazy-loaded)
+│   │   └── Documentation.tsx       # In-app docs with circuit/block/flow diagrams
+│   │
+│   ├── constants/
+│   │   └── hardware.ts             # Hardware module definitions
 │   │
 │   ├── types/
 │   │   └── index.ts                # TypeScript interfaces (SensorData, AccidentEvent, etc.)
@@ -502,6 +518,16 @@ The dashboard uses **code splitting** and **vendor chunking** to minimize initia
 | Lazy-loaded pages | 0 | 4 | Map, Analytics, Docs, Accidents |
 | Vendor chunks | 1 monolith | 4 split | React, Leaflet, Recharts, PDF |
 
+### React Optimization
+
+| Technique | Where | Purpose |
+|-----------|-------|---------|
+| `React.memo` | Dashboard, Analytics, LiveMap | Skip re-renders when props unchanged |
+| `useMemo` | AppContext Provider value, chartData, trail | Prevent cascading re-renders on 1 Hz updates |
+| Data capping | `sensorHistory: 60`, `logs: 200`, `events: 500` | Prevent memory growth |
+| Toast timer cleanup | ToastContext `Map` ref | Prevent timer leaks on unmount |
+| Reduced backdrop blur | `blur(12px)` | Reduce compositor load |
+
 ### Firmware Memory Safety
 
 | Concern | Solution |
@@ -511,6 +537,17 @@ The dashboard uses **code splitting** and **vendor chunking** to minimize initia
 | `Wire.requestFrom()` overload ambiguity | Cast all params to `uint8_t` |
 | Cancel button bounce | 200ms software debounce |
 | JSON document size | `StaticJsonDocument<300>` — fits 14 fields with 76-byte headroom |
+
+### Theme System
+
+16 semantic CSS variables automatically adapt between dark and light modes:
+
+```
+Light Mode: -600 Tailwind variants (e.g., --color-emerald: #059669)
+Dark Mode:  -400 Tailwind variants (e.g., --color-emerald: #34d399)
+```
+
+Variables: `--color-{emerald, red, amber, blue, cyan, orange, purple, gray}` + `--status-*-bg` backgrounds.
 
 ---
 
@@ -545,5 +582,15 @@ The dashboard uses **code splitting** and **vendor chunking** to minimize initia
 **Built with ❤️ as a Multidisciplinary Project**
 
 *Saving lives through technology — one helmet at a time.*
+
+---
+
+<sub>
+
+**Smart Safety Helmet** © 2025 — Multidisciplinary Project (MDP)
+
+Arduino Uno R3 · React 19 · TypeScript 5.9 · Node.js · WebSocket · Leaflet · Recharts
+
+</sub>
 
 </div>
