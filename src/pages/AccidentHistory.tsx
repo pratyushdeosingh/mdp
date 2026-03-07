@@ -33,8 +33,8 @@ export default function AccidentHistory() {
       {/* Summary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <GlassCard className="flex items-center gap-4 p-5">
-          <div className="p-2.5 rounded-xl bg-red-500/10">
-            <AlertTriangle size={20} className="text-red-400" />
+          <div className="p-2.5 rounded-xl" style={{ background: 'var(--status-red-bg)' }}>
+            <AlertTriangle size={20} style={{ color: 'var(--color-red)' }} />
           </div>
           <div>
             <p className="text-xs text-[var(--text-muted)]">Total Events</p>
@@ -42,8 +42,8 @@ export default function AccidentHistory() {
           </div>
         </GlassCard>
         <GlassCard className="flex items-center gap-4 p-5">
-          <div className="p-2.5 rounded-xl bg-amber-500/10">
-            <Activity size={20} className="text-amber-400" />
+          <div className="p-2.5 rounded-xl" style={{ background: 'var(--status-amber-bg)' }}>
+            <Activity size={20} style={{ color: 'var(--color-amber)' }} />
           </div>
           <div>
             <p className="text-xs text-[var(--text-muted)]">Peak Acceleration</p>
@@ -55,8 +55,8 @@ export default function AccidentHistory() {
           </div>
         </GlassCard>
         <GlassCard className="flex items-center gap-4 p-5">
-          <div className="p-2.5 rounded-xl bg-blue-500/10">
-            <Clock size={20} className="text-blue-400" />
+          <div className="p-2.5 rounded-xl" style={{ background: 'var(--status-blue-bg)' }}>
+            <Clock size={20} style={{ color: 'var(--color-blue)' }} />
           </div>
           <div>
             <p className="text-xs text-[var(--text-muted)]">Mode</p>
@@ -68,8 +68,8 @@ export default function AccidentHistory() {
       {/* Event List */}
       {accidentEvents.length === 0 ? (
         <GlassCard className="flex flex-col items-center justify-center py-16">
-          <div className="p-4 rounded-2xl bg-emerald-500/10 mb-4">
-            <CheckCircle size={32} className="text-emerald-400" />
+          <div className="p-4 rounded-2xl mb-4" style={{ background: 'var(--status-emerald-bg)' }}>
+            <CheckCircle size={32} style={{ color: 'var(--color-emerald)' }} />
           </div>
           <p className="text-lg font-semibold text-[var(--text-primary)]">No Accidents Detected</p>
           <p className="text-sm text-[var(--text-muted)] mt-1">

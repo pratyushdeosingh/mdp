@@ -19,7 +19,7 @@ function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="flex items-center gap-3">
-        <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--accent)' }} />
         <span className="text-sm text-[var(--text-muted)]">Loading...</span>
       </div>
     </div>

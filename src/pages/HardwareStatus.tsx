@@ -33,8 +33,8 @@ export default function HardwareStatus() {
               {workingCount}<span className="text-[var(--text-muted)] font-normal">/{total}</span>
             </p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <CheckCircle size={20} className="text-emerald-400" />
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'var(--status-emerald-bg)', border: '1px solid color-mix(in srgb, var(--color-emerald) 20%, transparent)' }}>
+            <CheckCircle size={20} style={{ color: 'var(--color-emerald)' }} />
           </div>
         </div>
       </div>
@@ -43,7 +43,7 @@ export default function HardwareStatus() {
       <GlassCard className="p-6">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase">Hardware Integration Progress</span>
-          <span className="text-sm font-bold text-emerald-400">{Math.round((workingCount / total) * 100)}%</span>
+          <span className="text-sm font-bold" style={{ color: 'var(--color-emerald)' }}>{Math.round((workingCount / total) * 100)}%</span>
         </div>
         <div className="w-full h-2.5 rounded-full bg-[var(--bg-secondary)] overflow-hidden border border-[var(--border-color)]">
           <div
@@ -61,11 +61,12 @@ export default function HardwareStatus() {
         {hardwareModules.map(mod => (
           <GlassCard key={mod.id} className="p-6">
             <div className="flex items-start gap-4">
-              <div className={`p-3 rounded-xl shrink-0 border ${mod.status === 'working'
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/15'
-                    : mod.status === 'damaged' ? 'bg-red-500/10 text-red-400 border-red-500/15'
-                    : 'bg-amber-500/10 text-amber-400 border-amber-500/15'
-                  }`}>
+              <div className="p-3 rounded-xl shrink-0 border"
+                style={{
+                  background: mod.status === 'working' ? 'var(--status-emerald-bg)' : mod.status === 'damaged' ? 'var(--status-red-bg)' : 'var(--status-amber-bg)',
+                  color: mod.status === 'working' ? 'var(--color-emerald)' : mod.status === 'damaged' ? 'var(--color-red)' : 'var(--color-amber)',
+                  borderColor: 'transparent',
+                }}>
                 {iconMap[mod.icon]}
               </div>
               <div className="flex-1 min-w-0">
@@ -92,10 +93,10 @@ export default function HardwareStatus() {
       </div>
 
       {/* Summary note */}
-      <GlassCard className="p-6 border-emerald-500/15">
+      <GlassCard className="p-6">
         <div className="flex items-start gap-4">
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 shrink-0">
-            <CheckCircle size={18} className="text-emerald-400" />
+          <div className="p-2.5 rounded-xl shrink-0" style={{ background: 'var(--status-emerald-bg)' }}>
+            <CheckCircle size={18} style={{ color: 'var(--color-emerald)' }} />
           </div>
           <div>
             <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-1.5">Integration Complete</h4>

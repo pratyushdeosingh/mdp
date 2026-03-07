@@ -114,7 +114,12 @@ export default function ConnectionPanel() {
         ) : (
           <button
             onClick={disconnectSerial}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
+            style={{
+              background: 'var(--status-red-bg)',
+              border: '1px solid color-mix(in srgb, var(--color-red) 30%, transparent)',
+              color: 'var(--color-red)',
+            }}
           >
             <Unplug size={14} />
             Disconnect

@@ -288,15 +288,16 @@ export default function AccelerationGauge({
             </svg>
 
             {/* Status text below gauge */}
-            <div className={`mt-1 flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold ${accidentDetected
-                ? 'bg-red-500/15 text-red-400 gauge-status-pulse'
-                : 'bg-emerald-500/10 text-emerald-400'
-                }`}>
+            <div className={`mt-1 flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold ${accidentDetected ? 'gauge-status-pulse' : ''}`}
+                style={{
+                  background: accidentDetected ? 'var(--status-red-bg)' : 'var(--status-emerald-bg)',
+                  color: accidentDetected ? 'var(--color-red)' : 'var(--color-emerald)',
+                }}>
                 {accidentDetected ? (
                     <span>⚠ Accident Detected</span>
                 ) : (
                     <>
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-live" />
+                        <span className="w-1.5 h-1.5 rounded-full pulse-live" style={{ background: 'var(--color-emerald)' }} />
                         <span>System Safe</span>
                     </>
                 )}

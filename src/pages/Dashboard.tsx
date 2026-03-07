@@ -101,7 +101,7 @@ const Dashboard = memo(function Dashboard() {
           value={d.gps.latitude}
           unit="deg"
           icon={<MapPin size={24} />}
-          color="text-blue-400"
+          color="var(--color-blue)"
           pulse
         />
         <MetricCard
@@ -109,7 +109,7 @@ const Dashboard = memo(function Dashboard() {
           value={d.gps.longitude}
           unit="deg"
           icon={<Navigation size={24} />}
-          color="text-cyan-400"
+          color="var(--color-cyan)"
           pulse
         />
         <MetricCard
@@ -117,14 +117,14 @@ const Dashboard = memo(function Dashboard() {
           value={d.gps.speed}
           unit="km/h"
           icon={<Gauge size={24} />}
-          color="text-emerald-400"
+          color="var(--color-emerald)"
         />
         <MetricCard
           label="Altitude"
           value={d.gps.altitude}
           unit="m"
           icon={<Mountain size={24} />}
-          color="text-purple-400"
+          color="var(--color-purple)"
         />
       </div>
 
