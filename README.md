@@ -343,9 +343,10 @@ graph LR
         MPU_GND["GND"]
     end
 
-    subgraph BUZZ["🔊 Piezo Buzzer"]
-        BUZ_P["(+)"]
-        BUZ_N["(−)"]
+    subgraph BUZZ["🔊 Buzzer Module (3-Pin)"]
+        BUZ_S["S (Signal)"]
+        BUZ_P["(+) VCC"]
+        BUZ_N["(−) GND"]
     end
 
     subgraph BTN["🛑 Cancel Button"]
@@ -363,7 +364,8 @@ graph LR
     V5 --> MPU_VCC
     GND --> MPU_GND
 
-    D8 --> BUZ_P
+    D8 -->|"Signal"| BUZ_S
+    V5 --> BUZ_P
     GND --> BUZ_N
 
     D7 --- BTN_1
@@ -384,8 +386,9 @@ graph LR
 | NEO-6M GPS RX | **D3** | SoftwareSerial TX | Arduino → GPS | 9600 baud UART |
 | MPU6050 SDA | **A4** | I2C Data | Bidirectional | Address: `0x68` |
 | MPU6050 SCL | **A5** | I2C Clock | Bidirectional | |
-| Piezo Buzzer (+) | **D8** | Digital Out | Arduino → Buzzer | 500ms on/off pattern |
-| Piezo Buzzer (−) | **GND** | Ground | — | |
+| Buzzer Signal (S) | **D8** | Digital Out | Arduino → Buzzer | Signal pin, 500ms on/off pattern |
+| Buzzer Power (+) | **5V** | Power | Arduino → Buzzer | VCC pin |
+| Buzzer Ground (−) | **GND** | Ground | — | GND pin |
 | Cancel Button Pin 1 | **D7** | Digital In | Button → Arduino | `INPUT_PULLUP`, active LOW |
 | Cancel Button Pin 2 | **GND** | Ground | — | Connect other leg to GND |
 | NEO-6M VCC | **5V** | Power | Arduino → GPS | 3.3V or 5V depending on module |

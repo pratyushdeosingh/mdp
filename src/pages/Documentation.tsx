@@ -66,7 +66,9 @@ const connections = [
   { from: 'Arduino Uno', fromPin: 'D3', to: 'NEO-6M GPS', toPin: 'RX', type: 'uart', label: 'SoftwareSerial TX · 9600 baud' },
   { from: 'MPU6050', fromPin: 'SDA', to: 'Arduino Uno', toPin: 'A4', type: 'i2c', label: 'I2C Data · Addr 0x68' },
   { from: 'MPU6050', fromPin: 'SCL', to: 'Arduino Uno', toPin: 'A5', type: 'i2c', label: 'I2C Clock' },
-  { from: 'Arduino Uno', fromPin: 'D8', to: 'Piezo Buzzer', toPin: '(+)', type: 'digital', label: 'Digital Out · 500ms beep' },
+  { from: 'Arduino Uno', fromPin: 'D8', to: 'Buzzer Module', toPin: 'S', type: 'digital', label: 'Signal pin · 500ms beep' },
+  { from: 'Arduino Uno', fromPin: '5V', to: 'Buzzer Module', toPin: '(+)', type: 'power', label: '5V Power' },
+  { from: 'Arduino Uno', fromPin: 'GND', to: 'Buzzer Module', toPin: '(−)', type: 'ground', label: 'Ground' },
   { from: 'Cancel Button', fromPin: 'Pin 1', to: 'Arduino Uno', toPin: 'D7', type: 'digital', label: 'INPUT_PULLUP · Active LOW' },
   { from: 'Arduino Uno', fromPin: '5V', to: 'NEO-6M GPS', toPin: 'VCC', type: 'power', label: '5V Power' },
   { from: 'Arduino Uno', fromPin: '5V', to: 'MPU6050', toPin: 'VCC', type: 'power', label: '5V Power' },
@@ -93,9 +95,9 @@ const modules = [
     color: 'orange',
   },
   {
-    name: '🔊 Piezo Buzzer',
-    sub: 'Active buzzer · 500ms on/off',
-    pins: ['(+)', '(−) → GND'],
+    name: '🔊 Buzzer Module',
+    sub: 'Active · 3-Pin (S, +, −)',
+    pins: ['S → D8', '(+) → 5V', '(−) → GND'],
     color: 'red',
   },
   {
