@@ -2,10 +2,14 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import type { SensorData, ImpactSeverity, UserResponse } from '../types';
 
 const ACCIDENT_THRESHOLD = 20;
+const CAUTION_THRESHOLD = 12;
+const BASELINE = 9.8;
+const SEVERE_CEILING = 40;
 const BUFFER_SIZE = 5;
 
 export interface AccidentDetectionState {
   impactMagnitude: number;
+  severityPercent: number;
   isAccidentActive: boolean;
   accidentStartTime: number | null;
   elapsedSeconds: number;
@@ -15,15 +19,30 @@ export interface AccidentDetectionState {
   impactZone: 'normal' | 'caution' | 'danger';
 }
 
-function classifySeverity(buffer: number[], peak: number): ImpactSeverity {
-  if (peak < 15) return 'none';
-  const highReadings = buffer.filter(v => v >= ACCIDENT_THRESHOLD).length;
-  const severeReadings = buffer.filter(v => v >= 30).length;
+// Smooth curve: maps acceleration to 0-100 score
+function accelToScore(accel: number): number {
+  const normalized = Math.max(0, accel - BASELINE) / (SEVERE_CEILING - BASELINE);
+  // Quadratic curve: gentle near baseline, steep at high values
+  return Math.min(100, normalized * normalized * 100 * 1.2);
+}
 
-  if (peak >= 40 || severeReadings >= 2) return 'severe';
-  if (peak >= 30 || highReadings >= 3) return 'high';
-  if (peak >= 20 || highReadings >= 2) return 'medium';
-  return 'low';
+function computeSeverityPercent(magnitude: number, peak: number, buffer: number[]): number {
+  const magnitudeScore = accelToScore(magnitude);
+  const peakScore = accelToScore(peak);
+  const highCount = buffer.filter(v => v >= CAUTION_THRESHOLD).length;
+  const durationScore = (highCount / Math.max(buffer.length, 1)) * 100;
+
+  return Math.min(100, Math.round(
+    magnitudeScore * 0.50 + peakScore * 0.30 + durationScore * 0.20
+  ));
+}
+
+function severityFromPercent(percent: number): ImpactSeverity {
+  if (percent >= 80) return 'severe';
+  if (percent >= 60) return 'high';
+  if (percent >= 40) return 'medium';
+  if (percent >= 20) return 'low';
+  return 'none';
 }
 
 function getImpactZone(magnitude: number): 'normal' | 'caution' | 'danger' {
@@ -35,6 +54,7 @@ function getImpactZone(magnitude: number): 'normal' | 'caution' | 'danger' {
 export function useAccidentDetection(sensorData: SensorData | null) {
   const [state, setState] = useState<AccidentDetectionState>({
     impactMagnitude: 0,
+    severityPercent: 0,
     isAccidentActive: false,
     accidentStartTime: null,
     elapsedSeconds: 0,
@@ -61,28 +81,32 @@ export function useAccidentDetection(sensorData: SensorData | null) {
     }
 
     const zone = getImpactZone(magnitude);
+    const percent = computeSeverityPercent(magnitude, peakRef.current, bufferRef.current);
+    const severity = severityFromPercent(percent);
     const isAccident = magnitude >= ACCIDENT_THRESHOLD || sensorData.accidentDetected;
 
     if (isAccident && !accidentActiveRef.current) {
       accidentActiveRef.current = true;
       peakRef.current = magnitude;
 
+      const freshPercent = computeSeverityPercent(magnitude, magnitude, bufferRef.current);
       setState(prev => ({
         ...prev,
         impactMagnitude: magnitude,
+        severityPercent: freshPercent,
         isAccidentActive: true,
         accidentStartTime: Date.now(),
         elapsedSeconds: 0,
-        severity: classifySeverity(bufferRef.current, magnitude),
+        severity: severityFromPercent(freshPercent),
         peakAcceleration: magnitude,
         userResponse: 'not_received',
         impactZone: zone,
       }));
     } else if (accidentActiveRef.current) {
-      const severity = classifySeverity(bufferRef.current, peakRef.current);
       setState(prev => ({
         ...prev,
         impactMagnitude: magnitude,
+        severityPercent: percent,
         severity,
         peakAcceleration: peakRef.current,
         impactZone: zone,
@@ -91,8 +115,9 @@ export function useAccidentDetection(sensorData: SensorData | null) {
       setState(prev => ({
         ...prev,
         impactMagnitude: magnitude,
+        severityPercent: percent,
+        severity,
         impactZone: zone,
-        severity: classifySeverity(bufferRef.current, peakRef.current),
       }));
     }
   }, [sensorData]);
@@ -127,6 +152,7 @@ export function useAccidentDetection(sensorData: SensorData | null) {
       isAccidentActive: false,
       accidentStartTime: null,
       elapsedSeconds: 0,
+      severityPercent: 0,
       severity: 'none',
       peakAcceleration: 0,
       userResponse: 'safe',

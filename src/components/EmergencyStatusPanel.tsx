@@ -37,6 +37,7 @@ const userResponseConfig: Record<UserResponse, { label: string; color: string; b
 export default function EmergencyStatusPanel({ sensorData, accidentState, onUserSafe }: EmergencyStatusPanelProps) {
   const {
     impactMagnitude,
+    severityPercent,
     isAccidentActive,
     elapsedSeconds,
     severity,
@@ -92,7 +93,7 @@ export default function EmergencyStatusPanel({ sensorData, accidentState, onUser
           <h3 className="text-[10px] font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase mb-3">
             Impact Meter
           </h3>
-          <ImpactMeter value={impactMagnitude} zone={impactZone} />
+          <ImpactMeter value={severityPercent} rawAcceleration={impactMagnitude} zone={impactZone} />
           <div
             className={`mt-3 flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold ${
               isAccidentActive ? 'gauge-status-pulse' : ''
@@ -135,7 +136,8 @@ export default function EmergencyStatusPanel({ sensorData, accidentState, onUser
           <StatusCard
             icon={<Activity size={20} />}
             label="Impact Level"
-            value={`${impactMagnitude.toFixed(1)} m/s²`}
+            value={`${severityPercent}%`}
+            subValue={`${impactMagnitude.toFixed(1)} m/s²`}
             color={impactZone === 'danger' ? 'var(--color-red)' : impactZone === 'caution' ? 'var(--color-amber)' : 'var(--color-emerald)'}
             bg={impactZone === 'danger' ? 'var(--status-red-bg)' : impactZone === 'caution' ? 'var(--status-amber-bg)' : 'var(--status-emerald-bg)'}
           />
@@ -187,6 +189,7 @@ function StatusCard({
   icon,
   label,
   value,
+  subValue,
   color,
   bg,
   pulse,
@@ -194,6 +197,7 @@ function StatusCard({
   icon: React.ReactNode;
   label: string;
   value: string;
+  subValue?: string;
   color: string;
   bg: string;
   pulse?: boolean;
@@ -212,9 +216,12 @@ function StatusCard({
           {label}
         </span>
       </div>
-      <div className="flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full" style={{ background: color }} />
+      <div className="flex items-baseline gap-2">
+        <span className="w-2 h-2 rounded-full shrink-0 self-center" style={{ background: color }} />
         <span className="text-lg font-bold" style={{ color }}>{value}</span>
+        {subValue && (
+          <span className="text-xs text-[var(--text-muted)] font-medium">{subValue}</span>
+        )}
       </div>
     </div>
   );

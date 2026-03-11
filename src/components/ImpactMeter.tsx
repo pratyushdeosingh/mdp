@@ -2,11 +2,12 @@ import { useRef, useEffect, useState } from 'react';
 
 interface ImpactMeterProps {
   value: number;
+  rawAcceleration: number;
   maxValue?: number;
   zone: 'normal' | 'caution' | 'danger';
 }
 
-export default function ImpactMeter({ value, maxValue = 50, zone }: ImpactMeterProps) {
+export default function ImpactMeter({ value, rawAcceleration, maxValue = 100, zone }: ImpactMeterProps) {
   const [displayValue, setDisplayValue] = useState(value);
   const animRef = useRef<number>(0);
   const currentRef = useRef(value);
@@ -15,7 +16,7 @@ export default function ImpactMeter({ value, maxValue = 50, zone }: ImpactMeterP
     const target = Math.min(Math.max(value, 0), maxValue);
     const animate = () => {
       const diff = target - currentRef.current;
-      if (Math.abs(diff) < 0.01) {
+      if (Math.abs(diff) < 0.05) {
         currentRef.current = target;
         setDisplayValue(target);
         return;
@@ -55,25 +56,35 @@ export default function ImpactMeter({ value, maxValue = 50, zone }: ImpactMeterP
     return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`;
   };
 
-  // Zone boundaries: Green 0-12, Yellow 12-20, Red 20-50
+  // Zone boundaries: 0-20% Safe, 20-40% Elevated, 40-60% Warning, 60-80% Critical, 80-100% Severe
   const zones = [
-    { from: 0, to: 12, color: '#10b981', label: 'Normal' },
-    { from: 12, to: 20, color: '#f59e0b', label: 'Caution' },
-    { from: 20, to: maxValue, color: '#ef4444', label: 'Danger' },
+    { from: 0, to: 20, color: '#10b981', label: 'Safe' },
+    { from: 20, to: 40, color: '#f59e0b', label: 'Elevated' },
+    { from: 40, to: 60, color: '#f97316', label: 'Warning' },
+    { from: 60, to: 80, color: '#ef4444', label: 'Critical' },
+    { from: 80, to: 100, color: '#b91c1c', label: 'Severe' },
   ];
 
-  const ticks = [0, 10, 20, 30, 40, 50];
+  const ticks = [0, 20, 40, 60, 80, 100];
 
   const needleAngle = valueToAngle(displayValue);
 
-  const zoneColor = zone === 'danger' ? '#ef4444' : zone === 'caution' ? '#f59e0b' : '#10b981';
+  const getZoneColor = (v: number) => {
+    if (v >= 80) return '#b91c1c';
+    if (v >= 60) return '#ef4444';
+    if (v >= 40) return '#f97316';
+    if (v >= 20) return '#f59e0b';
+    return '#10b981';
+  };
+
+  const zoneColor = getZoneColor(displayValue);
 
   return (
     <div className={`relative flex flex-col items-center ${zone === 'danger' ? 'impact-meter-alert' : ''}`}>
       <svg
         width="100%"
         height="100%"
-        viewBox="0 0 300 185"
+        viewBox="0 0 300 190"
         className="overflow-visible max-w-[300px]"
       >
         <defs>
@@ -141,7 +152,7 @@ export default function ImpactMeter({ value, maxValue = 50, zone }: ImpactMeterP
           const outerR = radius - arcWidth / 2 - 2;
           const p1 = polarToCartesian(angle, innerR);
           const p2 = polarToCartesian(angle, outerR);
-          const labelR = radius - arcWidth / 2 - 22;
+          const labelR = radius - arcWidth / 2 - 24;
           const labelPos = polarToCartesian(angle, labelR);
 
           return (
@@ -158,10 +169,10 @@ export default function ImpactMeter({ value, maxValue = 50, zone }: ImpactMeterP
                 dominantBaseline="central"
                 fill="var(--text-muted)"
                 fontSize={10}
-                fontWeight={500}
+                fontWeight={600}
                 fontFamily="Inter, sans-serif"
               >
-                {val}
+                {val}%
               </text>
             </g>
           );
@@ -182,30 +193,45 @@ export default function ImpactMeter({ value, maxValue = 50, zone }: ImpactMeterP
           <circle cx={cx} cy={cy} r={2.5} fill="#fff" opacity={0.5} />
         </g>
 
-        {/* Center value */}
+        {/* Center percentage display */}
         <text
-          x={cx} y={cy - 35}
+          x={cx} y={cy - 40}
           textAnchor="middle"
           dominantBaseline="central"
-          fill="var(--text-primary)"
-          fontSize={32}
+          fill={zoneColor}
+          fontSize={36}
           fontWeight={800}
           fontFamily="Inter, sans-serif"
         >
-          {displayValue.toFixed(1)}
+          {Math.round(displayValue)}%
         </text>
         <text
-          x={cx} y={cy - 14}
+          x={cx} y={cy - 18}
           textAnchor="middle"
           dominantBaseline="central"
           fill="var(--text-muted)"
-          fontSize={11}
+          fontSize={10}
           fontFamily="Inter, sans-serif"
+          fontWeight={600}
+          letterSpacing="0.05em"
         >
-          m/s²
+          SEVERITY
         </text>
 
-        {/* Zone labels at bottom */}
+        {/* Small m/s² reference below center */}
+        <text
+          x={cx} y={cy - 2}
+          textAnchor="middle"
+          dominantBaseline="central"
+          fill="var(--text-muted)"
+          fontSize={10}
+          fontFamily="Inter, sans-serif"
+          opacity={0.7}
+        >
+          {rawAcceleration.toFixed(1)} m/s²
+        </text>
+
+        {/* Zone labels along the outer edge */}
         {zones.map((z, i) => {
           const midVal = (z.from + z.to) / 2;
           const angle = valueToAngle(midVal);
@@ -218,7 +244,7 @@ export default function ImpactMeter({ value, maxValue = 50, zone }: ImpactMeterP
               textAnchor="middle"
               dominantBaseline="central"
               fill={z.color}
-              fontSize={9}
+              fontSize={8}
               fontWeight={700}
               fontFamily="Inter, sans-serif"
               letterSpacing="0.05em"
