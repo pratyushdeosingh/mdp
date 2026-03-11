@@ -18,10 +18,14 @@ import GlassCard from '../components/GlassCard';
 import EmptyState from '../components/EmptyState';
 import ConnectionPanel from '../components/ConnectionPanel';
 import AccelerationGauge from '../components/AccelerationGauge';
+import EmergencyStatusPanel from '../components/EmergencyStatusPanel';
+import SimulationControls from '../components/SimulationControls';
 import { useAppContext } from '../context/AppContext';
+import { useAccidentDetection } from '../hooks/useAccidentDetection';
 
 const Dashboard = memo(function Dashboard() {
-  const { sensorData, dataMode, isStreaming, setIsStreaming, connectionStatus } = useAppContext();
+  const { sensorData, dataMode, isStreaming, setIsStreaming, connectionStatus, activeScenario, triggerScenario } = useAppContext();
+  const accidentState = useAccidentDetection(sensorData);
 
   // Hardware mode with no data yet — show connection panel
   if (dataMode === 'hardware' && !sensorData) {
@@ -52,7 +56,23 @@ const Dashboard = memo(function Dashboard() {
   const d = sensorData;
 
   return (
-    <div className="grid h-full min-h-full grid-rows-[auto_auto_1fr_auto] gap-8">
+    <div className="grid h-full min-h-full gap-8">
+      {/* Emergency Status Panel — layman-friendly overview */}
+      <EmergencyStatusPanel
+        sensorData={d}
+        accidentState={accidentState}
+        onUserSafe={accidentState.markUserSafe}
+      />
+
+      {/* Simulation Controls — test scenarios without hardware */}
+      {dataMode === 'simulation' && (
+        <SimulationControls
+          activeScenario={activeScenario}
+          onTriggerScenario={triggerScenario}
+          onUserSafe={accidentState.markUserSafe}
+        />
+      )}
+
       {/* Header */}
       <div className="relative flex flex-col items-center justify-center text-center">
         <div>

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo, type ReactNode } from 'react';
-import type { SensorData, LogEntry, DataMode, ThemeMode, ConnectionStatus, SerialPortInfo, AccidentEvent } from '../types';
-import { generateSensorData, generateLogEntry, resetSimulatorState } from '../utils/simulator';
+import type { SensorData, LogEntry, DataMode, ThemeMode, ConnectionStatus, SerialPortInfo, AccidentEvent, ScenarioType } from '../types';
+import { generateSensorData, generateLogEntry, resetSimulatorState, generateScenarioData } from '../utils/simulator';
 import { useSerialConnection } from '../hooks/useSerialConnection';
 
 interface AppContextType {
@@ -23,6 +23,9 @@ interface AppContextType {
   refreshPorts: () => Promise<void>;
   connectSerial: (port: string) => Promise<void>;
   disconnectSerial: () => Promise<void>;
+  // Simulation scenario control
+  activeScenario: ScenarioType;
+  triggerScenario: (scenario: ScenarioType, durationMs?: number) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -44,6 +47,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const accidentIdRef = useRef(0);
   const prevAccidentRef = useRef(false);
+  const [activeScenario, setActiveScenario] = useState<ScenarioType>(null);
+  const activeScenarioRef = useRef<ScenarioType>(null);
+  const scenarioTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Track accident transitions (false→true = new event, true→false = resolved)
   const trackAccident = useCallback((data: SensorData) => {
@@ -96,6 +102,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Serial connection hook
   const serial = useSerialConnection(handleHardwareData);
 
+  // Keep scenario ref in sync for use inside interval closures
+  useEffect(() => { activeScenarioRef.current = activeScenario; }, [activeScenario]);
+
+  const triggerScenario = useCallback((scenario: ScenarioType, durationMs = 5000) => {
+    if (scenarioTimerRef.current) clearTimeout(scenarioTimerRef.current);
+    setActiveScenario(scenario);
+    activeScenarioRef.current = scenario;
+    if (scenario) {
+      scenarioTimerRef.current = setTimeout(() => {
+        setActiveScenario(null);
+        activeScenarioRef.current = null;
+      }, scenario === 'normal' ? 2000 : durationMs);
+    }
+  }, []);
+
   const toggleTheme = useCallback(() => {
     setTheme(prev => {
       const next = prev === 'dark' ? 'light' : 'dark';
@@ -123,7 +144,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setSensorHistory([initial]);
 
       intervalRef.current = setInterval(() => {
-        const newData = generateSensorData();
+        const newData = activeScenarioRef.current
+          ? generateScenarioData(activeScenarioRef.current)
+          : generateSensorData();
         setSensorData(newData);
         trackAccident(newData);
         setSensorHistory(prev => {
@@ -178,10 +201,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     refreshPorts: serial.refreshPorts,
     connectSerial: serial.connect,
     disconnectSerial: serial.disconnect,
+    activeScenario,
+    triggerScenario,
   }), [
     sensorData, sensorHistory, logs, accidentEvents,
     dataMode, theme, isStreaming,
     setDataMode, toggleTheme, setIsStreaming,
+    activeScenario, triggerScenario,
     serial.connectionStatus, serial.availablePorts, serial.selectedPort,
     serial.setSelectedPort, serial.lastError, serial.refreshPorts,
     serial.connect, serial.disconnect,

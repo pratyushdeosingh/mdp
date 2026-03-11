@@ -97,6 +97,38 @@ export function generateLogEntry(): LogEntry {
   }
 }
 
+export function generateScenarioData(scenario: 'normal' | 'accident' | 'severe'): SensorData {
+  const base = generateSensorData();
+  switch (scenario) {
+    case 'normal':
+      return base;
+    case 'accident': {
+      const ax = parseFloat((15 + Math.random() * 5).toFixed(3));
+      const ay = parseFloat((12 + Math.random() * 5).toFixed(3));
+      const az = parseFloat((10 + Math.random() * 3).toFixed(3));
+      return {
+        ...base,
+        accelerometer: { x: ax, y: ay, z: az },
+        totalAcceleration: parseFloat(Math.sqrt(ax * ax + ay * ay + az * az).toFixed(2)),
+        accidentDetected: true,
+        systemStatus: 'warning',
+      };
+    }
+    case 'severe': {
+      const ax = parseFloat((25 + Math.random() * 10).toFixed(3));
+      const ay = parseFloat((20 + Math.random() * 10).toFixed(3));
+      const az = parseFloat((15 + Math.random() * 5).toFixed(3));
+      return {
+        ...base,
+        accelerometer: { x: ax, y: ay, z: az },
+        totalAcceleration: parseFloat(Math.sqrt(ax * ax + ay * ay + az * az).toFixed(2)),
+        accidentDetected: true,
+        systemStatus: 'warning',
+      };
+    }
+  }
+}
+
 export function exportSensorDataCSV(history: SensorData[]): string {
   const headers = 'Timestamp,Latitude,Longitude,Speed,Altitude,AccX,AccY,AccZ,TotalAccel,AccidentDetected,Status,Battery,Temp\n';
   const rows = history.map(d =>
