@@ -68,6 +68,7 @@ export function generateSensorData(): SensorData {
     accidentDetected,
     batteryLevel: Math.floor(70 + Math.random() * 30),
     temperature: parseFloat((35 + Math.random() * 10).toFixed(1)),
+    gpsValid: true,
   };
 }
 

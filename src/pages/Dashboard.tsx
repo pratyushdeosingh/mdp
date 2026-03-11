@@ -20,12 +20,15 @@ import ConnectionPanel from '../components/ConnectionPanel';
 import AccelerationGauge from '../components/AccelerationGauge';
 import EmergencyStatusPanel from '../components/EmergencyStatusPanel';
 import SimulationControls from '../components/SimulationControls';
+import { GPSStatusPanel } from '../components/GPSStatusPanel';
 import { useAppContext } from '../context/AppContext';
 import { useAccidentDetection } from '../hooks/useAccidentDetection';
+import { useGPSStatus } from '../hooks/useGPSStatus';
 
 const Dashboard = memo(function Dashboard() {
   const { sensorData, dataMode, isStreaming, setIsStreaming, connectionStatus, activeScenario, triggerScenario } = useAppContext();
   const accidentState = useAccidentDetection(sensorData);
+  const gpsStatus = useGPSStatus(sensorData);
 
   // Hardware mode with no data yet — show connection panel
   if (dataMode === 'hardware' && !sensorData) {
@@ -256,6 +259,9 @@ const Dashboard = memo(function Dashboard() {
         </GlassCard>
       </div>
 
+      {/* GPS Health Monitor */}
+      <GPSStatusPanel gpsStatus={gpsStatus} />
+
       {/* GPS Info Strip */}
       <GlassCard className="p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -263,7 +269,17 @@ const Dashboard = memo(function Dashboard() {
             <div className="flex items-center gap-2.5">
               <Satellite size={16} style={{ color: 'var(--color-blue)' }} />
               <span className="text-sm text-[var(--text-muted)]">GPS</span>
-              <span className="text-sm font-semibold" style={{ color: 'var(--color-emerald)' }}>Active</span>
+              <span className="text-sm font-semibold" style={{
+                color: gpsStatus.state === 'locked' ? 'var(--color-emerald)' :
+                       gpsStatus.state === 'cold_start' ? 'var(--color-amber)' :
+                       gpsStatus.state === 'searching' ? 'var(--color-orange)' :
+                       gpsStatus.state === 'lost_fix' ? 'var(--color-red)' : 'var(--color-gray)'
+              }}>
+                {gpsStatus.state === 'locked' ? 'Active' :
+                 gpsStatus.state === 'cold_start' ? 'Acquiring…' :
+                 gpsStatus.state === 'searching' ? 'No Fix' :
+                 gpsStatus.state === 'lost_fix' ? 'Fix Lost' : 'No Data'}
+              </span>
             </div>
             <div className="flex items-center gap-2.5">
               <MapPin size={16} style={{ color: 'var(--color-cyan)' }} />

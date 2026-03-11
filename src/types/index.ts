@@ -16,6 +16,7 @@ export interface SensorData {
   accidentDetected: boolean;
   batteryLevel: number;
   temperature: number;
+  gpsValid?: boolean;
 }
 
 export interface HardwareModule {
