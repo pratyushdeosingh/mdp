@@ -3,9 +3,13 @@ import type { SensorData, ImpactSeverity, UserResponse } from '../types';
 
 const ACCIDENT_THRESHOLD = 20;
 const CAUTION_THRESHOLD = 12;
-const BASELINE = 9.8;
-const SEVERE_CEILING = 40;
 const BUFFER_SIZE = 5;
+
+// Sigmoid midpoint and steepness — tuned so that:
+//   9.8 m/s² (gravity) ≈ 5%,  20 m/s² (accident) ≈ 38%,
+//   25 m/s² ≈ 68%,  30 m/s² ≈ 88%,  40+ m/s² ≈ 99%
+const SIGMOID_MIDPOINT = 22;
+const SIGMOID_K = 0.25;
 
 export interface AccidentDetectionState {
   impactMagnitude: number;
@@ -19,21 +23,24 @@ export interface AccidentDetectionState {
   impactZone: 'normal' | 'caution' | 'danger';
 }
 
-// Smooth curve: maps acceleration to 0-100 score
+// Sigmoid (logistic) curve — smooth S-shape that maps acceleration to 0-100
 function accelToScore(accel: number): number {
-  const normalized = Math.max(0, accel - BASELINE) / (SEVERE_CEILING - BASELINE);
-  // Quadratic curve: gentle near baseline, steep at high values
-  return Math.min(100, normalized * normalized * 100 * 1.2);
+  return 100 / (1 + Math.exp(-SIGMOID_K * (accel - SIGMOID_MIDPOINT)));
 }
 
 function computeSeverityPercent(magnitude: number, peak: number, buffer: number[]): number {
   const magnitudeScore = accelToScore(magnitude);
   const peakScore = accelToScore(peak);
-  const highCount = buffer.filter(v => v >= CAUTION_THRESHOLD).length;
-  const durationScore = (highCount / Math.max(buffer.length, 1)) * 100;
 
+  // Two-tier duration: caution readings contribute 40%, danger readings 60%
+  const cautionCount = buffer.filter(v => v >= CAUTION_THRESHOLD).length;
+  const dangerCount = buffer.filter(v => v >= ACCIDENT_THRESHOLD).length;
+  const bufLen = Math.max(buffer.length, 1);
+  const durationScore = ((cautionCount * 0.4 + dangerCount * 0.6) / bufLen) * 100;
+
+  // Weights: 40% instant magnitude, 35% peak (retains history), 25% duration (sustained = worse)
   return Math.min(100, Math.round(
-    magnitudeScore * 0.50 + peakScore * 0.30 + durationScore * 0.20
+    magnitudeScore * 0.40 + peakScore * 0.35 + durationScore * 0.25
   ));
 }
 
