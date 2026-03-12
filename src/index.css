@@ -88,7 +88,7 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.4s ease, color 0.4s ease;
   min-height: 100vh;
   margin: 0;
 }
@@ -626,4 +626,172 @@ body {
 .focus-ring-animate:focus-visible {
   animation: focusRing 0.2s ease-out forwards;
   outline: none;
+}
+
+/* ===== LANDING PAGE ANIMATIONS ===== */
+.landing-gradient-text {
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 50%, var(--color-purple) 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 6s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.landing-icon-float {
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes orbDrift1 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.15); }
+}
+
+@keyframes orbDrift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.1; }
+  50% { transform: translate(20px, -20px) scale(1.1); opacity: 0.15; }
+}
+
+.landing-orb-1 { animation: orbDrift1 8s ease-in-out infinite; }
+.landing-orb-2 { animation: orbDrift2 10s ease-in-out infinite; }
+
+.landing-cta-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-cta-glow::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: rotate(45deg) translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.landing-cta-glow:hover::before {
+  transform: rotate(45deg) translateX(100%);
+}
+
+.landing-feature-card {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+/* ===== SMOOTH THEME TRANSITIONS ===== */
+.glass-card,
+.gps-status-panel {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== SIDEBAR ACTIVE STATE ===== */
+.sidebar-nav-active {
+  background: var(--nav-active-bg);
+  position: relative;
+}
+
+.sidebar-nav-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+  animation: slideInLeft 0.2s ease-out;
+}
+
+@keyframes slideInLeft {
+  from { transform: translateY(-50%) scaleY(0); }
+  to { transform: translateY(-50%) scaleY(1); }
+}
+
+/* Custom tooltip for collapsed sidebar */
+.sidebar-tooltip {
+  position: relative;
+}
+
+.sidebar-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%) scale(0.9);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 100;
+}
+
+.sidebar-tooltip:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+/* ===== CHART POLISH ===== */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  opacity: 0.4;
+}
+
+.recharts-tooltip-wrapper {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  transition: all 0.15s ease;
+}
+
+.recharts-active-dot {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.recharts-legend-item-text {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+/* ===== EMERGENCY PANEL SHAKE ON ACCIDENT ===== */
+@keyframes emergencyFlash {
+  0% { opacity: 1; }
+  25% { opacity: 0.85; }
+  50% { opacity: 1; }
+  75% { opacity: 0.9; }
+  100% { opacity: 1; }
+}
+
+.emergency-panel-alert {
+  animation: emergencyPulse 2s ease-in-out infinite, emergencyShake 0.5s ease-out;
+}
+
+/* ===== SIDEBAR COLLAPSE ICON ROTATION ===== */
+.sidebar-collapse-icon {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== RESPONSIVE CHART HEIGHT ===== */
+@media (max-width: 640px) {
+  .recharts-wrapper {
+    font-size: 10px;
+  }
 }

@@ -118,7 +118,11 @@ const Analytics = memo(function Analytics() {
       borderRadius: '12px',
       fontSize: '12px',
       color: 'var(--text-primary)',
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+      padding: '10px 14px',
     },
+    cursor: { stroke: 'var(--accent)', strokeWidth: 1, strokeDasharray: '4 4' },
+    animationDuration: 200,
   };
 
   return (
@@ -152,9 +156,9 @@ const Analytics = memo(function Analytics() {
             />
             <Tooltip {...tooltipStyle} />
             <Legend wrapperStyle={{ fontSize: '12px' }} />
-            <Line type="monotone" dataKey="accX" stroke="#f97316" strokeWidth={2} dot={false} name="Acc X" />
-            <Line type="monotone" dataKey="accY" stroke="#06b6d4" strokeWidth={2} dot={false} name="Acc Y" />
-            <Line type="monotone" dataKey="accZ" stroke="#a855f7" strokeWidth={2} dot={false} name="Acc Z" />
+            <Line type="monotone" dataKey="accX" stroke="#f97316" strokeWidth={2} dot={false} name="Acc X" animationDuration={800} />
+            <Line type="monotone" dataKey="accY" stroke="#06b6d4" strokeWidth={2} dot={false} name="Acc Y" animationDuration={800} animationBegin={200} />
+            <Line type="monotone" dataKey="accZ" stroke="#a855f7" strokeWidth={2} dot={false} name="Acc Z" animationDuration={800} animationBegin={400} />
           </LineChart>
         </ResponsiveContainer>
       </GlassCard>
@@ -193,6 +197,7 @@ const Analytics = memo(function Analytics() {
               strokeWidth={2}
               fill="url(#speedGradient)"
               name="Speed"
+              animationDuration={1000}
             />
           </AreaChart>
         </ResponsiveContainer>

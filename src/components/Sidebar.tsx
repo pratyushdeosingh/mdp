@@ -166,12 +166,13 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive
-                ? 'text-[var(--nav-active-text)]'
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isActive
+                ? 'sidebar-nav-active text-[var(--nav-active-text)]'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]'
-              } ${collapsed ? 'justify-center' : ''}`
+              } ${collapsed ? 'justify-center sidebar-tooltip' : ''}`
             }
-            title={item.label}
+            data-tooltip={collapsed ? item.label : undefined}
+            title={collapsed ? undefined : item.label}
           >
             <item.icon size={18} className="shrink-0" />
             {!collapsed && <span>{item.label}</span>}
