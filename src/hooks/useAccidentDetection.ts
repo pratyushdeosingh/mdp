@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { SensorData, ImpactSeverity, UserResponse } from '../types';
 
-const ACCIDENT_THRESHOLD = 20;
+// Match Arduino firmware ACCIDENT_THRESHOLD (25.0 m/s²) for consistency
+const ACCIDENT_THRESHOLD = 25;
 const CAUTION_THRESHOLD = 12;
 const BUFFER_SIZE = 5;
 

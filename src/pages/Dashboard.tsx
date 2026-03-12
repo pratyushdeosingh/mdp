@@ -65,6 +65,7 @@ const Dashboard = memo(function Dashboard() {
         sensorData={d}
         accidentState={accidentState}
         onUserSafe={accidentState.markUserSafe}
+        gpsStatus={gpsStatus}
       />
 
       {/* Simulation Controls — test scenarios without hardware */}
@@ -103,7 +104,7 @@ const Dashboard = memo(function Dashboard() {
 
       {/* Accident Detection Alert */}
       {d.accidentDetected && (
-        <div role="alert" aria-live="polite" aria-atomic="true"
+        <div role="alert" aria-live="assertive" aria-atomic="true"
           className="p-5 rounded-2xl border-2 flex items-center gap-4 animate-slow-pulse"
           style={{ background: 'var(--status-red-bg)', borderColor: 'var(--color-red)', borderWidth: '2px' }}
         >

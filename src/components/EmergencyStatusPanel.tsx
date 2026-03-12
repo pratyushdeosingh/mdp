@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Shield,
   Activity,
@@ -6,9 +7,11 @@ import {
   UserCheck,
   ShieldCheck,
   ShieldAlert,
+  Satellite,
 } from 'lucide-react';
 import type { SensorData, ImpactSeverity, UserResponse } from '../types';
 import type { AccidentDetectionState } from '../hooks/useAccidentDetection';
+import type { GPSStatus } from '../hooks/useGPSStatus';
 import GlassCard from './GlassCard';
 import ImpactMeter from './ImpactMeter';
 import SeverityBadge from './SeverityBadge';
@@ -18,6 +21,7 @@ interface EmergencyStatusPanelProps {
   sensorData: SensorData;
   accidentState: AccidentDetectionState;
   onUserSafe: () => void;
+  gpsStatus?: GPSStatus;
 }
 
 const severityColorMap: Record<ImpactSeverity, { color: string; bg: string }> = {
@@ -34,7 +38,7 @@ const userResponseConfig: Record<UserResponse, { label: string; color: string; b
   safe:         { label: 'User Safe ✓',  color: 'var(--color-emerald)', bg: 'var(--status-emerald-bg)' },
 };
 
-export default function EmergencyStatusPanel({ sensorData, accidentState, onUserSafe }: EmergencyStatusPanelProps) {
+export default function EmergencyStatusPanel({ sensorData, accidentState, onUserSafe, gpsStatus }: EmergencyStatusPanelProps) {
   const {
     impactMagnitude,
     severityPercent,
@@ -49,7 +53,45 @@ export default function EmergencyStatusPanel({ sensorData, accidentState, onUser
   const resCfg = userResponseConfig[userResponse];
   const isOnline = sensorData.systemStatus !== 'offline';
 
+  // Debounce "I'm Safe" button to prevent accidental double-taps
+  const [isSafeMarking, setIsSafeMarking] = useState(false);
+  const handleMarkSafe = () => {
+    if (isSafeMarking) return;
+    setIsSafeMarking(true);
+    onUserSafe();
+    setTimeout(() => setIsSafeMarking(false), 1500);
+  };
+
+  // GPS status card config
+  const gpsCardColor = gpsStatus
+    ? gpsStatus.state === 'locked' ? 'var(--color-emerald)'
+      : gpsStatus.state === 'cold_start' ? 'var(--color-amber)'
+      : gpsStatus.state === 'searching' ? 'var(--color-orange, #c2410c)'
+      : gpsStatus.state === 'lost_fix' ? 'var(--color-red)'
+      : 'var(--color-gray)'
+    : 'var(--color-gray)';
+  const gpsCardBg = gpsStatus
+    ? gpsStatus.state === 'locked' ? 'var(--status-emerald-bg)'
+      : gpsStatus.state === 'cold_start' ? 'var(--status-amber-bg)'
+      : gpsStatus.state === 'searching' ? 'rgba(249, 115, 22, 0.15)'
+      : gpsStatus.state === 'lost_fix' ? 'var(--status-red-bg)'
+      : 'var(--status-gray-bg)'
+    : 'var(--status-gray-bg)';
+  const gpsLabel = gpsStatus
+    ? gpsStatus.state === 'locked' ? 'GPS Locked'
+      : gpsStatus.state === 'cold_start' ? 'Acquiring…'
+      : gpsStatus.state === 'searching' ? 'No Fix'
+      : gpsStatus.state === 'lost_fix' ? 'Fix Lost'
+      : 'No Data'
+    : 'No Data';
+
   return (
+    <section
+      role="region"
+      aria-label="Emergency Status Monitor"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
     <GlassCard
       className={`p-6 md:p-8 ${isAccidentActive ? 'emergency-panel-alert' : ''}`}
       style={isAccidentActive ? { borderColor: 'var(--color-red)', borderWidth: '2px' } : undefined}
@@ -77,12 +119,14 @@ export default function EmergencyStatusPanel({ sensorData, accidentState, onUser
         </div>
         {isAccidentActive && (
           <button
-            onClick={onUserSafe}
-            className="emergency-safe-btn px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2"
-            style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}
+            onClick={handleMarkSafe}
+            disabled={isSafeMarking}
+            aria-label={`Mark user as safe — ${isSafeMarking ? 'processing' : 'press to reset accident alert'}`}
+            className="emergency-safe-btn px-6 py-4 md:py-3 rounded-xl text-sm font-bold text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-wait focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2"
+            style={{ background: 'linear-gradient(135deg, #059669, #10b981)', minHeight: '48px' }}
           >
             <ShieldCheck size={18} className="inline mr-2 -mt-0.5" />
-            I'm Safe
+            {isSafeMarking ? 'Marking Safe…' : "I'm Safe"}
           </button>
         )}
       </div>
@@ -179,9 +223,27 @@ export default function EmergencyStatusPanel({ sensorData, accidentState, onUser
             bg={resCfg.bg}
             pulse={userResponse === 'not_received'}
           />
+
+          {/* Card 7: GPS Status */}
+          {gpsStatus && (
+            <StatusCard
+              icon={<Satellite size={20} />}
+              label="GPS Status"
+              value={gpsLabel}
+              subValue={gpsStatus.state === 'cold_start'
+                ? `${gpsStatus.coldStartProgress}% acquired`
+                : gpsStatus.coordinates
+                  ? `${gpsStatus.coordinates.lat.toFixed(4)}°, ${gpsStatus.coordinates.lng.toFixed(4)}°`
+                  : undefined}
+              color={gpsCardColor}
+              bg={gpsCardBg}
+              pulse={gpsStatus.state === 'lost_fix'}
+            />
+          )}
         </div>
       </div>
     </GlassCard>
+    </section>
   );
 }
 

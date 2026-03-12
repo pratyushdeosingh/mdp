@@ -58,10 +58,10 @@ export default function ImpactMeter({ value, rawAcceleration, maxValue = 100, zo
 
   // Zone boundaries: 0-20% Safe, 20-40% Elevated, 40-60% Warning, 60-80% Critical, 80-100% Severe
   const zones = [
-    { from: 0, to: 20, color: '#10b981', label: 'Safe' },
-    { from: 20, to: 40, color: '#f59e0b', label: 'Elevated' },
-    { from: 40, to: 60, color: '#f97316', label: 'Warning' },
-    { from: 60, to: 80, color: '#ef4444', label: 'Critical' },
+    { from: 0, to: 20, color: 'var(--color-emerald, #10b981)', label: 'Safe' },
+    { from: 20, to: 40, color: 'var(--color-amber, #f59e0b)', label: 'Elevated' },
+    { from: 40, to: 60, color: 'var(--color-orange, #f97316)', label: 'Warning' },
+    { from: 60, to: 80, color: 'var(--color-red, #ef4444)', label: 'Critical' },
     { from: 80, to: 100, color: '#b91c1c', label: 'Severe' },
   ];
 
