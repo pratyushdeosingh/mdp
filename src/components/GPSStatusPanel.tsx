@@ -40,7 +40,7 @@ export function GPSStatusPanel({ gpsStatus }: GPSStatusPanelProps) {
   }, [gpsStatus.state, gpsStatus.coldStartProgress, gpsStatus.elapsedSinceStart]);
 
   return (
-    <div className="gps-status-panel" style={{ borderColor: config.color }}>
+    <div className="gps-status-panel animate-card-in" style={{ borderColor: config.color }}>
       {/* Header */}
       <div className="gps-status-header">
         <span className="gps-status-icon">{config.icon}</span>
@@ -49,7 +49,7 @@ export function GPSStatusPanel({ gpsStatus }: GPSStatusPanelProps) {
           <span className="gps-elapsed">Uptime: {formatTime(gpsStatus.elapsedSinceStart)}</span>
         </div>
         <div
-          className={`gps-status-dot ${gpsStatus.state === 'locked' ? 'gps-dot-pulse' : ''}`}
+          className={`gps-status-dot ${gpsStatus.state !== 'unknown' ? 'gps-dot-pulse' : ''}`}
           style={{ backgroundColor: config.color }}
         />
       </div>

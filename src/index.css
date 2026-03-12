@@ -221,6 +221,22 @@ body {
   animation-delay: 0.4s;
 }
 
+.stagger-children>*:nth-child(9) {
+  animation-delay: 0.45s;
+}
+
+.stagger-children>*:nth-child(10) {
+  animation-delay: 0.5s;
+}
+
+.stagger-children>*:nth-child(11) {
+  animation-delay: 0.55s;
+}
+
+.stagger-children>*:nth-child(12) {
+  animation-delay: 0.6s;
+}
+
 .terminal-text {
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
 }
@@ -510,4 +526,104 @@ body {
 
 .gps-warning-box li {
   margin-bottom: 4px;
+}
+
+/* --- Mobile responsiveness --- */
+@media (max-width: 640px) {
+  .glass-card {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 16px;
+  }
+
+  .gps-status-panel {
+    padding: 16px 18px;
+    border-radius: 12px;
+  }
+
+  .gps-status-icon { font-size: 22px; }
+  .gps-status-title h3 { font-size: 13px; }
+  .gps-status-message { font-size: 12px; }
+}
+
+/* --- Smooth color transitions --- */
+.severity-badge-transition {
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* --- Button press feedback --- */
+@keyframes buttonPress {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.93); }
+  100% { transform: scale(1); }
+}
+
+.btn-press:active {
+  animation: buttonPress 0.3s ease-out;
+}
+
+/* --- Scale transition utility --- */
+.scale-transition {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Timer scale on accident --- */
+@keyframes timerAppear {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.timer-scale-in {
+  animation: timerAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* --- Card entry animation --- */
+@keyframes cardSlideIn {
+  0% { transform: translateY(12px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.animate-card-in {
+  animation: cardSlideIn 0.4s ease-out forwards;
+}
+
+/* --- Emergency panel shake on accident --- */
+@keyframes emergencyShake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-3px); }
+  30% { transform: translateX(3px); }
+  45% { transform: translateX(-2px); }
+  60% { transform: translateX(2px); }
+  75% { transform: translateX(-1px); }
+}
+
+.emergency-shake {
+  animation: emergencyShake 0.5s ease-out;
+}
+
+/* --- Status card hover lift --- */
+.status-card-hover {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+}
+
+.status-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Gauge needle smooth --- */
+.impact-meter-needle {
+  will-change: transform;
+  transition: filter 0.3s ease;
+}
+
+/* --- Focus ring animation --- */
+@keyframes focusRing {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+  100% { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
+}
+
+.focus-ring-animate:focus-visible {
+  animation: focusRing 0.2s ease-out forwards;
+  outline: none;
 }

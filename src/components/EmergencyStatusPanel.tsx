@@ -131,7 +131,7 @@ export default function EmergencyStatusPanel({ sensorData, accidentState, onUser
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(240px,320px)_1fr] gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[minmax(240px,320px)_1fr] gap-6">
         {/* Left: Impact Meter */}
         <div className="flex flex-col items-center justify-center">
           <h3 className="text-[10px] font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase mb-3">
@@ -166,7 +166,7 @@ export default function EmergencyStatusPanel({ sensorData, accidentState, onUser
         </div>
 
         {/* Right: 6 Status Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
           {/* Card 1: Helmet Status */}
           <StatusCard
             icon={<Shield size={20} />}
@@ -266,7 +266,7 @@ function StatusCard({
 }) {
   return (
     <div
-      className={`p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col gap-3 ${
+      className={`p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col gap-3 status-card-hover ${
         pulse ? 'animate-slow-pulse' : ''
       }`}
     >

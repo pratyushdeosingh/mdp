@@ -136,7 +136,7 @@ const Dashboard = memo(function Dashboard() {
       )}
 
       {/* Metrics Grid — GPS & Motion */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 stagger-children">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 stagger-children">
         <MetricCard
           label="Latitude"
           value={d.gps.latitude}
@@ -170,7 +170,7 @@ const Dashboard = memo(function Dashboard() {
       </div>
 
       {/* Accelerometer + System — Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
         {/* Accelerometer Card */}
         <GlassCard className="p-7 flex flex-col">
@@ -180,7 +180,7 @@ const Dashboard = memo(function Dashboard() {
           </h3>
 
           {/* Axis Values */}
-          <div className="grid grid-cols-3 gap-4 mb-6 shrink-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6 shrink-0">
             {(['x', 'y', 'z'] as const).map(axis => (
               <div key={axis} className="text-center p-4 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-color)]">
                 <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mb-1.5">Axis {axis.toUpperCase()}</p>

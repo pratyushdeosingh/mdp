@@ -13,7 +13,7 @@ function formatTime(seconds: number): string {
 
 export default function AccidentTimer({ elapsedSeconds, isActive }: AccidentTimerProps) {
   return (
-    <div className={`flex flex-col items-center gap-2 ${isActive ? 'timer-active' : ''}`}>
+    <div className={`flex flex-col items-center gap-2 ${isActive ? 'timer-active timer-scale-in' : ''}`}>
       <div className="flex items-center gap-2">
         <Timer size={18} style={{ color: isActive ? 'var(--color-red)' : 'var(--text-muted)' }} />
         <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
@@ -21,8 +21,11 @@ export default function AccidentTimer({ elapsedSeconds, isActive }: AccidentTime
         </span>
       </div>
       <span
-        className={`text-3xl font-mono font-bold tracking-wider ${isActive ? 'timer-digits' : ''}`}
-        style={{ color: isActive ? 'var(--color-red)' : 'var(--text-muted)' }}
+        className={`text-3xl font-bold tracking-wider ${isActive ? 'timer-digits' : ''}`}
+        style={{
+          color: isActive ? 'var(--color-red)' : 'var(--text-muted)',
+          fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+        }}
       >
         {formatTime(elapsedSeconds)}
       </span>

@@ -62,7 +62,7 @@ export default function DashboardLayout() {
       )}
 
       <main
-        className="flex-1 overflow-y-auto transition-all duration-300 flex flex-col p-6 md:p-8 lg:p-10"
+        className="flex-1 overflow-y-auto transition-all duration-300 flex flex-col p-4 sm:p-6 md:p-8 lg:p-10"
         style={{
           marginLeft: isDesktop ? (collapsed ? '4rem' : '15rem') : 0,
           paddingTop: isDesktop ? undefined : '3.5rem',

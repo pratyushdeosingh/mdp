@@ -19,7 +19,7 @@ export default function SeverityBadge({ severity, size = 'sm' }: SeverityBadgePr
 
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full font-bold ${
+      className={`inline-flex items-center gap-2 rounded-full font-bold severity-badge-transition ${
         isLarge ? 'px-4 py-2 text-base' : 'px-3 py-1 text-xs'
       } ${severity === 'severe' || severity === 'high' ? 'severity-pulse' : ''}`}
       style={{ background: cfg.bg, color: cfg.color }}
