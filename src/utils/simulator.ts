@@ -98,7 +98,7 @@ export function generateLogEntry(): LogEntry {
   }
 }
 
-export function generateScenarioData(scenario: 'normal' | 'accident' | 'severe'): SensorData {
+export function generateScenarioData(scenario: 'normal' | 'accident' | 'severe' | 'gps_loss' | 'sensor_noise'): SensorData {
   const base = generateSensorData();
   switch (scenario) {
     case 'normal':
@@ -125,6 +125,27 @@ export function generateScenarioData(scenario: 'normal' | 'accident' | 'severe')
         totalAcceleration: parseFloat(Math.sqrt(ax * ax + ay * ay + az * az).toFixed(2)),
         accidentDetected: true,
         systemStatus: 'warning',
+      };
+    }
+    case 'gps_loss':
+      return {
+        ...base,
+        gps: { latitude: 0, longitude: 0, speed: 0, altitude: 0 },
+        gpsValid: false,
+        systemStatus: 'warning',
+      };
+    case 'sensor_noise': {
+      // Erratic readings with random spikes simulating electromagnetic interference
+      const spike = Math.random() > 0.5;
+      const ax = parseFloat(((spike ? 8 : 0.5) * (Math.random() - 0.5) * 2).toFixed(3));
+      const ay = parseFloat(((spike ? 6 : 0.3) * (Math.random() - 0.5) * 2).toFixed(3));
+      const az = parseFloat((9.81 + (spike ? 5 : 0.2) * (Math.random() - 0.5) * 2).toFixed(3));
+      return {
+        ...base,
+        accelerometer: { x: ax, y: ay, z: az },
+        totalAcceleration: parseFloat(Math.sqrt(ax * ax + ay * ay + az * az).toFixed(2)),
+        accidentDetected: false,
+        systemStatus: spike ? 'warning' : 'online',
       };
     }
   }

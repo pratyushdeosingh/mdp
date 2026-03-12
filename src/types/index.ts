@@ -53,7 +53,7 @@ export type DataMode = 'simulation' | 'hardware';
 export type ThemeMode = 'dark' | 'light';
 export type ImpactSeverity = 'none' | 'low' | 'medium' | 'high' | 'severe';
 export type UserResponse = 'safe' | 'not_received' | 'pending';
-export type ScenarioType = 'normal' | 'accident' | 'severe' | null;
+export type ScenarioType = 'normal' | 'accident' | 'severe' | 'gps_loss' | 'sensor_noise' | null;
 
 // Hardware integration types
 

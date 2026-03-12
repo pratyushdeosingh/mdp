@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import {
   MapPin,
   Navigation,
@@ -29,6 +29,23 @@ const Dashboard = memo(function Dashboard() {
   const { sensorData, dataMode, isStreaming, setIsStreaming, connectionStatus, activeScenario, triggerScenario } = useAppContext();
   const accidentState = useAccidentDetection(sensorData);
   const gpsStatus = useGPSStatus(sensorData);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.altKey) {
+        if (e.key === 's' || e.key === 'S') {
+          e.preventDefault();
+          accidentState.markUserSafe();
+        } else if (e.key === 'p' || e.key === 'P') {
+          e.preventDefault();
+          setIsStreaming(!isStreaming);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [accidentState, isStreaming, setIsStreaming]);
 
   // Hardware mode with no data yet — show connection panel
   if (dataMode === 'hardware' && !sensorData) {

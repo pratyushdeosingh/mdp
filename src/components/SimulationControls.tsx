@@ -1,4 +1,4 @@
-import { Play, Zap, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Play, Zap, AlertTriangle, ShieldCheck, WifiOff, Radio } from 'lucide-react';
 import type { ScenarioType } from '../types';
 import GlassCard from './GlassCard';
 
@@ -11,7 +11,7 @@ interface SimulationControlsProps {
 export default function SimulationControls({ activeScenario, onTriggerScenario, onUserSafe }: SimulationControlsProps) {
   const buttons = [
     {
-      label: 'Simulate Normal',
+      label: 'Normal',
       scenario: 'normal' as const,
       icon: <Play size={16} />,
       color: 'var(--color-emerald)',
@@ -20,7 +20,7 @@ export default function SimulationControls({ activeScenario, onTriggerScenario, 
       duration: 3000,
     },
     {
-      label: 'Simulate Accident',
+      label: 'Accident',
       scenario: 'accident' as const,
       icon: <AlertTriangle size={16} />,
       color: 'var(--color-amber)',
@@ -29,13 +29,31 @@ export default function SimulationControls({ activeScenario, onTriggerScenario, 
       duration: 4000,
     },
     {
-      label: 'Simulate Severe Crash',
+      label: 'Severe Crash',
       scenario: 'severe' as const,
       icon: <Zap size={16} />,
       color: 'var(--color-red)',
       bg: 'var(--status-red-bg)',
       border: 'var(--color-red)',
       duration: 5000,
+    },
+    {
+      label: 'GPS Loss',
+      scenario: 'gps_loss' as const,
+      icon: <WifiOff size={16} />,
+      color: 'var(--color-orange, #c2410c)',
+      bg: 'rgba(249, 115, 22, 0.15)',
+      border: 'var(--color-orange, #c2410c)',
+      duration: 8000,
+    },
+    {
+      label: 'Sensor Noise',
+      scenario: 'sensor_noise' as const,
+      icon: <Radio size={16} />,
+      color: 'var(--color-purple)',
+      bg: 'rgba(124, 58, 237, 0.1)',
+      border: 'var(--color-purple)',
+      duration: 6000,
     },
   ];
 

@@ -9,16 +9,21 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
+  BarChart,
+  Bar,
+  Cell,
+  PieChart,
+  Pie,
 } from 'recharts';
 import GlassCard from '../components/GlassCard';
 import EmptyState from '../components/EmptyState';
 import { useAppContext } from '../context/AppContext';
-import { Activity, Gauge, Shield } from 'lucide-react';
+import { Activity, Gauge, Shield, AlertTriangle } from 'lucide-react';
 
 import { useMemo, memo } from 'react';
 
 const Analytics = memo(function Analytics() {
-  const { sensorHistory } = useAppContext();
+  const { sensorHistory, accidentEvents } = useAppContext();
 
   const chartData = useMemo(() =>
     sensorHistory.map((d, i) => ({
@@ -32,6 +37,53 @@ const Analytics = memo(function Analytics() {
       totalAccel: d.totalAcceleration,
     })),
     [sensorHistory]
+  );
+
+  // Incident analytics data
+  const severityDistribution = useMemo(() => {
+    if (accidentEvents.length === 0) return [];
+    const buckets = [
+      { name: 'Low (<20)', range: [0, 20], color: '#10b981', count: 0 },
+      { name: 'Medium (20-25)', range: [20, 25], color: '#f59e0b', count: 0 },
+      { name: 'High (25-35)', range: [25, 35], color: '#f97316', count: 0 },
+      { name: 'Severe (35+)', range: [35, Infinity], color: '#ef4444', count: 0 },
+    ];
+    for (const event of accidentEvents) {
+      const a = event.totalAcceleration;
+      for (const b of buckets) {
+        if (a >= b.range[0] && a < b.range[1]) { b.count++; break; }
+      }
+    }
+    return buckets.filter(b => b.count > 0);
+  }, [accidentEvents]);
+
+  const hourDistribution = useMemo(() => {
+    const hours = Array.from({ length: 24 }, (_, i) => ({ hour: `${i}:00`, count: 0 }));
+    for (const event of accidentEvents) {
+      const h = new Date(event.timestamp).getHours();
+      hours[h].count++;
+    }
+    return hours;
+  }, [accidentEvents]);
+
+  const speedCorrelation = useMemo(() =>
+    accidentEvents.map(e => ({
+      speed: e.gps.speed,
+      acceleration: e.totalAcceleration,
+      id: e.id,
+    })),
+    [accidentEvents]
+  );
+
+  const responseTimeData = useMemo(() =>
+    accidentEvents
+      .filter(e => e.resolved && e.resolvedAt)
+      .map(e => ({
+        id: `#${e.id}`,
+        responseTime: Math.round((e.resolvedAt! - e.timestamp) / 1000),
+        accel: e.totalAcceleration,
+      })),
+    [accidentEvents]
   );
 
   if (sensorHistory.length === 0) {
@@ -189,6 +241,109 @@ const Analytics = memo(function Analytics() {
           </ResponsiveContainer>
         </GlassCard>
       </div>
+
+      {/* Incident Analytics Section */}
+      {accidentEvents.length > 0 && (
+        <>
+          <div className="mt-4">
+            <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <AlertTriangle size={18} style={{ color: 'var(--color-red)' }} />
+              Incident Analytics
+            </h2>
+            <p className="text-sm text-[var(--text-muted)] mt-1">
+              {accidentEvents.length} incident{accidentEvents.length !== 1 ? 's' : ''} analyzed
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Severity Distribution */}
+            <GlassCard className="p-6">
+              <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5">
+                Severity Distribution
+              </h3>
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie
+                    data={severityDistribution}
+                    dataKey="count"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label={({ name, value }) => `${name}: ${value}`}
+                    labelLine
+                  >
+                    {severityDistribution.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip {...tooltipStyle} />
+                </PieChart>
+              </ResponsiveContainer>
+            </GlassCard>
+
+            {/* Time-of-Day Pattern */}
+            <GlassCard className="p-6">
+              <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5">
+                Incidents by Hour of Day
+              </h3>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={hourDistribution}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                  <XAxis dataKey="hour" tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" interval={2} />
+                  <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" allowDecimals={false} />
+                  <Tooltip {...tooltipStyle} />
+                  <Bar dataKey="count" name="Incidents" radius={[4, 4, 0, 0]}>
+                    {hourDistribution.map((_, i) => (
+                      <Cell key={i} fill={hourDistribution[i].count > 0 ? '#ef4444' : 'var(--border-color)'} opacity={hourDistribution[i].count > 0 ? 0.8 : 0.3} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </GlassCard>
+
+            {/* Speed vs Acceleration Correlation */}
+            {speedCorrelation.length > 1 && (
+              <GlassCard className="p-6">
+                <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5">
+                  Speed vs Impact Correlation
+                </h3>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={speedCorrelation}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                    <XAxis dataKey="speed" tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" unit=" km/h" />
+                    <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" unit=" m/s²" />
+                    <Tooltip {...tooltipStyle} />
+                    <Bar dataKey="acceleration" name="Impact (m/s²)" fill="#f97316" opacity={0.7} radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </GlassCard>
+            )}
+
+            {/* Response Time */}
+            {responseTimeData.length > 0 && (
+              <GlassCard className="p-6">
+                <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5">
+                  Response Time per Incident
+                </h3>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={responseTimeData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                    <XAxis dataKey="id" tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" />
+                    <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" unit="s" />
+                    <Tooltip {...tooltipStyle} />
+                    <Bar dataKey="responseTime" name="Response (seconds)" radius={[4, 4, 0, 0]}>
+                      {responseTimeData.map((entry, i) => (
+                        <Cell key={i} fill={entry.responseTime > 30 ? '#ef4444' : entry.responseTime > 10 ? '#f59e0b' : '#10b981'} opacity={0.8} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </GlassCard>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 });

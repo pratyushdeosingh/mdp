@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef, us
 import type { SensorData, LogEntry, DataMode, ThemeMode, ConnectionStatus, SerialPortInfo, AccidentEvent, ScenarioType } from '../types';
 import { generateSensorData, generateLogEntry, resetSimulatorState, generateScenarioData } from '../utils/simulator';
 import { useSerialConnection } from '../hooks/useSerialConnection';
+import { useOfflineStore } from '../hooks/useOfflineStore';
 
 interface AppContextType {
   sensorData: SensorData | null;
@@ -26,6 +27,7 @@ interface AppContextType {
   // Simulation scenario control
   activeScenario: ScenarioType;
   triggerScenario: (scenario: ScenarioType, durationMs?: number) => void;
+  clearAccidentHistory: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -101,6 +103,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Serial connection hook
   const serial = useSerialConnection(handleHardwareData);
+
+  // Offline persistence — sync accidentEvents with IndexedDB
+  const setAccidentEventsDirectly = useCallback((events: AccidentEvent[]) => {
+    setAccidentEvents(events);
+  }, []);
+  const { clearStorage } = useOfflineStore(accidentEvents, setAccidentEventsDirectly);
 
   // Keep scenario ref in sync for use inside interval closures
   useEffect(() => { activeScenarioRef.current = activeScenario; }, [activeScenario]);
@@ -203,11 +211,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     disconnectSerial: serial.disconnect,
     activeScenario,
     triggerScenario,
+    clearAccidentHistory: clearStorage,
   }), [
     sensorData, sensorHistory, logs, accidentEvents,
     dataMode, theme, isStreaming,
     setDataMode, toggleTheme, setIsStreaming,
-    activeScenario, triggerScenario,
+    activeScenario, triggerScenario, clearStorage,
     serial.connectionStatus, serial.availablePorts, serial.selectedPort,
     serial.setSelectedPort, serial.lastError, serial.refreshPorts,
     serial.connect, serial.disconnect,

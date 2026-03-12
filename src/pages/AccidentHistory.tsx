@@ -1,9 +1,11 @@
-import { AlertTriangle, MapPin, Gauge, Activity, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { AlertTriangle, MapPin, Gauge, Activity, Clock, CheckCircle, XCircle, FileDown, Trash2 } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 import { useAppContext } from '../context/AppContext';
+import { generateIncidentReport, exportIncidentCSV } from '../utils/incidentReport';
+import { downloadCSV } from '../utils/simulator';
 
 export default function AccidentHistory() {
-  const { accidentEvents, dataMode } = useAppContext();
+  const { accidentEvents, dataMode, clearAccidentHistory } = useAppContext();
 
   const activeCount = accidentEvents.filter(e => !e.resolved).length;
   const resolvedCount = accidentEvents.filter(e => e.resolved).length;
@@ -18,15 +20,47 @@ export default function AccidentHistory() {
             All detected accident events with timestamps and sensor readings
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border" style={{ background: 'var(--status-red-bg)', borderColor: 'color-mix(in srgb, var(--color-red) 20%, transparent)' }}>
-            <XCircle size={14} style={{ color: 'var(--color-red)' }} />
-            <span className="text-xs font-medium" style={{ color: 'var(--color-red)' }}>{activeCount} Active</span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border" style={{ background: 'var(--status-emerald-bg)', borderColor: 'color-mix(in srgb, var(--color-emerald) 20%, transparent)' }}>
-            <CheckCircle size={14} style={{ color: 'var(--color-emerald)' }} />
-            <span className="text-xs font-medium" style={{ color: 'var(--color-emerald)' }}>{resolvedCount} Resolved</span>
-          </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => generateIncidentReport(accidentEvents)}
+            disabled={accidentEvents.length === 0}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            style={{ color: 'var(--color-blue)', borderColor: 'var(--color-blue)', background: 'var(--status-blue-bg)' }}
+            title="Export incident report as PDF"
+          >
+            <FileDown size={14} /> Export PDF
+          </button>
+          <button
+            onClick={() => {
+              const csv = exportIncidentCSV(accidentEvents);
+              downloadCSV(csv, `Incidents_${new Date().toISOString().split('T')[0]}.csv`);
+            }}
+            disabled={accidentEvents.length === 0}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            style={{ color: 'var(--color-emerald)', borderColor: 'var(--color-emerald)', background: 'var(--status-emerald-bg)' }}
+            title="Export incident data as CSV"
+          >
+            <FileDown size={14} /> Export CSV
+          </button>
+          <button
+            onClick={() => { if (window.confirm('Clear all accident history? This cannot be undone.')) clearAccidentHistory(); }}
+            disabled={accidentEvents.length === 0}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            style={{ color: 'var(--color-red)', borderColor: 'var(--color-red)', background: 'transparent' }}
+            title="Clear all accident history"
+          >
+            <Trash2 size={14} /> Clear
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border" style={{ background: 'var(--status-red-bg)', borderColor: 'color-mix(in srgb, var(--color-red) 20%, transparent)' }}>
+          <XCircle size={14} style={{ color: 'var(--color-red)' }} />
+          <span className="text-xs font-medium" style={{ color: 'var(--color-red)' }}>{activeCount} Active</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border" style={{ background: 'var(--status-emerald-bg)', borderColor: 'color-mix(in srgb, var(--color-emerald) 20%, transparent)' }}>
+          <CheckCircle size={14} style={{ color: 'var(--color-emerald)' }} />
+          <span className="text-xs font-medium" style={{ color: 'var(--color-emerald)' }}>{resolvedCount} Resolved</span>
         </div>
       </div>
 
