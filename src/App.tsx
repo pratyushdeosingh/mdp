@@ -14,6 +14,9 @@ const LiveMap = lazy(() => import('./pages/LiveMap'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const Documentation = lazy(() => import('./pages/Documentation'));
 const AccidentHistory = lazy(() => import('./pages/AccidentHistory'));
+const Onboarding = lazy(() => import('./pages/Onboarding'));
+const ValidationLogs = lazy(() => import('./pages/ValidationLogs'));
+const LoadTesting = lazy(() => import('./pages/LoadTesting'));
 
 function PageLoader() {
   return (
@@ -86,6 +89,9 @@ export default function App() {
                 <Route path="/accidents" element={<Suspense fallback={<PageLoader />}><AccidentHistory /></Suspense>} />
                 <Route path="/hardware" element={<HardwareStatus />} />
                 <Route path="/docs" element={<Suspense fallback={<PageLoader />}><Documentation /></Suspense>} />
+                <Route path="/onboarding" element={<Suspense fallback={<PageLoader />}><Onboarding /></Suspense>} />
+                <Route path="/validation" element={<Suspense fallback={<PageLoader />}><ValidationLogs /></Suspense>} />
+                <Route path="/load-testing" element={<Suspense fallback={<PageLoader />}><LoadTesting /></Suspense>} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

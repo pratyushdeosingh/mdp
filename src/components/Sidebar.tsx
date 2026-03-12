@@ -15,6 +15,9 @@ import {
   ChevronRight,
   AlertTriangle,
   X,
+  Sparkles,
+  ShieldCheck,
+  Zap,
 } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
@@ -29,6 +32,9 @@ const navItems = [
   { path: '/serial', label: 'Serial Monitor', icon: Terminal },
   { path: '/accidents', label: 'Accidents', icon: AlertTriangle },
   { path: '/hardware', label: 'Hardware', icon: Cpu },
+  { path: '/validation', label: 'Validation', icon: ShieldCheck },
+  { path: '/load-testing', label: 'Load Testing', icon: Zap },
+  { path: '/onboarding', label: 'Setup Wizard', icon: Sparkles },
   { path: '/docs', label: 'Documentation', icon: FileText },
 ];
 
