@@ -33,10 +33,10 @@ export function generateIncidentReport(events: AccidentEvent[]): void {
   const peakAccel = Math.max(...events.map(e => e.totalAcceleration));
   const avgAccel = events.reduce((s, e) => s + e.totalAcceleration, 0) / events.length;
   const resolvedCount = events.filter(e => e.resolved).length;
-  const avgResponseTime = events
-    .filter(e => e.resolved && e.resolvedAt)
-    .map(e => ((e.resolvedAt! - e.timestamp) / 1000))
-    .reduce((s, t, _, arr) => s + t / arr.length, 0);
+  const resolvedEvents = events.filter(e => e.resolved && e.resolvedAt);
+  const avgResponseTime = resolvedEvents.length > 0
+    ? resolvedEvents.reduce((s, e) => s + (e.resolvedAt! - e.timestamp) / 1000, 0) / resolvedEvents.length
+    : 0;
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');

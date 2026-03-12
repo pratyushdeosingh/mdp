@@ -131,6 +131,11 @@ export function useAccidentDetection(sensorData: SensorData | null) {
   }, [sensorData]);
 
   useEffect(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
     if (state.isAccidentActive && state.userResponse !== 'safe') {
       timerRef.current = setInterval(() => {
         setState(prev => ({
@@ -140,12 +145,8 @@ export function useAccidentDetection(sensorData: SensorData | null) {
             : 0,
         }));
       }, 1000);
-    } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
     }
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };

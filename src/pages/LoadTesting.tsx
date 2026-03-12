@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { Zap, Play, Square, BarChart2, AlertTriangle, CheckCircle, Clock, Cpu } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 import { useAppContext } from '../context/AppContext';
@@ -115,9 +115,16 @@ export default function LoadTesting() {
     progressRef.current = null;
     setActiveTest(null);
     setProgress(0);
-    // Reset to normal after test
     triggerScenario('normal');
   }, [triggerScenario]);
+
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (progressRef.current) clearInterval(progressRef.current);
+    };
+  }, []);
 
   const runTest = useCallback((preset: Preset) => {
     if (activeTest) return;
