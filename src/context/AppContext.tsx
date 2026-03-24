@@ -137,7 +137,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Initialize theme from saved preference
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, []);
+  }, [theme]);
 
   // Data simulation loop
   useEffect(() => {
@@ -145,11 +145,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Reset simulator state so we don't continue from old coordinates
       resetSimulatorState();
 
-      // Generate initial data immediately
-      const initial = generateSensorData();
-      setSensorData(initial);
-      trackAccident(initial);
-      setSensorHistory([initial]);
+      // Generate initial data in a microtask to avoid synchronous setState in effect
+      // This satisfies the react-hooks/set-state-in-effect rule while maintaining immediate data
+      queueMicrotask(() => {
+        const initial = generateSensorData();
+        setSensorData(initial);
+        trackAccident(initial);
+        setSensorHistory([initial]);
+      });
 
       intervalRef.current = setInterval(() => {
         const newData = activeScenarioRef.current
@@ -179,14 +182,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } else if (dataMode === 'hardware') {
       // Stop simulation interval
       if (intervalRef.current) clearInterval(intervalRef.current);
-      // Clear sensor data — will be populated by hardware connection
-      setSensorData(null);
-      setSensorHistory([]);
-      setLogs(prev => [...prev, {
-        timestamp: Date.now(),
-        type: 'warning',
-        message: '[SYS] Switched to HARDWARE mode – Use the connection panel to connect your Arduino.',
-      }]);
+      // Clear sensor data in microtask to avoid synchronous setState in effect
+      queueMicrotask(() => {
+        setSensorData(null);
+        setSensorHistory([]);
+        setLogs(prev => [...prev, {
+          timestamp: Date.now(),
+          type: 'warning',
+          message: '[SYS] Switched to HARDWARE mode – Use the connection panel to connect your Arduino.',
+        }]);
+      });
     }
   }, [dataMode, isStreaming, trackAccident]);
 

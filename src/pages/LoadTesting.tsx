@@ -132,7 +132,7 @@ export default function LoadTesting() {
     const testId = `${preset.id}-${Date.now()}`;
     const startTime = performance.now();
     let eventsGenerated = 0;
-    let errors: string[] = [];
+    const errors: string[] = [];
     const processingTimes: number[] = [];
 
     setActiveTest(preset.id);

@@ -334,38 +334,50 @@ function BlockDiagramTab() {
   );
 }
 
-function FlowchartTab() {
-  const boxStyle = (color: string) => ({
-    borderColor:
-      color === 'emerald' ? 'rgba(16,185,129,0.3)' :
-      color === 'amber'   ? 'rgba(245,158,11,0.3)' :
-      color === 'red'     ? 'rgba(239,68,68,0.3)' :
-      color === 'cyan'    ? 'rgba(6,182,212,0.3)' : 'rgba(59,130,246,0.3)',
-    background:
-      color === 'emerald' ? 'rgba(16,185,129,0.1)' :
-      color === 'amber'   ? 'rgba(245,158,11,0.1)' :
-      color === 'red'     ? 'rgba(239,68,68,0.1)' :
-      color === 'cyan'    ? 'rgba(6,182,212,0.1)' : 'rgba(59,130,246,0.1)',
-  });
+// Flowchart helper functions and components (moved outside FlowchartTab to avoid "created during render")
+const flowchartBoxStyle = (color: string) => ({
+  borderColor:
+    color === 'emerald' ? 'rgba(16,185,129,0.3)' :
+    color === 'amber'   ? 'rgba(245,158,11,0.3)' :
+    color === 'red'     ? 'rgba(239,68,68,0.3)' :
+    color === 'cyan'    ? 'rgba(6,182,212,0.3)' : 'rgba(59,130,246,0.3)',
+  background:
+    color === 'emerald' ? 'rgba(16,185,129,0.1)' :
+    color === 'amber'   ? 'rgba(245,158,11,0.1)' :
+    color === 'red'     ? 'rgba(239,68,68,0.1)' :
+    color === 'cyan'    ? 'rgba(6,182,212,0.1)' : 'rgba(59,130,246,0.1)',
+});
 
-  const Box = ({ text, color, pill = false }: { text: string; color: string; pill?: boolean }) => (
-    <div className={`p-3 border text-center ${pill ? 'rounded-full' : 'rounded-xl'}`} style={boxStyle(color)}>
+function FlowchartBox({ text, color, pill = false }: { text: string; color: string; pill?: boolean }) {
+  return (
+    <div className={`p-3 border text-center ${pill ? 'rounded-full' : 'rounded-xl'}`} style={flowchartBoxStyle(color)}>
       <p className="text-xs font-medium text-[var(--text-primary)]">{text}</p>
     </div>
   );
+}
 
-  const Diamond = ({ text, color }: { text: string; color: string }) => (
-    <div className="p-3 border rounded-xl text-center" style={boxStyle(color)}>
+function FlowchartDiamond({ text, color }: { text: string; color: string }) {
+  return (
+    <div className="p-3 border rounded-xl text-center" style={flowchartBoxStyle(color)}>
       <p className="text-xs font-medium text-[var(--text-primary)]">◇ {text}</p>
     </div>
   );
+}
 
-  const Arrow = ({ label }: { label?: string }) => (
+function FlowchartArrow({ label }: { label?: string }) {
+  return (
     <div className="flex flex-col items-center">
       <div className="text-[var(--text-muted)] text-lg">↓</div>
       {label && <span className="text-[10px] text-[var(--text-muted)] -mt-1">{label}</span>}
     </div>
   );
+}
+
+function FlowchartTab() {
+  // Using renamed components: FlowchartBox, FlowchartDiamond, FlowchartArrow
+  const Box = FlowchartBox;
+  const Diamond = FlowchartDiamond;
+  const Arrow = FlowchartArrow;
 
   return (
     <div className="space-y-4">

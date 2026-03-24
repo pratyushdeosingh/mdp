@@ -30,6 +30,13 @@ function MapUpdater({ lat, lng }: { lat: number; lng: number }) {
 const LiveMap = memo(function LiveMap() {
   const { sensorData, sensorHistory } = useAppContext();
 
+  // Trail from history — memoized to avoid recalculating on every render
+  // Must be called before any early returns to satisfy rules of hooks
+  const trail = useMemo<[number, number][]>(
+    () => sensorHistory.map(d => [d.gps.latitude, d.gps.longitude]),
+    [sensorHistory]
+  );
+
   if (!sensorData) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -39,12 +46,6 @@ const LiveMap = memo(function LiveMap() {
   }
 
   const { latitude, longitude, speed } = sensorData.gps;
-
-  // Trail from history — memoized to avoid recalculating on every render
-  const trail = useMemo<[number, number][]>(
-    () => sensorHistory.map(d => [d.gps.latitude, d.gps.longitude]),
-    [sensorHistory]
-  );
 
   return (
     <div className="space-y-4">

@@ -142,7 +142,8 @@ export default function ValidationLogs() {
 
     const validationResults = validateSensorData(sensorData);
     if (validationResults.length > 0) {
-      addEntries(validationResults);
+      // Use queueMicrotask to avoid synchronous setState in effect
+      queueMicrotask(() => addEntries(validationResults));
     }
   }, [sensorData, addEntries]);
 

@@ -8,6 +8,7 @@ import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import SerialMonitor from './pages/SerialMonitor';
 import HardwareStatus from './pages/HardwareStatus';
+import SensorData from './pages/SensorData';
 
 // Lazy-load heavy pages (leaflet, recharts, jspdf-embedded iframe)
 const LiveMap = lazy(() => import('./pages/LiveMap'));
@@ -83,6 +84,7 @@ export default function App() {
               <Route element={<DashboardLayout />}>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/sensors" element={<SensorData />} />
                 <Route path="/map" element={<Suspense fallback={<PageLoader />}><LiveMap /></Suspense>} />
                 <Route path="/analytics" element={<Suspense fallback={<PageLoader />}><Analytics /></Suspense>} />
                 <Route path="/serial" element={<SerialMonitor />} />

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import type { AccidentEvent } from '../types';
 
 const DB_NAME = 'mdp-helmet-db';
@@ -67,7 +67,7 @@ export function useOfflineStore(
   accidentEvents: AccidentEvent[],
   setAccidentEvents: (events: AccidentEvent[]) => void,
 ): { isSynced: boolean; clearStorage: () => Promise<void> } {
-  const isSynced = useRef(false);
+  const [isSynced, setIsSynced] = useState(false);
   const hasLoadedRef = useRef(false);
   const prevLengthRef = useRef(0);
 
@@ -81,17 +81,17 @@ export function useOfflineStore(
         if (saved.length > 0) {
           setAccidentEvents(saved);
         }
-        isSynced.current = true;
+        setIsSynced(true);
       })
       .catch(err => {
         console.warn('[OfflineStore] Failed to load from IndexedDB:', err);
-        isSynced.current = true;
+        setIsSynced(true);
       });
   }, [setAccidentEvents]);
 
   // Save to IndexedDB when events change
   useEffect(() => {
-    if (!hasLoadedRef.current || !isSynced.current) return;
+    if (!hasLoadedRef.current || !isSynced) return;
     // Only save if the array actually changed (length or content)
     if (accidentEvents.length === prevLengthRef.current && accidentEvents.length === 0) return;
     prevLengthRef.current = accidentEvents.length;
@@ -99,12 +99,12 @@ export function useOfflineStore(
     putEvents(accidentEvents).catch(err => {
       console.warn('[OfflineStore] Failed to save to IndexedDB:', err);
     });
-  }, [accidentEvents]);
+  }, [accidentEvents, isSynced]);
 
   const clearStorage = useCallback(async () => {
     await clearAllEvents();
     setAccidentEvents([]);
   }, [setAccidentEvents]);
 
-  return { isSynced: isSynced.current, clearStorage };
+  return { isSynced, clearStorage };
 }

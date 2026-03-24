@@ -3,37 +3,90 @@
  * Shows Arduino Uno + half-size breadboard with realistic wiring.
  * Buzzer: 3-pin (S -> D8, + -> 5V rail, - -> GND rail)
  */
+
+// Colors constant - defined outside component
+const COLORS = {
+  bg: '#050a12',
+  gridDot: '#0e1a2e',
+  // Board colors
+  ardFill: '#0c2744',
+  ardStroke: '#2563eb',
+  bbFill: '#f5f0e8',
+  bbStroke: '#c8bfa8',
+  bbHole: '#d4cbb8',
+  bbHoleInner: '#8b8070',
+  bbRailRed: '#dc2626',
+  bbRailBlue: '#2563eb',
+  bbRailStripe: 'rgba(0,0,0,0.08)',
+  // Wires
+  uart: '#06b6d4',
+  i2c: '#f59e0b',
+  dig: '#3b82f6',
+  pwr: '#ef4444',
+  gnd: '#374151',
+  grn: '#10b981',
+  // Text
+  text: '#e8ecf4',
+  dim: '#5d6b82',
+  muted: '#8b95a8',
+  dark: '#1f2937',
+};
+
+// Wire helper component - defined outside main component
+function Wire({ points, color, width = 3, dashed = false }: {
+  points: string; color: string; width?: number; dashed?: boolean;
+}) {
+  return (
+    <polyline
+      points={points}
+      fill="none"
+      stroke={color}
+      strokeWidth={width}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeDasharray={dashed ? '6,4' : undefined}
+    />
+  );
+}
+
+// Breadboard hole component - defined outside main component
+function Hole({ x, y, active, color }: { x: number; y: number; active?: boolean; color?: string }) {
+  return (
+    <>
+      <rect 
+        x={x - 4} 
+        y={y - 4} 
+        width={8} 
+        height={8} 
+        rx={1.5} 
+        fill={active ? (color || COLORS.dig) : COLORS.bbHole} 
+        stroke={active ? 'rgba(255,255,255,0.3)' : COLORS.bbHoleInner} 
+        strokeWidth={active ? 1.2 : 0.5} 
+      />
+      {active && <circle cx={x} cy={y} r={2} fill="white" opacity={0.6} />}
+    </>
+  );
+}
+
+// Module chip component - defined outside main component
+function ModuleChip({ x, y, w, h, label, sub, color }: {
+  x: number; y: number; w: number; h: number; label: string; sub: string; color: string;
+}) {
+  return (
+    <g>
+      <rect x={x} y={y} width={w} height={h} rx={6} fill="#1a1a2e" stroke={color} strokeWidth={1.8} />
+      <text x={x + w / 2} y={y + h / 2 - 5} textAnchor="middle" fill={COLORS.text} fontSize={10} fontWeight="700">{label}</text>
+      <text x={x + w / 2} y={y + h / 2 + 8} textAnchor="middle" fill={COLORS.muted} fontSize={7}>{sub}</text>
+    </g>
+  );
+}
+
 export default function CircuitSchematic() {
   const W = 1040;
   const H = 720;
 
-  // Colors
-  const C = {
-    bg: '#050a12',
-    gridDot: '#0e1a2e',
-    // Board colors
-    ardFill: '#0c2744',
-    ardStroke: '#2563eb',
-    bbFill: '#f5f0e8',
-    bbStroke: '#c8bfa8',
-    bbHole: '#d4cbb8',
-    bbHoleInner: '#8b8070',
-    bbRailRed: '#dc2626',
-    bbRailBlue: '#2563eb',
-    bbRailStripe: 'rgba(0,0,0,0.08)',
-    // Wires
-    uart: '#06b6d4',
-    i2c: '#f59e0b',
-    dig: '#3b82f6',
-    pwr: '#ef4444',
-    gnd: '#374151',
-    grn: '#10b981',
-    // Text
-    text: '#e8ecf4',
-    dim: '#5d6b82',
-    muted: '#8b95a8',
-    dark: '#1f2937',
-  };
+  // Use the colors constant
+  const C = COLORS;
 
   // Breadboard geometry
   const BB = { x: 380, y: 190, w: 620, h: 420 };
@@ -45,40 +98,6 @@ export default function CircuitSchematic() {
   const RAIL_BOT = BB.y + BB.h - 22;
   const ROW_A = BB.y + 75;
   const rowY = (r: number) => ROW_A + r * ROW_GAP;
-
-  // Wire helper
-  const Wire = ({ points, color, width = 3, dashed = false }: {
-    points: string; color: string; width?: number; dashed?: boolean;
-  }) => (
-    <polyline
-      points={points}
-      fill="none"
-      stroke={color}
-      strokeWidth={width}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeDasharray={dashed ? '6,4' : undefined}
-    />
-  );
-
-  // Breadboard hole
-  const Hole = ({ x, y, active, color }: { x: number; y: number; active?: boolean; color?: string }) => (
-    <>
-      <rect x={x - 4} y={y - 4} width={8} height={8} rx={1.5} fill={active ? (color || C.dig) : C.bbHole} stroke={active ? 'rgba(255,255,255,0.3)' : C.bbHoleInner} strokeWidth={active ? 1.2 : 0.5} />
-      {active && <circle cx={x} cy={y} r={2} fill="white" opacity={0.6} />}
-    </>
-  );
-
-  // Module label on breadboard
-  const ModuleChip = ({ x, y, w, h, label, sub, color }: {
-    x: number; y: number; w: number; h: number; label: string; sub: string; color: string;
-  }) => (
-    <g>
-      <rect x={x} y={y} width={w} height={h} rx={6} fill="#1a1a2e" stroke={color} strokeWidth={1.8} />
-      <text x={x + w / 2} y={y + h / 2 - 5} textAnchor="middle" fill={C.text} fontSize={10} fontWeight="700">{label}</text>
-      <text x={x + w / 2} y={y + h / 2 + 8} textAnchor="middle" fill={C.muted} fontSize={7}>{sub}</text>
-    </g>
-  );
 
   return (
     <div className="w-full overflow-x-auto">
