@@ -53,7 +53,7 @@ export default function SerialMonitor() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-5xl mx-auto w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Serial Monitor</h1>
@@ -112,7 +112,7 @@ export default function SerialMonitor() {
 
             {logs.length === 0 ? (
               <div className="text-[var(--text-muted)] animate-slow-pulse">
-                Waiting for data...
+                Awaiting serial data…
               </div>
             ) : (
               logs.map((entry, i) => <LogLine key={`${entry.timestamp}-${i}`} entry={entry} />)

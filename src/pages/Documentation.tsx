@@ -562,7 +562,7 @@ export default function Documentation() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-5xl mx-auto w-full">
       <div>
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">Project Documentation</h1>
         <p className="text-sm text-[var(--text-muted)] mt-1">

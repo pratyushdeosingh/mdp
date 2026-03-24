@@ -47,7 +47,7 @@ const Dashboard = memo(function Dashboard() {
         {connectionStatus === 'connected' && (
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full pulse-live" style={{ background: 'var(--color-emerald)' }} />
-            <span className="text-sm font-medium" style={{ color: 'var(--color-emerald)' }}>Connected — waiting for first data packet…</span>
+            <span className="text-sm font-medium" style={{ color: 'var(--color-emerald)' }}>Connected — awaiting sensor data</span>
           </div>
         )}
       </div>
@@ -60,7 +60,7 @@ const Dashboard = memo(function Dashboard() {
       <EmptyState
         icon={<Radio size={32} style={{ color: 'var(--color-blue)' }} />}
         title="Initializing Sensors"
-        message="Waiting for the first data packet from the simulation engine…"
+        message="Establishing connection to simulation engine…"
       />
     );
   }

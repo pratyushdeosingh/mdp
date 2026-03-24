@@ -40,7 +40,7 @@ const LiveMap = memo(function LiveMap() {
   if (!sensorData) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[var(--text-muted)]">Waiting for GPS data...</p>
+        <p className="text-[var(--text-muted)]">Acquiring GPS coordinates…</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ const LiveMap = memo(function LiveMap() {
   const { latitude, longitude, speed } = sensorData.gps;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-5xl mx-auto w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Live Map View</h1>

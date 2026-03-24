@@ -41,10 +41,10 @@ const SensorData = memo(function SensorData() {
     return (
       <EmptyState
         icon={<Radio size={32} style={{ color: 'var(--color-blue)' }} />}
-        title="Waiting for Sensor Data"
+        title="Sensor Data"
         message={dataMode === 'hardware' 
-          ? 'Connect your Arduino device to start receiving live sensor data.' 
-          : 'Starting simulation engine...'}
+          ? 'Connect your Arduino device to begin receiving live data.' 
+          : 'Initializing simulation engine…'}
       />
     );
   }

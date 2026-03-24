@@ -75,10 +75,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Bottom tag */}
-      <div className="absolute bottom-6 text-xs text-[var(--text-muted)] animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-        Multidisciplinary Project — Review IV
-      </div>
+
     </div>
   );
 }
