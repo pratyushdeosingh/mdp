@@ -72,151 +72,150 @@ const Dashboard = memo(function Dashboard() {
   const speed = d.gps.speed;
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6">
+    <div className="w-full h-full min-h-[calc(100vh-120px)] flex flex-col gap-6">
       {/* ── Alert Banner ── */}
       <AlertBanner
         accidentDetected={d.accidentDetected}
         onUserSafe={accidentState.markUserSafe}
       />
 
-      {/* ── Main Grid: Hero + Metrics Side-by-Side on large screens ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Hero Status Card - takes 2 columns on large screens */}
+      {/* ── Main Grid - fills available space ── */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 auto-rows-fr">
+        {/* Hero Status Card - large center card */}
         <GlassCard
-          className={`lg:col-span-2 p-8 ${isAccident ? 'emergency-panel-alert' : ''}`}
+          className={`lg:col-span-8 lg:row-span-2 p-8 flex flex-col justify-center ${isAccident ? 'emergency-panel-alert' : ''}`}
           style={isAccident ? { borderColor: 'var(--color-red)', borderWidth: '2px' } : undefined}
         >
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            {/* Icon */}
+          <div className="flex flex-col items-center justify-center gap-6 text-center h-full">
+            {/* Large Icon */}
             <div
-              className={`w-24 h-24 rounded-2xl flex items-center justify-center shrink-0 ${isAccident ? 'animate-slow-pulse' : ''}`}
+              className={`w-32 h-32 rounded-3xl flex items-center justify-center ${isAccident ? 'animate-slow-pulse' : ''}`}
               style={{
                 background: isAccident ? 'var(--status-red-bg)' : 'var(--status-emerald-bg)',
               }}
             >
               {isAccident
-                ? <ShieldAlert size={48} style={{ color: 'var(--color-red)' }} />
-                : <Shield size={48} style={{ color: 'var(--color-emerald)' }} />
+                ? <ShieldAlert size={64} style={{ color: 'var(--color-red)' }} />
+                : <Shield size={64} style={{ color: 'var(--color-emerald)' }} />
               }
             </div>
 
             {/* Status Text */}
-            <div className="text-center sm:text-left flex-1">
+            <div>
               <h1
-                className="text-2xl md:text-3xl lg:text-4xl font-extrabold"
+                className="text-3xl md:text-4xl lg:text-5xl font-extrabold"
                 style={{ color: isAccident ? 'var(--color-red)' : 'var(--color-emerald)' }}
               >
                 {isAccident ? 'ACCIDENT DETECTED' : "You're Safe"}
               </h1>
-              <p className="text-sm md:text-base mt-2" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-base md:text-lg mt-3" style={{ color: 'var(--text-muted)' }}>
                 {isAccident
                   ? `Impact detected • ${accidentState.elapsedSeconds}s ago`
                   : 'All systems normal — helmet is actively monitoring'}
               </p>
+            </div>
 
-              {/* I'm Safe Button (only during accident) */}
-              {isAccident && (
-                <button
-                  onClick={accidentState.markUserSafe}
-                  className="mt-4 px-8 py-4 rounded-2xl text-base font-bold text-white transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
-                  style={{ background: 'linear-gradient(135deg, #059669, #10b981)', minHeight: '56px' }}
-                >
-                  <ShieldCheck size={20} className="inline mr-2 -mt-0.5" />
-                  I'm Safe
-                </button>
-              )}
+            {/* I'm Safe Button (only during accident) */}
+            {isAccident && (
+              <button
+                onClick={accidentState.markUserSafe}
+                className="mt-2 px-10 py-5 rounded-2xl text-lg font-bold text-white transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+                style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}
+              >
+                <ShieldCheck size={24} className="inline mr-2 -mt-0.5" />
+                I'm Safe
+              </button>
+            )}
+          </div>
+        </GlassCard>
+
+        {/* Right Column - Battery Card */}
+        <GlassCard className="lg:col-span-4 p-6 flex flex-col justify-center status-card-hover">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-xl" style={{ background: battLevel > 40 ? 'var(--status-emerald-bg)' : battLevel > 15 ? 'var(--status-amber-bg)' : 'var(--status-red-bg)' }}>
+              <Battery size={28} style={{ color: battLevel > 40 ? 'var(--color-emerald)' : battLevel > 15 ? 'var(--color-amber)' : 'var(--color-red)' }} />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Battery Level</p>
+              <p className="text-3xl font-extrabold mt-1" style={{ color: 'var(--text-primary)' }}>{battLevel}%</p>
+            </div>
+          </div>
+          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'var(--border-color)' }}>
+            <div
+              className="h-full rounded-full transition-all duration-700"
+              style={{
+                width: `${battLevel}%`,
+                background: battLevel > 40 ? 'var(--color-emerald)' : battLevel > 15 ? 'var(--color-amber)' : 'var(--color-red)',
+              }}
+            />
+          </div>
+          <p className="text-sm font-medium mt-3" style={{ color: battLevel > 40 ? 'var(--color-emerald)' : battLevel > 15 ? 'var(--color-amber)' : 'var(--color-red)' }}>
+            {battLevel > 60 ? 'Battery healthy' : battLevel > 25 ? 'Consider charging' : 'Battery low!'}
+          </p>
+        </GlassCard>
+
+        {/* Right Column - Temperature & Speed */}
+        <GlassCard className="lg:col-span-4 p-6 flex flex-col justify-center status-card-hover">
+          <div className="grid grid-cols-2 gap-6">
+            {/* Temperature */}
+            <div className="text-center">
+              <div className="p-3 rounded-xl mx-auto w-fit mb-3" style={{ background: temp < 40 ? 'var(--status-emerald-bg)' : temp < 55 ? 'var(--status-amber-bg)' : 'var(--status-red-bg)' }}>
+                <Thermometer size={24} style={{ color: temp < 40 ? 'var(--color-emerald)' : temp < 55 ? 'var(--color-amber)' : 'var(--color-red)' }} />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Temperature</p>
+              <p className="text-3xl font-extrabold mt-1" style={{ color: 'var(--text-primary)' }}>{temp}°C</p>
+              <p className="text-xs font-medium mt-1" style={{ color: temp < 40 ? 'var(--color-emerald)' : temp < 55 ? 'var(--color-amber)' : 'var(--color-red)' }}>
+                {temp < 40 ? 'Normal' : temp < 55 ? 'Warm' : 'Hot!'}
+              </p>
+            </div>
+
+            {/* Speed */}
+            <div className="text-center">
+              <div className="p-3 rounded-xl mx-auto w-fit mb-3" style={{ background: 'var(--status-blue-bg)' }}>
+                <Gauge size={24} style={{ color: 'var(--color-blue)' }} />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Speed</p>
+              <p className="text-3xl font-extrabold mt-1" style={{ color: 'var(--text-primary)' }}>{speed.toFixed(0)}</p>
+              <p className="text-xs font-medium mt-1" style={{ color: 'var(--color-blue)' }}>km/h</p>
             </div>
           </div>
         </GlassCard>
 
-        {/* Quick Stats Column - stacked on right side */}
-        <div className="flex flex-col gap-4">
-          {/* Battery */}
-          <GlassCard className="p-5 flex-1 status-card-hover">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl" style={{ background: battLevel > 40 ? 'var(--status-emerald-bg)' : battLevel > 15 ? 'var(--status-amber-bg)' : 'var(--status-red-bg)' }}>
-                <Battery size={22} style={{ color: battLevel > 40 ? 'var(--color-emerald)' : battLevel > 15 ? 'var(--color-amber)' : 'var(--color-red)' }} />
+        {/* Bottom Row - Location spanning full width */}
+        <GlassCard className="lg:col-span-12 p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl" style={{ background: 'var(--status-blue-bg)' }}>
+                <MapPin size={24} style={{ color: 'var(--color-blue)' }} />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Battery</p>
-                <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-2xl font-extrabold" style={{ color: 'var(--text-primary)' }}>{battLevel}%</span>
-                  <span className="text-xs font-medium" style={{ color: battLevel > 40 ? 'var(--color-emerald)' : battLevel > 15 ? 'var(--color-amber)' : 'var(--color-red)' }}>
-                    {battLevel > 60 ? 'Healthy' : battLevel > 25 ? 'Charge soon' : 'Low!'}
-                  </span>
-                </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+                  Current Location
+                </p>
+                <p className="text-lg font-semibold mt-1" style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+                  {d.gps.latitude.toFixed(6)}°, {d.gps.longitude.toFixed(6)}°
+                </p>
               </div>
             </div>
-            <div className="w-full h-2 rounded-full overflow-hidden mt-3" style={{ background: 'var(--border-color)' }}>
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{
-                  width: `${battLevel}%`,
-                  background: battLevel > 40 ? 'var(--color-emerald)' : battLevel > 15 ? 'var(--color-amber)' : 'var(--color-red)',
-                }}
-              />
+            <div className="flex items-center gap-8">
+              <div className="text-center">
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Altitude</p>
+                <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{d.gps.altitude?.toFixed(0) ?? 0}m</p>
+              </div>
+              <div className="text-center">
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>GPS Speed</p>
+                <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{speed.toFixed(1)} km/h</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full pulse-live" style={{ background: 'var(--color-emerald)' }} />
+                <span className="text-base font-semibold" style={{ color: 'var(--color-emerald)' }}>
+                  {isStreaming ? 'Live' : 'Paused'}
+                </span>
+              </div>
             </div>
-          </GlassCard>
-
-          {/* Temperature & Speed Row */}
-          <div className="grid grid-cols-2 gap-4">
-            <GlassCard className="p-4 status-card-hover">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 rounded-xl" style={{ background: temp < 40 ? 'var(--status-emerald-bg)' : temp < 55 ? 'var(--status-amber-bg)' : 'var(--status-red-bg)' }}>
-                  <Thermometer size={18} style={{ color: temp < 40 ? 'var(--color-emerald)' : temp < 55 ? 'var(--color-amber)' : 'var(--color-red)' }} />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Temp</span>
-              </div>
-              <p className="text-2xl font-extrabold" style={{ color: 'var(--text-primary)' }}>{temp}°C</p>
-            </GlassCard>
-
-            <GlassCard className="p-4 status-card-hover">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 rounded-xl" style={{ background: 'var(--status-blue-bg)' }}>
-                  <Gauge size={18} style={{ color: 'var(--color-blue)' }} />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Speed</span>
-              </div>
-              <p className="text-2xl font-extrabold" style={{ color: 'var(--text-primary)' }}>{speed.toFixed(0)} <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>km/h</span></p>
-            </GlassCard>
           </div>
-        </div>
+        </GlassCard>
       </div>
-
-      {/* ── Location + GPS Strip ── */}
-      <GlassCard className="p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="p-2.5 rounded-xl" style={{ background: 'var(--status-blue-bg)' }}>
-              <MapPin size={20} style={{ color: 'var(--color-blue)' }} />
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
-                Current Location
-              </p>
-              <p className="text-base font-semibold mt-0.5" style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
-                {d.gps.latitude.toFixed(6)}°, {d.gps.longitude.toFixed(6)}°
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 sm:gap-6">
-            <div className="text-center">
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Altitude</p>
-              <p className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{d.gps.altitude?.toFixed(0) ?? 0}m</p>
-            </div>
-            <div className="text-center">
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Speed</p>
-              <p className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{speed.toFixed(0)} km/h</p>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full pulse-live" style={{ background: 'var(--color-emerald)' }} />
-              <span className="text-sm font-semibold" style={{ color: 'var(--color-emerald)' }}>
-                {isStreaming ? 'Live' : 'Paused'}
-              </span>
-            </div>
-          </div>
-        </div>
-      </GlassCard>
 
       {/* ── Simulation Controls (only in sim mode) ── */}
       {dataMode === 'simulation' && (
