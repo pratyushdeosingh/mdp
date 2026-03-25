@@ -4,7 +4,6 @@ import L from 'leaflet';
 import { useAppContext } from '../context/AppContext';
 import GlassCard from '../components/GlassCard';
 import { MapPin, Navigation, Gauge } from 'lucide-react';
-import 'leaflet/dist/leaflet.css';
 
 // Custom marker icon — created once at module scope
 const markerIcon = new L.Icon({
@@ -21,6 +20,14 @@ const markerIcon = new L.Icon({
 
 function MapUpdater({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
+  
+  // Fix Leaflet rendering issue when container size isn't known at mount
+  useEffect(() => {
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+  }, [map]);
+  
   useEffect(() => {
     map.setView([lat, lng], map.getZoom(), { animate: true, duration: 0.5 });
   }, [lat, lng, map]);
@@ -61,12 +68,13 @@ const LiveMap = memo(function LiveMap() {
       </div>
 
       {/* Map */}
-      <GlassCard className="p-0 overflow-hidden" style={{ height: 'min(500px, 65vh)' }}>
+      <GlassCard className="p-0 overflow-hidden" style={{ height: '450px', minHeight: '350px' }}>
         <MapContainer
           center={[latitude, longitude]}
           zoom={15}
-          style={{ height: '100%', width: '100%', borderRadius: '16px' }}
+          style={{ height: '100%', width: '100%', borderRadius: '16px', minHeight: '350px' }}
           zoomControl={true}
+          scrollWheelZoom={true}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
