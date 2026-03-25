@@ -112,16 +112,15 @@ export function useSerialConnection(onData: (data: SensorData) => void) {
           if (msg.type === 'data' && msg.payload) {
             if (isValidSensorPayload(msg.payload)) {
               onDataRef.current(msg.payload);
-            } else {
-              console.warn('[WS] Received malformed sensor payload, skipping');
             }
+            // Silently skip malformed payloads
           } else if (msg.type === 'status') {
             setConnectionStatus(msg.connected === true ? 'connected' : 'disconnected');
           } else if (msg.type === 'error') {
             setLastError(msg.message || 'Unknown error from bridge');
           }
         } catch {
-          console.warn('[WS] Failed to parse WebSocket message');
+          // Silently skip unparseable messages
         }
       };
 

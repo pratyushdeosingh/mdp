@@ -1,5 +1,26 @@
 import { useRef, useEffect, useState } from 'react';
 
+// Gauge configuration constants
+const GAUGE = {
+  CENTER_X: 150,
+  CENTER_Y: 155,
+  RADIUS: 115,
+  ARC_WIDTH: 16,
+  START_ANGLE: 180,
+  END_ANGLE: 360,
+  SWEEP_ANGLE: 180,
+  TICKS: [0, 20, 40, 60, 80, 100],
+} as const;
+
+// Zone color mappings
+const ZONE_COLORS = {
+  SAFE: 'var(--color-emerald, #10b981)',
+  ELEVATED: 'var(--color-amber, #f59e0b)',
+  WARNING: 'var(--color-orange, #f97316)',
+  CRITICAL: 'var(--color-red, #ef4444)',
+  SEVERE: '#b91c1c',
+} as const;
+
 interface ImpactMeterProps {
   value: number;
   rawAcceleration: number;
@@ -29,13 +50,7 @@ export default function ImpactMeter({ value, rawAcceleration, maxValue = 100, zo
     return () => cancelAnimationFrame(animRef.current);
   }, [value, maxValue]);
 
-  const cx = 150;
-  const cy = 155;
-  const radius = 115;
-  const arcWidth = 16;
-  const startAngle = 180;
-  const endAngle = 360;
-  const sweepAngle = 180;
+  const { CENTER_X: cx, CENTER_Y: cy, RADIUS: radius, ARC_WIDTH: arcWidth, START_ANGLE: startAngle, END_ANGLE: endAngle, SWEEP_ANGLE: sweepAngle } = GAUGE;
 
   const valueToAngle = (v: number) => {
     const clamped = Math.min(Math.max(v, 0), maxValue);
@@ -58,23 +73,21 @@ export default function ImpactMeter({ value, rawAcceleration, maxValue = 100, zo
 
   // Zone boundaries: 0-20% Safe, 20-40% Elevated, 40-60% Warning, 60-80% Critical, 80-100% Severe
   const zones = [
-    { from: 0, to: 20, color: 'var(--color-emerald, #10b981)', label: 'Safe' },
-    { from: 20, to: 40, color: 'var(--color-amber, #f59e0b)', label: 'Elevated' },
-    { from: 40, to: 60, color: 'var(--color-orange, #f97316)', label: 'Warning' },
-    { from: 60, to: 80, color: 'var(--color-red, #ef4444)', label: 'Critical' },
-    { from: 80, to: 100, color: '#b91c1c', label: 'Severe' },
+    { from: 0, to: 20, color: ZONE_COLORS.SAFE, label: 'Safe' },
+    { from: 20, to: 40, color: ZONE_COLORS.ELEVATED, label: 'Elevated' },
+    { from: 40, to: 60, color: ZONE_COLORS.WARNING, label: 'Warning' },
+    { from: 60, to: 80, color: ZONE_COLORS.CRITICAL, label: 'Critical' },
+    { from: 80, to: 100, color: ZONE_COLORS.SEVERE, label: 'Severe' },
   ];
-
-  const ticks = [0, 20, 40, 60, 80, 100];
 
   const needleAngle = valueToAngle(displayValue);
 
   const getZoneColor = (v: number) => {
-    if (v >= 80) return '#b91c1c';
-    if (v >= 60) return '#ef4444';
-    if (v >= 40) return '#f97316';
-    if (v >= 20) return '#f59e0b';
-    return '#10b981';
+    if (v >= 80) return ZONE_COLORS.SEVERE;
+    if (v >= 60) return ZONE_COLORS.CRITICAL;
+    if (v >= 40) return ZONE_COLORS.WARNING;
+    if (v >= 20) return ZONE_COLORS.ELEVATED;
+    return ZONE_COLORS.SAFE;
   };
 
   const zoneColor = getZoneColor(displayValue);
@@ -146,7 +159,7 @@ export default function ImpactMeter({ value, rawAcceleration, maxValue = 100, zo
         )}
 
         {/* Tick marks and labels */}
-        {ticks.map(val => {
+        {GAUGE.TICKS.map(val => {
           const angle = valueToAngle(val);
           const innerR = radius - arcWidth / 2 - 12;
           const outerR = radius - arcWidth / 2 - 2;

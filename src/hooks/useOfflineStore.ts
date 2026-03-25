@@ -83,8 +83,8 @@ export function useOfflineStore(
         }
         setIsSynced(true);
       })
-      .catch(err => {
-        console.warn('[OfflineStore] Failed to load from IndexedDB:', err);
+      .catch(() => {
+        // Silently fail - IndexedDB may not be available
         setIsSynced(true);
       });
   }, [setAccidentEvents]);
@@ -96,8 +96,8 @@ export function useOfflineStore(
     if (accidentEvents.length === prevLengthRef.current && accidentEvents.length === 0) return;
     prevLengthRef.current = accidentEvents.length;
 
-    putEvents(accidentEvents).catch(err => {
-      console.warn('[OfflineStore] Failed to save to IndexedDB:', err);
+    putEvents(accidentEvents).catch(() => {
+      // Silently fail - IndexedDB may not be available
     });
   }, [accidentEvents, isSynced]);
 
