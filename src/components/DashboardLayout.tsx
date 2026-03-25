@@ -80,8 +80,8 @@ export default function DashboardLayout() {
       <NavDrawer key={location.pathname} open={drawerOpen} onClose={handleClose} />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-10">
-        <div key={location.pathname} className="page-transition w-full max-w-5xl mx-auto">
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+        <div key={location.pathname} className="page-transition w-full h-full">
           <Outlet />
         </div>
       </main>

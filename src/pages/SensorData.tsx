@@ -57,7 +57,7 @@ const SensorData = memo(function SensorData() {
   const thresholdProgress = Math.min((totalAcceleration / ACCIDENT_THRESHOLD) * 100, 100);
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="w-full min-h-[calc(100vh-120px)] flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -285,7 +285,7 @@ const SensorData = memo(function SensorData() {
       </GlassCard>
 
       {/* ─── Additional Sensor Info ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-auto">
         {/* Temperature */}
         <GlassCard className="p-5 status-card-hover">
           <div className="flex items-center gap-3 mb-3">
