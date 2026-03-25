@@ -18,7 +18,7 @@ export default function HardwareStatus() {
   const total = hardwareModules.length;
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto w-full">
+    <div className="w-full min-h-[calc(100vh-120px)] flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Hardware Status</h1>

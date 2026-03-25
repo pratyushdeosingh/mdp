@@ -88,7 +88,7 @@ const Analytics = memo(function Analytics() {
 
   if (sensorHistory.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="w-full min-h-[calc(100vh-120px)] flex flex-col gap-6">
         <div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Analytics</h1>
           <p className="text-sm text-[var(--text-muted)] mt-1.5">60-second rolling charts</p>
@@ -126,7 +126,7 @@ const Analytics = memo(function Analytics() {
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto w-full">
+    <div className="w-full min-h-[calc(100vh-120px)] flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">Sensor Analytics</h1>
         <p className="text-sm text-[var(--text-muted)] mt-1.5">

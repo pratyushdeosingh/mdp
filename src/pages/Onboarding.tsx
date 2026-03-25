@@ -30,7 +30,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="w-full min-h-[calc(100vh-120px)] flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">Setup Wizard</h1>
         <p className="text-sm text-[var(--text-muted)] mt-1.5">

@@ -11,7 +11,7 @@ export default function AccidentHistory() {
   const resolvedCount = accidentEvents.filter(e => e.resolved).length;
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto w-full">
+    <div className="w-full min-h-[calc(100vh-120px)] flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
