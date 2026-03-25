@@ -15,6 +15,19 @@ const BATTERY_DRAIN_RATE = 0.002; // % per second (roughly 0.12% per minute, 7.2
 // Stable temperature simulation - fluctuates slowly around a base
 let currentTemp = 35 + Math.random() * 3;
 
+// Stable speed simulation - smooth transitions
+let currentSpeed = 35; // Start at 35 km/h
+let targetSpeed = 35;
+let speedChangeTimer = 0;
+
+// Stable altitude simulation
+let currentAltitude = 48; // Start at 48m
+
+// Accelerometer stability - smooth values
+let smoothAccX = 0;
+let smoothAccY = 0;
+let smoothAccZ = 9.81;
+
 export function resetSimulatorState() {
   currentLat = BASE_LAT;
   currentLng = BASE_LNG;
@@ -23,6 +36,13 @@ export function resetSimulatorState() {
   batteryLevel = 95;
   lastBatteryUpdate = Date.now();
   currentTemp = 35 + Math.random() * 3;
+  currentSpeed = 35;
+  targetSpeed = 35;
+  speedChangeTimer = 0;
+  currentAltitude = 48;
+  smoothAccX = 0;
+  smoothAccY = 0;
+  smoothAccZ = 9.81;
 }
 
 function clamp(val: number, min: number, max: number): number {
@@ -35,31 +55,59 @@ function randomWalk(current: number, step: number, min: number, max: number): nu
 }
 
 export function generateSensorData(): SensorData {
-  // Simulate a moving vehicle with realistic GPS drift
-  heading += (Math.random() - 0.5) * 30;
-  const speed = 20 + Math.random() * 40; // 20-60 km/h
-  const moveDistance = (speed / 3600) * 0.001; // rough movement per tick
-
+  // Smooth heading changes - gradual turns
+  heading += (Math.random() - 0.5) * 8; // Much smaller heading changes
+  
+  // Smooth speed transitions - occasionally change target, then interpolate
+  speedChangeTimer++;
+  if (speedChangeTimer > 15) { // Change target every ~15 seconds
+    speedChangeTimer = 0;
+    // New target speed - realistic city driving between 0-60 km/h
+    if (Math.random() < 0.1) {
+      targetSpeed = 0; // Occasional stop
+    } else if (Math.random() < 0.3) {
+      targetSpeed = 20 + Math.random() * 20; // Slow speed (20-40)
+    } else {
+      targetSpeed = 35 + Math.random() * 25; // Normal speed (35-60)
+    }
+  }
+  // Smooth interpolation towards target (ease towards it)
+  currentSpeed = currentSpeed + (targetSpeed - currentSpeed) * 0.08;
+  currentSpeed = clamp(currentSpeed, 0, 80);
+  
+  // GPS position - smooth movement based on current speed
+  const moveDistance = (currentSpeed / 3600) * 0.0008; // Smaller movement increments
   currentLat += Math.cos((heading * Math.PI) / 180) * moveDistance;
   currentLng += Math.sin((heading * Math.PI) / 180) * moveDistance;
 
-  // Keep within a reasonable area
-  if (Math.abs(currentLat - BASE_LAT) > 0.02) {
-    heading += 180;
-    currentLat = randomWalk(currentLat, 0.001, BASE_LAT - 0.02, BASE_LAT + 0.02);
+  // Keep within a reasonable area with smooth turnaround
+  if (Math.abs(currentLat - BASE_LAT) > 0.015) {
+    heading += 120 + Math.random() * 60; // Gradual turn back
   }
-  if (Math.abs(currentLng - BASE_LNG) > 0.02) {
-    heading += 180;
-    currentLng = randomWalk(currentLng, 0.001, BASE_LNG - 0.02, BASE_LNG + 0.02);
+  if (Math.abs(currentLng - BASE_LNG) > 0.015) {
+    heading += 120 + Math.random() * 60;
   }
+  
+  // Smooth altitude changes - very gradual (±0.2m per tick)
+  currentAltitude = randomWalk(currentAltitude, 0.2, 42, 55);
 
-  const accX = parseFloat((Math.sin(Date.now() / 1000) * 0.5 + (Math.random() - 0.5) * 0.3).toFixed(3));
-  const accY = parseFloat((Math.cos(Date.now() / 800) * 0.3 + (Math.random() - 0.5) * 0.2).toFixed(3));
-  const accZ = parseFloat((9.81 + (Math.random() - 0.5) * 0.4).toFixed(3));
+  // Smooth accelerometer readings - low-pass filtered with small perturbations
+  const rawAccX = (Math.sin(Date.now() / 2000) * 0.3 + (Math.random() - 0.5) * 0.1);
+  const rawAccY = (Math.cos(Date.now() / 1500) * 0.2 + (Math.random() - 0.5) * 0.08);
+  const rawAccZ = (9.81 + (Math.random() - 0.5) * 0.15);
+  
+  // Smooth interpolation for accelerometer (low-pass filter)
+  smoothAccX = smoothAccX * 0.85 + rawAccX * 0.15;
+  smoothAccY = smoothAccY * 0.85 + rawAccY * 0.15;
+  smoothAccZ = smoothAccZ * 0.85 + rawAccZ * 0.15;
+  
+  const accX = parseFloat(smoothAccX.toFixed(3));
+  const accY = parseFloat(smoothAccY.toFixed(3));
+  const accZ = parseFloat(smoothAccZ.toFixed(3));
   const totalAccel = parseFloat(Math.sqrt(accX * accX + accY * accY + accZ * accZ).toFixed(2));
 
-  // Simulate rare accident events (~1% chance)
-  const accidentDetected = Math.random() < 0.01;
+  // Simulate rare accident events (~0.5% chance - reduced)
+  const accidentDetected = Math.random() < 0.005;
 
   // Realistic battery drain - slowly decreases over time
   const now = Date.now();
@@ -68,22 +116,22 @@ export function generateSensorData(): SensorData {
   lastBatteryUpdate = now;
 
   // Realistic temperature - slow random walk with tiny fluctuations
-  currentTemp = randomWalk(currentTemp, 0.1, 32, 42);
+  currentTemp = randomWalk(currentTemp, 0.05, 33, 40);
 
   return {
     timestamp: Date.now(),
     gps: {
       latitude: parseFloat(currentLat.toFixed(6)),
       longitude: parseFloat(currentLng.toFixed(6)),
-      speed: parseFloat(speed.toFixed(1)),
-      altitude: parseFloat((45 + Math.random() * 10).toFixed(1)),
+      speed: parseFloat(currentSpeed.toFixed(1)),
+      altitude: parseFloat(currentAltitude.toFixed(1)),
     },
     accelerometer: {
       x: accX,
       y: accY,
       z: accZ,
     },
-    systemStatus: Math.random() > 0.05 ? 'online' : 'warning',
+    systemStatus: 'online', // More stable - always online in normal operation
     totalAcceleration: totalAccel,
     accidentDetected,
     batteryLevel: Math.floor(batteryLevel),
