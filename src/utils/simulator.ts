@@ -7,11 +7,22 @@ let currentLat = BASE_LAT;
 let currentLng = BASE_LNG;
 let heading = Math.random() * 360;
 
+// Stable battery simulation - starts at 95% and slowly depletes
+let batteryLevel = 95;
+let lastBatteryUpdate = Date.now();
+const BATTERY_DRAIN_RATE = 0.002; // % per second (roughly 0.12% per minute, 7.2% per hour)
+
+// Stable temperature simulation - fluctuates slowly around a base
+let currentTemp = 35 + Math.random() * 3;
+
 export function resetSimulatorState() {
   currentLat = BASE_LAT;
   currentLng = BASE_LNG;
   heading = Math.random() * 360;
   logCounter = 0;
+  batteryLevel = 95;
+  lastBatteryUpdate = Date.now();
+  currentTemp = 35 + Math.random() * 3;
 }
 
 function clamp(val: number, min: number, max: number): number {
@@ -50,6 +61,15 @@ export function generateSensorData(): SensorData {
   // Simulate rare accident events (~1% chance)
   const accidentDetected = Math.random() < 0.01;
 
+  // Realistic battery drain - slowly decreases over time
+  const now = Date.now();
+  const elapsedSeconds = (now - lastBatteryUpdate) / 1000;
+  batteryLevel = Math.max(5, batteryLevel - elapsedSeconds * BATTERY_DRAIN_RATE);
+  lastBatteryUpdate = now;
+
+  // Realistic temperature - slow random walk with tiny fluctuations
+  currentTemp = randomWalk(currentTemp, 0.1, 32, 42);
+
   return {
     timestamp: Date.now(),
     gps: {
@@ -66,8 +86,8 @@ export function generateSensorData(): SensorData {
     systemStatus: Math.random() > 0.05 ? 'online' : 'warning',
     totalAcceleration: totalAccel,
     accidentDetected,
-    batteryLevel: Math.floor(70 + Math.random() * 30),
-    temperature: parseFloat((35 + Math.random() * 10).toFixed(1)),
+    batteryLevel: Math.floor(batteryLevel),
+    temperature: parseFloat(currentTemp.toFixed(1)),
     gpsValid: true,
   };
 }
