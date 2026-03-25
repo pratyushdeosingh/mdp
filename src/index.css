@@ -9,32 +9,32 @@
     --bg-card-hover: #1c1c1c;
     --bg-elevated: #1a1a1a;
     --text-primary: #e8eaed;
-    --text-secondary: #9aa0a6;
-    --text-muted: #5f6368;
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-subtle: rgba(255, 255, 255, 0.04);
+    --text-secondary: #b0b5bb;
+    --text-muted: #8a8f97;
+    --border-color: rgba(255, 255, 255, 0.12);
+    --border-subtle: rgba(255, 255, 255, 0.06);
     --accent: #00d4ff;
     --accent-glow: rgba(0, 212, 255, 0.12);
     --success: #34d399;
-    --warning: #fbbf24;
+    --warning: #f59e0b;
     --danger: #f87171;
     --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
     /* Semantic status colors */
     --color-emerald: #34d399;
     --color-red: #f87171;
-    --color-amber: #fbbf24;
+    --color-amber: #f59e0b;
     --color-blue: #60a5fa;
     --color-cyan: #00d4ff;
     --color-orange: #fb923c;
-    --color-purple: #c084fc;
-    --color-gray: #6b7280;
+    --color-purple: #d8b4fe;
+    --color-gray: #9ca3af;
     /* Status backgrounds */
-    --status-emerald-bg: rgba(52, 211, 153, 0.1);
-    --status-red-bg: rgba(248, 113, 113, 0.1);
-    --status-amber-bg: rgba(251, 191, 36, 0.1);
-    --status-blue-bg: rgba(96, 165, 250, 0.1);
-    --status-gray-bg: rgba(107, 114, 128, 0.1);
+    --status-emerald-bg: rgba(52, 211, 153, 0.12);
+    --status-red-bg: rgba(248, 113, 113, 0.12);
+    --status-amber-bg: rgba(245, 158, 11, 0.12);
+    --status-blue-bg: rgba(96, 165, 250, 0.12);
+    --status-gray-bg: rgba(156, 163, 175, 0.12);
     /* Nav/Drawer */
     --nav-active-bg: rgba(0, 212, 255, 0.1);
     --nav-active-text: #00d4ff;
@@ -51,8 +51,8 @@
     --bg-card-hover: #ffffff;
     --bg-elevated: #ffffff;
     --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
     --border-color: rgba(148, 163, 184, 0.25);
     --border-subtle: rgba(148, 163, 184, 0.12);
     --accent: #0891b2;
@@ -70,11 +70,11 @@
     --color-orange: #c2410c;
     --color-purple: #7c3aed;
     --color-gray: #6b7280;
-    --status-emerald-bg: rgba(5, 150, 105, 0.08);
-    --status-red-bg: rgba(220, 38, 38, 0.08);
-    --status-amber-bg: rgba(217, 119, 6, 0.08);
-    --status-blue-bg: rgba(37, 99, 235, 0.08);
-    --status-gray-bg: rgba(107, 114, 128, 0.08);
+    --status-emerald-bg: rgba(5, 150, 105, 0.1);
+    --status-red-bg: rgba(220, 38, 38, 0.1);
+    --status-amber-bg: rgba(217, 119, 6, 0.1);
+    --status-blue-bg: rgba(37, 99, 235, 0.1);
+    --status-gray-bg: rgba(107, 114, 128, 0.1);
     --nav-active-bg: rgba(8, 145, 178, 0.08);
     --nav-active-text: #0891b2;
     --glass-bg: rgba(255, 255, 255, 0.8);
@@ -678,10 +678,48 @@ body {
 
 /* ===== CHART POLISH ===== */
 .recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line { opacity: 0.4; }
-.recharts-tooltip-wrapper { filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15)); transition: all 0.15s ease; }
+.recharts-cartesian-grid-vertical line { opacity: 0.5; }
+.recharts-tooltip-wrapper { filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25)); transition: all 0.15s ease; }
 .recharts-active-dot { filter: drop-shadow(0 0 6px currentColor); }
-.recharts-legend-item-text { font-size: 11px !important; font-weight: 500 !important; }
+.recharts-legend-item-text { font-size: 12px !important; font-weight: 500 !important; color: var(--text-secondary) !important; }
+
+/* Improved Recharts tooltip styling */
+.recharts-default-tooltip {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+.recharts-tooltip-label {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  margin-bottom: 8px !important;
+}
+
+.recharts-tooltip-item {
+  color: var(--text-secondary) !important;
+  font-size: 12px !important;
+  padding: 2px 0 !important;
+}
+
+.recharts-tooltip-item-name {
+  color: var(--text-muted) !important;
+}
+
+.recharts-tooltip-item-value {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* Pie chart label improvements */
+.recharts-pie-label-text {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  fill: var(--text-primary) !important;
+}
 
 /* ===== LEAFLET Z-INDEX CONTAINMENT ===== */
 /* Prevent Leaflet from creating high z-index layers that overlap our drawer */
@@ -692,7 +730,6 @@ body {
 /* ===== LEAFLET DARK MODE ===== */
 .dark .leaflet-tile-pane { filter: brightness(0.7) contrast(1.1) saturate(0.8); }
 .dark .leaflet-control-zoom a { background: var(--bg-secondary) !important; color: var(--text-primary) !important; border-color: var(--border-color) !important; }
-.dark .recharts-default-tooltip { background: var(--bg-secondary) !important; border-color: var(--border-color) !important; }
 
 .threshold-bar { transition: width 0.5s ease-out; }
 
@@ -711,16 +748,26 @@ body {
   transform: translateY(-2px);
 }
 
+/* ===== TABLET RESPONSIVE ===== */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .glass-card { padding: 20px; border-radius: 16px; }
+  .recharts-wrapper { font-size: 11px; }
+  .recharts-legend-item-text { font-size: 11px !important; }
+}
+
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 640px) {
-  .glass-card { border-radius: 14px; }
-  .status-card { padding: 20px 18px; border-radius: 16px; }
-  .gps-status-panel { padding: 16px 18px; border-radius: 12px; }
-  .gps-status-icon { font-size: 22px; }
-  .gps-status-title h3 { font-size: 13px; }
-  .gps-status-message { font-size: 12px; }
+  .glass-card { border-radius: 14px; padding: 16px; }
+  .status-card { padding: 18px 16px; border-radius: 14px; }
+  .gps-status-panel { padding: 14px 16px; border-radius: 12px; }
+  .gps-status-icon { font-size: 20px; }
+  .gps-status-title h3 { font-size: 12px; }
+  .gps-status-message { font-size: 11px; }
   .drawer-panel { width: 100%; max-width: 100vw; }
   .recharts-wrapper { font-size: 10px; }
+  .recharts-legend-item-text { font-size: 10px !important; }
+  .recharts-tooltip-label { font-size: 12px !important; }
+  .recharts-tooltip-item { font-size: 11px !important; }
 }
 
 @keyframes emergencyFlash {

@@ -106,11 +106,11 @@ export default function Onboarding() {
               <button
                 onClick={() => setDataMode('simulation')}
                 className={`p-5 rounded-2xl border-2 text-left transition-all ${
-                  dataMode === 'simulation' ? 'border-blue-500' : 'border-[var(--border-color)]'
+                  dataMode === 'simulation' ? 'border-[var(--accent)]' : 'border-[var(--border-color)]'
                 }`}
                 style={{ background: dataMode === 'simulation' ? 'var(--status-blue-bg)' : 'var(--bg-secondary)' }}
               >
-                <Radio size={24} style={{ color: 'var(--accent)' }} />
+                <RadioWaveIcon size={24} style={{ color: 'var(--accent)' }} />
                 <p className="text-sm font-bold text-[var(--text-primary)] mt-3">Simulation Mode</p>
                 <p className="text-xs text-[var(--text-muted)] mt-1">
                   No hardware needed. Uses simulated sensor data for testing and demonstration.
@@ -119,7 +119,7 @@ export default function Onboarding() {
               <button
                 onClick={() => setDataMode('hardware')}
                 className={`p-5 rounded-2xl border-2 text-left transition-all ${
-                  dataMode === 'hardware' ? 'border-blue-500' : 'border-[var(--border-color)]'
+                  dataMode === 'hardware' ? 'border-[var(--accent)]' : 'border-[var(--border-color)]'
                 }`}
                 style={{ background: dataMode === 'hardware' ? 'var(--status-blue-bg)' : 'var(--bg-secondary)' }}
               >
@@ -237,7 +237,7 @@ export default function Onboarding() {
   );
 }
 
-function Radio(props: { size: number; style: React.CSSProperties }) {
+function RadioWaveIcon(props: { size: number; style: React.CSSProperties }) {
   return (
     <svg width={props.size} height={props.size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={props.style}>
       <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" /><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5" />

@@ -160,7 +160,7 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-2 px-2 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 py-2 px-2 space-y-0.5 overflow-y-auto" aria-label="Main navigation">
         {navItems.map(item => (
           <NavLink
             key={item.path}

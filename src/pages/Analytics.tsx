@@ -116,46 +116,63 @@ const Analytics = memo(function Analytics() {
       background: 'var(--bg-secondary)',
       border: '1px solid var(--border-color)',
       borderRadius: '12px',
-      fontSize: '12px',
+      fontSize: '13px',
       color: 'var(--text-primary)',
-      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
-      padding: '10px 14px',
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+      padding: '12px 16px',
+    },
+    labelStyle: {
+      color: 'var(--text-primary)',
+      fontWeight: 600,
+      marginBottom: '6px',
+    },
+    itemStyle: {
+      color: 'var(--text-secondary)',
+      fontSize: '12px',
+      padding: '2px 0',
     },
     cursor: { stroke: 'var(--accent)', strokeWidth: 1, strokeDasharray: '4 4' },
     animationDuration: 200,
+  };
+
+  // Chart axis styling for better visibility
+  const axisStyle = {
+    tick: { fontSize: 11, fill: 'var(--text-secondary)' },
+    stroke: 'var(--border-color)',
   };
 
   return (
     <div className="w-full min-h-[calc(100vh-120px)] flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">Sensor Analytics</h1>
-        <p className="text-sm text-[var(--text-muted)] mt-1.5">
+        <p className="text-sm text-[var(--text-secondary)] mt-1.5">
           Last {sensorHistory.length} seconds of telemetry data
         </p>
       </div>
 
       {/* Accelerometer Chart */}
       <GlassCard className="p-6">
-        <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
+        <h3 className="text-xs font-bold text-[var(--text-secondary)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
           <Activity size={16} style={{ color: 'var(--color-orange)' }} />
           Accelerometer (X, Y, Z) vs Time
         </h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.5} />
             <XAxis
               dataKey="time"
-              tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
-              stroke="var(--border-color)"
+              tick={axisStyle.tick}
+              stroke={axisStyle.stroke}
               interval="preserveStartEnd"
             />
             <YAxis
-              tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
-              stroke="var(--border-color)"
+              tick={axisStyle.tick}
+              stroke={axisStyle.stroke}
               domain={['auto', 'auto']}
+              tickFormatter={(v) => `${v.toFixed(1)}`}
             />
-            <Tooltip {...tooltipStyle} />
-            <Legend wrapperStyle={{ fontSize: '12px' }} />
+            <Tooltip {...tooltipStyle} formatter={(value) => [`${Number(value).toFixed(2)} m/s²`]} />
+            <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--text-secondary)' }} />
             <Line type="monotone" dataKey="accX" stroke="#f97316" strokeWidth={2} dot={false} name="Acc X" animationDuration={800} />
             <Line type="monotone" dataKey="accY" stroke="#06b6d4" strokeWidth={2} dot={false} name="Acc Y" animationDuration={800} animationBegin={200} />
             <Line type="monotone" dataKey="accZ" stroke="#a855f7" strokeWidth={2} dot={false} name="Acc Z" animationDuration={800} animationBegin={400} />
@@ -165,7 +182,7 @@ const Analytics = memo(function Analytics() {
 
       {/* Speed Chart */}
       <GlassCard className="p-6">
-        <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
+        <h3 className="text-xs font-bold text-[var(--text-secondary)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
           <Gauge size={16} style={{ color: 'var(--color-emerald)' }} />
           Speed vs Time
         </h3>
@@ -177,19 +194,19 @@ const Analytics = memo(function Analytics() {
                 <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.5} />
             <XAxis
               dataKey="time"
-              tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
-              stroke="var(--border-color)"
+              tick={axisStyle.tick}
+              stroke={axisStyle.stroke}
               interval="preserveStartEnd"
             />
             <YAxis
-              tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
-              stroke="var(--border-color)"
+              tick={axisStyle.tick}
+              stroke={axisStyle.stroke}
               unit=" km/h"
             />
-            <Tooltip {...tooltipStyle} />
+            <Tooltip {...tooltipStyle} formatter={(value) => [`${Number(value).toFixed(1)} km/h`]} />
             <Area
               type="monotone"
               dataKey="speed"
@@ -206,7 +223,7 @@ const Analytics = memo(function Analytics() {
       {/* Altitude + Total Acceleration side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <GlassCard className="p-6">
-          <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5">Altitude vs Time</h3>
+          <h3 className="text-xs font-bold text-[var(--text-secondary)] tracking-[0.15em] uppercase mb-5">Altitude vs Time</h3>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={chartData}>
               <defs>
@@ -215,17 +232,17 @@ const Analytics = memo(function Analytics() {
                   <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-              <XAxis dataKey="time" tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" interval="preserveStartEnd" />
-              <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" unit=" m" />
-              <Tooltip {...tooltipStyle} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.5} />
+              <XAxis dataKey="time" tick={axisStyle.tick} stroke={axisStyle.stroke} interval="preserveStartEnd" />
+              <YAxis tick={axisStyle.tick} stroke={axisStyle.stroke} unit=" m" />
+              <Tooltip {...tooltipStyle} formatter={(value) => [`${Number(value).toFixed(1)} m`]} />
               <Area type="monotone" dataKey="altitude" stroke="#8b5cf6" strokeWidth={2} fill="url(#altGradient)" name="Altitude" />
             </AreaChart>
           </ResponsiveContainer>
         </GlassCard>
 
         <GlassCard className="p-6">
-          <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
+          <h3 className="text-xs font-bold text-[var(--text-secondary)] tracking-[0.15em] uppercase mb-5 flex items-center gap-2">
             <Shield size={14} style={{ color: 'var(--color-red)' }} />
             Total Acceleration vs Time
           </h3>
@@ -237,10 +254,10 @@ const Analytics = memo(function Analytics() {
                   <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-              <XAxis dataKey="time" tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" interval="preserveStartEnd" />
-              <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" unit=" m/s²" />
-              <Tooltip {...tooltipStyle} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.5} />
+              <XAxis dataKey="time" tick={axisStyle.tick} stroke={axisStyle.stroke} interval="preserveStartEnd" />
+              <YAxis tick={axisStyle.tick} stroke={axisStyle.stroke} unit=" m/s²" />
+              <Tooltip {...tooltipStyle} formatter={(value) => [`${Number(value).toFixed(2)} m/s²`]} />
               <Area type="monotone" dataKey="totalAccel" stroke="#ef4444" strokeWidth={2} fill="url(#accelGradient)" name="Total Accel" />
             </AreaChart>
           </ResponsiveContainer>
@@ -255,7 +272,7 @@ const Analytics = memo(function Analytics() {
               <AlertTriangle size={18} style={{ color: 'var(--color-red)' }} />
               Incident Analytics
             </h2>
-            <p className="text-sm text-[var(--text-muted)] mt-1">
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
               {accidentEvents.length} incident{accidentEvents.length !== 1 ? 's' : ''} analyzed
             </p>
           </div>
@@ -263,7 +280,7 @@ const Analytics = memo(function Analytics() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {/* Severity Distribution */}
             <GlassCard className="p-6">
-              <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5">
+              <h3 className="text-xs font-bold text-[var(--text-secondary)] tracking-[0.15em] uppercase mb-5">
                 Severity Distribution
               </h3>
               <ResponsiveContainer width="100%" height={220}>
@@ -275,32 +292,32 @@ const Analytics = memo(function Analytics() {
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
-                    label={({ name, value }) => `${name}: ${value}`}
-                    labelLine
+                    label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
+                    labelLine={{ stroke: 'var(--text-secondary)' }}
                   >
                     {severityDistribution.map((entry, i) => (
                       <Cell key={i} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip {...tooltipStyle} />
+                  <Tooltip {...tooltipStyle} formatter={(value, name) => [`${value} incidents`, name]} />
                 </PieChart>
               </ResponsiveContainer>
             </GlassCard>
 
             {/* Time-of-Day Pattern */}
             <GlassCard className="p-6">
-              <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5">
+              <h3 className="text-xs font-bold text-[var(--text-secondary)] tracking-[0.15em] uppercase mb-5">
                 Incidents by Hour of Day
               </h3>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={hourDistribution}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                  <XAxis dataKey="hour" tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" interval={2} />
-                  <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" allowDecimals={false} />
-                  <Tooltip {...tooltipStyle} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.5} />
+                  <XAxis dataKey="hour" tick={axisStyle.tick} stroke={axisStyle.stroke} interval={2} />
+                  <YAxis tick={axisStyle.tick} stroke={axisStyle.stroke} allowDecimals={false} />
+                  <Tooltip {...tooltipStyle} formatter={(value) => [`${value} incident${Number(value) !== 1 ? 's' : ''}`]} />
                   <Bar dataKey="count" name="Incidents" radius={[4, 4, 0, 0]}>
                     {hourDistribution.map((_, i) => (
-                      <Cell key={i} fill={hourDistribution[i].count > 0 ? '#ef4444' : 'var(--border-color)'} opacity={hourDistribution[i].count > 0 ? 0.8 : 0.3} />
+                      <Cell key={i} fill={hourDistribution[i].count > 0 ? '#ef4444' : 'var(--border-color)'} opacity={hourDistribution[i].count > 0 ? 0.85 : 0.3} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -310,16 +327,16 @@ const Analytics = memo(function Analytics() {
             {/* Speed vs Acceleration Correlation */}
             {speedCorrelation.length > 1 && (
               <GlassCard className="p-6">
-                <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5">
+                <h3 className="text-xs font-bold text-[var(--text-secondary)] tracking-[0.15em] uppercase mb-5">
                   Speed vs Impact Correlation
                 </h3>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={speedCorrelation}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                    <XAxis dataKey="speed" tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" unit=" km/h" />
-                    <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" unit=" m/s²" />
-                    <Tooltip {...tooltipStyle} />
-                    <Bar dataKey="acceleration" name="Impact (m/s²)" fill="#f97316" opacity={0.7} radius={[4, 4, 0, 0]} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.5} />
+                    <XAxis dataKey="speed" tick={axisStyle.tick} stroke={axisStyle.stroke} unit=" km/h" />
+                    <YAxis tick={axisStyle.tick} stroke={axisStyle.stroke} unit=" m/s²" />
+                    <Tooltip {...tooltipStyle} formatter={(value) => [`${Number(value).toFixed(1)} m/s²`]} />
+                    <Bar dataKey="acceleration" name="Impact (m/s²)" fill="#f97316" opacity={0.8} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </GlassCard>
@@ -328,18 +345,18 @@ const Analytics = memo(function Analytics() {
             {/* Response Time */}
             {responseTimeData.length > 0 && (
               <GlassCard className="p-6">
-                <h3 className="text-xs font-bold text-[var(--text-muted)] tracking-[0.15em] uppercase mb-5">
+                <h3 className="text-xs font-bold text-[var(--text-secondary)] tracking-[0.15em] uppercase mb-5">
                   Response Time per Incident
                 </h3>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={responseTimeData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                    <XAxis dataKey="id" tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" />
-                    <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} stroke="var(--border-color)" unit="s" />
-                    <Tooltip {...tooltipStyle} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.5} />
+                    <XAxis dataKey="id" tick={axisStyle.tick} stroke={axisStyle.stroke} />
+                    <YAxis tick={axisStyle.tick} stroke={axisStyle.stroke} unit="s" />
+                    <Tooltip {...tooltipStyle} formatter={(value) => [`${Number(value).toFixed(1)} seconds`]} />
                     <Bar dataKey="responseTime" name="Response (seconds)" radius={[4, 4, 0, 0]}>
                       {responseTimeData.map((entry, i) => (
-                        <Cell key={i} fill={entry.responseTime > 30 ? '#ef4444' : entry.responseTime > 10 ? '#f59e0b' : '#10b981'} opacity={0.8} />
+                        <Cell key={i} fill={entry.responseTime > 30 ? '#ef4444' : entry.responseTime > 10 ? '#f59e0b' : '#10b981'} opacity={0.85} />
                       ))}
                     </Bar>
                   </BarChart>

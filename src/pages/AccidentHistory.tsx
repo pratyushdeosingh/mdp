@@ -127,7 +127,7 @@ export default function AccidentHistory() {
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   {/* Status + ID */}
                   <div className="flex items-center gap-3 shrink-0">
-                    <div className={`p-2.5 rounded-xl ${event.resolved ? 'bg-emerald-500/10' : 'bg-red-500/10 animate-slow-pulse'}`}>
+                    <div className={`p-2.5 rounded-xl ${event.resolved ? '' : 'animate-slow-pulse'}`} style={{ background: event.resolved ? 'var(--status-emerald-bg)' : 'var(--status-red-bg)' }}>
                       <AlertTriangle size={20} style={{ color: event.resolved ? 'var(--color-emerald)' : 'var(--color-red)' }} />
                     </div>
                     <div>

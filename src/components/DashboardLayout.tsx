@@ -53,7 +53,7 @@ export default function DashboardLayout() {
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ background: 'rgba(0, 212, 255, 0.1)' }}
+            style={{ background: 'var(--status-blue-bg)' }}
           >
             <Radio size={16} style={{ color: 'var(--accent)' }} />
           </div>

@@ -123,7 +123,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
           <div className="flex items-center gap-3">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: 'rgba(0, 212, 255, 0.1)' }}
+              style={{ background: 'var(--status-blue-bg)' }}
             >
               <Radio size={18} style={{ color: 'var(--accent)' }} />
             </div>
