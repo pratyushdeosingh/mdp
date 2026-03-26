@@ -12,9 +12,18 @@ dist
 dist-ssr
 *.local
 
+# Environment files (CRITICAL: never commit secrets)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
 *.suo
@@ -22,3 +31,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# OS files
+Thumbs.db
+*.bak
+*.swp
+
+# Test coverage
+coverage/
+
+# Build artifacts
+*.tsbuildinfo

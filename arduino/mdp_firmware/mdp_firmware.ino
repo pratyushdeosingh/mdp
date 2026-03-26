@@ -10,12 +10,17 @@
  * NEO-6M GPS    — GPS TX → Arduino RX (pin 4), GPS RX → Arduino TX (pin 3)
  * MPU6050       — SDA → A4, SCL → A5
  * Buzzer        — pin 8
+ *
+ * Safety Features:
+ * - Watchdog timer (2s) prevents lockups if I2C hangs
+ * - Buffer overflow protection with larger dtostrf buffer
  */
 
 #include <Wire.h>
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
+#include <avr/wdt.h>  // Watchdog timer
 
 // ── Pin & Hardware Configuration ───────────────────────────
 #define GPS_RX_PIN   4
@@ -45,6 +50,9 @@ const unsigned long DEBOUNCE_MS = 200;
 
 // ── Setup ──────────────────────────────────────────────────
 void setup() {
+  // Disable watchdog during setup (may be on from previous reset)
+  wdt_disable();
+  
   Serial.begin(9600);
   gpsSerial.begin(9600);
 
@@ -67,11 +75,19 @@ void setup() {
   }
 
   // Startup message
-  Serial.println("{\"status\":\"boot\",\"msg\":\"MDP firmware ready\"}");
+  Serial.println(F("{\"status\":\"boot\",\"msg\":\"MDP firmware ready\",\"wdt\":\"enabled\"}"));
+  
+  // Enable watchdog timer (2 second timeout)
+  // If loop() hangs (e.g., I2C lockup), Arduino will auto-reset
+  wdt_enable(WDTO_2S);
 }
 
 // ── Main Loop ──────────────────────────────────────────────
 void loop() {
+  // Reset watchdog timer at start of each loop iteration
+  // If loop hangs, watchdog will reset the Arduino after 2 seconds
+  wdt_reset();
+  
   // ── 1. Feed GPS parser (listen for ~200ms) ──
   gpsSerial.listen();
   unsigned long gpsStart = millis();
@@ -145,7 +161,9 @@ void loop() {
   lastSend = millis();
 
   StaticJsonDocument<300> doc;
-  char buf[16]; // Reusable stack buffer for dtostrf (avoids String heap fragmentation)
+  // Increased buffer size to 24 chars for safety with large values
+  // Prevents buffer overflow with negative coordinates or large altitude/speed
+  char buf[24];
 
   // GPS valid flag — explicit boolean so server doesn't rely on lat/lng==0 check
   bool gpsValid = gps.location.isValid();
