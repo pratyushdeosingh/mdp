@@ -200,6 +200,7 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
         </button>
         <button
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all ${collapsed ? 'justify-center' : ''}`}
         >
           {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}

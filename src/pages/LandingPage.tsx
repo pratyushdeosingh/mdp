@@ -17,8 +17,8 @@ export default function LandingPage() {
       style={{ background: 'var(--bg-primary)' }}
     >
       {/* Animated background orbs */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-3xl opacity-20 landing-orb-1" style={{ background: 'var(--accent-glow)' }} />
-      <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] rounded-full blur-3xl opacity-10 landing-orb-2" style={{ background: 'var(--color-emerald)' }} />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-3xl opacity-20 landing-orb-1" style={{ background: 'var(--accent-glow)' }} aria-hidden="true" />
+      <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] rounded-full blur-3xl opacity-10 landing-orb-2" style={{ background: 'var(--color-emerald)' }} aria-hidden="true" />
 
       {/* Hero section */}
       <div className="relative z-10 text-center max-w-3xl w-full animate-fade-in-up flex flex-col items-center">
@@ -41,18 +41,20 @@ export default function LandingPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-5 mb-16 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
           <button
             onClick={() => navigate('/dashboard')}
+            aria-label="Enter the Smart Helmet Dashboard"
             className="group inline-flex items-center gap-3 px-12 py-5 text-white rounded-2xl text-lg font-semibold transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/25 active:scale-[0.97] landing-cta-glow"
             style={{ background: 'linear-gradient(135deg, var(--accent), #6366f1)' }}
           >
-            <Zap size={20} className="group-hover:rotate-12 transition-transform duration-300" />
+            <Zap size={20} className="group-hover:rotate-12 transition-transform duration-300" aria-hidden="true" />
             Enter Dashboard
-            <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform duration-300" />
+            <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform duration-300" aria-hidden="true" />
           </button>
           <button
             onClick={() => navigate('/docs')}
+            aria-label="View project documentation"
             className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl text-base font-medium border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] hover:bg-[var(--bg-secondary)] active:scale-[0.97] transition-all duration-300 hover:shadow-lg"
           >
-            <FileText size={18} />
+            <FileText size={18} aria-hidden="true" />
             Documentation
           </button>
         </div>

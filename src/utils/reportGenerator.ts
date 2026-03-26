@@ -2,11 +2,21 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { SensorData, HardwareModule } from '../types';
 
+export interface SystemReportResult {
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Generate a PDF system report for the Smart Safety Helmet.
+ * Returns a result object indicating success or failure.
+ */
 export function generateSystemReport(
   latestData: SensorData,
   history: SensorData[],
   hardwareModules: HardwareModule[]
-): void {
+): SystemReportResult {
+  try {
   const doc = new jsPDF();
   const now = new Date();
 
@@ -88,4 +98,9 @@ export function generateSystemReport(
   doc.text('Project Status: Review III – 100% Execution Achieved', 20, 78);
 
   doc.save(`Smart_Safety_Helmet_Report_${now.toISOString().split('T')[0]}.pdf`);
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error during PDF generation';
+    return { success: false, error: errorMessage };
+  }
 }

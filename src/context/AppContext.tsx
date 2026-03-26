@@ -32,6 +32,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | null>(null);
 
+const MAX_EVENTS = 500;
 const MAX_HISTORY = 60;
 const MAX_LOGS = 200;
 
@@ -72,7 +73,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
       setAccidentEvents(prev => {
         const updated = [event, ...prev];
-        return updated.length > 500 ? updated.slice(0, 500) : updated;
+        return updated.length > MAX_EVENTS ? updated.slice(0, MAX_EVENTS) : updated;
       });
     } else if (!isActive && wasActive) {
       // Resolve most recent active event

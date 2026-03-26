@@ -12,6 +12,8 @@ const BUFFER_SIZE = 5;
 const SIGMOID_MIDPOINT = 22;
 const SIGMOID_K = 0.25;
 
+const USER_SAFE_RESET_DELAY_MS = 5000;
+
 export interface AccidentDetectionState {
   impactMagnitude: number;
   severityPercent: number;
@@ -75,6 +77,7 @@ export function useAccidentDetection(sensorData: SensorData | null) {
   const bufferRef = useRef<number[]>([]);
   const peakRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const safeResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const accidentActiveRef = useRef(false);
 
   useEffect(() => {
@@ -166,9 +169,22 @@ export function useAccidentDetection(sensorData: SensorData | null) {
       peakAcceleration: 0,
       userResponse: 'safe',
     }));
-    setTimeout(() => {
+    // Clear any existing safe reset timeout before setting a new one
+    if (safeResetTimeoutRef.current) {
+      clearTimeout(safeResetTimeoutRef.current);
+    }
+    safeResetTimeoutRef.current = setTimeout(() => {
       setState(prev => ({ ...prev, userResponse: 'pending' }));
-    }, 5000);
+    }, USER_SAFE_RESET_DELAY_MS);
+  }, []);
+
+  // Cleanup safe reset timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (safeResetTimeoutRef.current) {
+        clearTimeout(safeResetTimeoutRef.current);
+      }
+    };
   }, []);
 
   return { ...state, markUserSafe };

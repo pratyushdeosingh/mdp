@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import type { GPSStatus, GPSState } from '../hooks/useGPSStatus';
 
+const COLD_START_MAX_SECONDS = 600;
+
 interface GPSStatusPanelProps {
   gpsStatus: GPSStatus;
 }
@@ -33,7 +35,7 @@ export function GPSStatusPanel({ gpsStatus }: GPSStatusPanelProps) {
           />
         </div>
         <span className="gps-progress-label">
-          {gpsStatus.coldStartProgress}% — ~{Math.ceil((600 - gpsStatus.elapsedSinceStart) / 60)} min remaining
+          {gpsStatus.coldStartProgress}% — ~{Math.ceil((COLD_START_MAX_SECONDS - gpsStatus.elapsedSinceStart) / 60)} min remaining
         </span>
       </div>
     );

@@ -16,6 +16,9 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | null>(null);
 
+const TOAST_DURATION_MS = 4000;
+const ANIMATION_DURATION_MS = 300;
+
 const ICONS = { success: CheckCircle, error: XCircle, warning: AlertTriangle, info: Info };
 const COLORS: Record<ToastType, { bg: string; border: string; text: string }> = {
   success: { bg: 'var(--status-emerald-bg)', border: 'var(--color-emerald)', text: 'var(--color-emerald)' },
@@ -32,13 +35,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const dismissToast = useCallback((id: number) => {
     timersRef.current.delete(id);
     setToasts(prev => prev.map(t => t.id === id ? { ...t, exiting: true } : t));
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 300);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), ANIMATION_DURATION_MS);
   }, []);
 
   const toast = useCallback((type: ToastType, message: string) => {
     const id = ++idRef.current;
     setToasts(prev => [...prev, { id, type, message }]);
-    const timer = setTimeout(() => dismissToast(id), 4000);
+    const timer = setTimeout(() => dismissToast(id), TOAST_DURATION_MS);
     timersRef.current.set(id, timer);
   }, [dismissToast]);
 

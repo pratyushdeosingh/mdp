@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Shield,
   Activity,
@@ -55,11 +55,26 @@ export default function EmergencyStatusPanel({ sensorData, accidentState, onUser
 
   // Debounce "I'm Safe" button to prevent accidental double-taps
   const [isSafeMarking, setIsSafeMarking] = useState(false);
+  const safeMarkTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Cleanup timeout on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (safeMarkTimeoutRef.current) {
+        clearTimeout(safeMarkTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleMarkSafe = () => {
     if (isSafeMarking) return;
     setIsSafeMarking(true);
     onUserSafe();
-    setTimeout(() => setIsSafeMarking(false), 1500);
+    // Clear any existing timeout before setting a new one
+    if (safeMarkTimeoutRef.current) {
+      clearTimeout(safeMarkTimeoutRef.current);
+    }
+    safeMarkTimeoutRef.current = setTimeout(() => setIsSafeMarking(false), 1500);
   };
 
   // GPS status card config

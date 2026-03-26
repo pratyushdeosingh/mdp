@@ -14,19 +14,25 @@ const statusConfig: Record<string, { bgVar: string; colorVar: string; dotVar: st
 };
 
 export default function StatusBadge({ status, size = 'sm' }: StatusBadgeProps) {
-  const cfg = statusConfig[status] || statusConfig['offline'];
+  const cfg = statusConfig[status];
+  
+  if (!cfg && import.meta.env.DEV) {
+    console.warn(`StatusBadge: Invalid status "${status}". Falling back to "offline".`);
+  }
+  
+  const resolvedCfg = cfg || statusConfig['offline'];
   const sizeClasses = size === 'md' ? 'px-3 py-1.5 text-sm' : 'px-2 py-0.5 text-xs';
 
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full font-medium ${sizeClasses}`}
-      style={{ background: cfg.bgVar, color: cfg.colorVar }}
+      style={{ background: resolvedCfg.bgVar, color: resolvedCfg.colorVar }}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${status === 'online' || status === 'working' ? 'pulse-live' : ''}`}
-        style={{ background: cfg.dotVar }}
+        style={{ background: resolvedCfg.dotVar }}
       />
-      {cfg.label}
+      {resolvedCfg.label}
     </span>
   );
 }

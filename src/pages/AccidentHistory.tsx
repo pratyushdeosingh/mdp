@@ -24,6 +24,7 @@ export default function AccidentHistory() {
           <button
             onClick={() => generateIncidentReport(accidentEvents)}
             disabled={accidentEvents.length === 0}
+            aria-label="Export incident report as PDF"
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             style={{ color: 'var(--color-blue)', borderColor: 'var(--color-blue)', background: 'var(--status-blue-bg)' }}
             title="Export incident report as PDF"
@@ -36,6 +37,7 @@ export default function AccidentHistory() {
               downloadCSV(csv, `Incidents_${new Date().toISOString().split('T')[0]}.csv`);
             }}
             disabled={accidentEvents.length === 0}
+            aria-label="Export incident data as CSV"
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             style={{ color: 'var(--color-emerald)', borderColor: 'var(--color-emerald)', background: 'var(--status-emerald-bg)' }}
             title="Export incident data as CSV"
@@ -45,6 +47,7 @@ export default function AccidentHistory() {
           <button
             onClick={() => { if (window.confirm('Clear all accident history? This cannot be undone.')) clearAccidentHistory(); }}
             disabled={accidentEvents.length === 0}
+            aria-label="Clear all accident history"
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
             style={{ color: 'var(--color-red)', borderColor: 'var(--color-red)', background: 'transparent' }}
             title="Clear all accident history"

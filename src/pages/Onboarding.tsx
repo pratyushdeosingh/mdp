@@ -39,12 +39,18 @@ export default function Onboarding() {
       </div>
 
       {/* Progress bar */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2" role="tablist" aria-label="Setup wizard steps">
         {STEPS.map((step, i) => (
           <div key={step.id} className="flex items-center gap-2 flex-1">
-            <div
+            <button
+              type="button"
+              role="tab"
+              aria-selected={i === stepIndex}
+              aria-label={`Step ${i + 1}: ${step.label}${i < stepIndex ? ' (completed)' : i === stepIndex ? ' (current)' : ''}`}
+              onClick={() => i < stepIndex && setCurrentStep(step.id)}
+              disabled={i > stepIndex}
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                i < stepIndex ? 'text-white' : i === stepIndex ? 'text-white' : 'text-[var(--text-muted)]'
+                i < stepIndex ? 'text-white cursor-pointer hover:opacity-80' : i === stepIndex ? 'text-white' : 'text-[var(--text-muted)] cursor-not-allowed'
               }`}
               style={{
                 background: i < stepIndex
@@ -56,11 +62,12 @@ export default function Onboarding() {
               }}
             >
               {i < stepIndex ? <CheckCircle size={16} /> : i + 1}
-            </div>
+            </button>
             {i < STEPS.length - 1 && (
               <div
                 className="flex-1 h-0.5 rounded"
                 style={{ background: i < stepIndex ? 'var(--color-emerald)' : 'var(--border-color)' }}
+                aria-hidden="true"
               />
             )}
           </div>

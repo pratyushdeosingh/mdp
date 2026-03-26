@@ -30,7 +30,13 @@ async function getAllEvents(): Promise<AccidentEvent[]> {
       events.sort((a, b) => b.timestamp - a.timestamp);
       resolve(events);
     };
-    req.onerror = () => reject(req.error);
+    req.onerror = () => {
+      db.close();
+      if (import.meta.env.DEV) {
+        console.error('[useOfflineStore] getAllEvents error:', req.error);
+      }
+      reject(req.error);
+    };
     tx.oncomplete = () => db.close();
   });
 }
@@ -44,7 +50,13 @@ async function putEvents(events: AccidentEvent[]): Promise<void> {
   }
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => { db.close(); resolve(); };
-    tx.onerror = () => { db.close(); reject(tx.error); };
+    tx.onerror = () => {
+      db.close();
+      if (import.meta.env.DEV) {
+        console.error('[useOfflineStore] putEvents error:', tx.error);
+      }
+      reject(tx.error);
+    };
   });
 }
 
@@ -54,7 +66,13 @@ async function clearAllEvents(): Promise<void> {
   tx.objectStore(STORE_NAME).clear();
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => { db.close(); resolve(); };
-    tx.onerror = () => { db.close(); reject(tx.error); };
+    tx.onerror = () => {
+      db.close();
+      if (import.meta.env.DEV) {
+        console.error('[useOfflineStore] clearAllEvents error:', tx.error);
+      }
+      reject(tx.error);
+    };
   });
 }
 

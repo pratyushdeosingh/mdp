@@ -135,7 +135,8 @@ export function useSerialConnection(onData: (data: SensorData) => void) {
             setLastError(`Connection lost. Reconnecting in ${delay / 1000}s (attempt ${attempts + 1}/${MAX_RECONNECT_ATTEMPTS})...`);
             reconnectTimeoutRef.current = window.setTimeout(() => {
               if (!isIntentionallyDisconnectedRef.current) {
-                connect(port);
+                // Use ref to get current port value, avoiding stale closure
+                connect(selectedPortRef.current);
               }
             }, delay);
           } else {

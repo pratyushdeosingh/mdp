@@ -219,6 +219,8 @@ export default function LoadTesting() {
               <button
                 onClick={() => activeTest ? stopTest() : runTest(preset)}
                 disabled={activeTest !== null && activeTest !== preset.id}
+                aria-label={activeTest === preset.id ? `Stop ${preset.name} test` : `Start ${preset.name} test`}
+                aria-pressed={activeTest === preset.id}
                 className="p-2 rounded-xl transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed"
                 style={{
                   background: activeTest === preset.id ? 'var(--status-red-bg)' : 'var(--status-emerald-bg)',

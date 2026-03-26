@@ -21,6 +21,15 @@ const ZONE_COLORS = {
   SEVERE: '#b91c1c',
 } as const;
 
+// Zone boundaries: 0-20% Safe, 20-40% Elevated, 40-60% Warning, 60-80% Critical, 80-100% Severe
+const ZONES = [
+  { from: 0, to: 20, color: ZONE_COLORS.SAFE, label: 'Safe' },
+  { from: 20, to: 40, color: ZONE_COLORS.ELEVATED, label: 'Elevated' },
+  { from: 40, to: 60, color: ZONE_COLORS.WARNING, label: 'Warning' },
+  { from: 60, to: 80, color: ZONE_COLORS.CRITICAL, label: 'Critical' },
+  { from: 80, to: 100, color: ZONE_COLORS.SEVERE, label: 'Severe' },
+] as const;
+
 interface ImpactMeterProps {
   value: number;
   rawAcceleration: number;
@@ -71,15 +80,6 @@ export default function ImpactMeter({ value, rawAcceleration, maxValue = 100, zo
     return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`;
   };
 
-  // Zone boundaries: 0-20% Safe, 20-40% Elevated, 40-60% Warning, 60-80% Critical, 80-100% Severe
-  const zones = [
-    { from: 0, to: 20, color: ZONE_COLORS.SAFE, label: 'Safe' },
-    { from: 20, to: 40, color: ZONE_COLORS.ELEVATED, label: 'Elevated' },
-    { from: 40, to: 60, color: ZONE_COLORS.WARNING, label: 'Warning' },
-    { from: 60, to: 80, color: ZONE_COLORS.CRITICAL, label: 'Critical' },
-    { from: 80, to: 100, color: ZONE_COLORS.SEVERE, label: 'Severe' },
-  ];
-
   const needleAngle = valueToAngle(displayValue);
 
   const getZoneColor = (v: number) => {
@@ -99,6 +99,8 @@ export default function ImpactMeter({ value, rawAcceleration, maxValue = 100, zo
         height="100%"
         viewBox="0 0 300 190"
         className="overflow-visible max-w-[300px]"
+        role="img"
+        aria-label={`Impact severity gauge showing ${Math.round(displayValue)}% severity at ${rawAcceleration.toFixed(1)} meters per second squared`}
       >
         <defs>
           <linearGradient id="impactNeedleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -132,7 +134,7 @@ export default function ImpactMeter({ value, rawAcceleration, maxValue = 100, zo
         />
 
         {/* Color zone arcs */}
-        {zones.map((z, i) => (
+        {ZONES.map((z, i) => (
           <path
             key={i}
             d={describeArc(valueToAngle(z.from), valueToAngle(z.to), radius)}
@@ -245,7 +247,7 @@ export default function ImpactMeter({ value, rawAcceleration, maxValue = 100, zo
         </text>
 
         {/* Zone labels along the outer edge */}
-        {zones.map((z, i) => {
+        {ZONES.map((z, i) => {
           const midVal = (z.from + z.to) / 2;
           const angle = valueToAngle(midVal);
           const labelR = radius + 20;

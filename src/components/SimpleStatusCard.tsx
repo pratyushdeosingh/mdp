@@ -13,22 +13,18 @@ const statusConfig = {
   good: {
     color: 'var(--color-emerald)',
     bg: 'rgba(52, 211, 153, 0.1)',
-    dotBg: 'rgba(52, 211, 153, 0.25)',
   },
   warning: {
     color: 'var(--color-amber)',
     bg: 'rgba(251, 191, 36, 0.1)',
-    dotBg: 'rgba(251, 191, 36, 0.25)',
   },
   critical: {
     color: 'var(--color-red)',
     bg: 'rgba(248, 113, 113, 0.1)',
-    dotBg: 'rgba(248, 113, 113, 0.25)',
   },
   offline: {
     color: 'var(--color-gray)',
     bg: 'rgba(107, 114, 128, 0.1)',
-    dotBg: 'rgba(107, 114, 128, 0.25)',
   },
 };
 

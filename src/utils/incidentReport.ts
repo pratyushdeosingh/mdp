@@ -2,11 +2,21 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { AccidentEvent } from '../types';
 
+export interface IncidentReportResult {
+  success: boolean;
+  error?: string;
+}
+
 /**
  * Generate a PDF incident report for one or more accident events.
+ * Returns a result object indicating success or failure.
  */
-export function generateIncidentReport(events: AccidentEvent[]): void {
-  if (events.length === 0) return;
+export function generateIncidentReport(events: AccidentEvent[]): IncidentReportResult {
+  if (events.length === 0) {
+    return { success: false, error: 'No events provided for report generation' };
+  }
+
+  try {
 
   const doc = new jsPDF();
   const now = new Date();
@@ -105,6 +115,11 @@ export function generateIncidentReport(events: AccidentEvent[]): void {
   }
 
   doc.save(`Incident_Report_${now.toISOString().split('T')[0]}.pdf`);
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error during PDF generation';
+    return { success: false, error: errorMessage };
+  }
 }
 
 /**

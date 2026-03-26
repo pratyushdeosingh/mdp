@@ -68,6 +68,7 @@ export default function SimulationControls({ activeScenario, onTriggerScenario, 
             key={btn.scenario}
             onClick={() => onTriggerScenario(btn.scenario, btn.duration)}
             disabled={activeScenario === btn.scenario}
+            aria-label={`Trigger ${btn.label} simulation scenario`}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             style={{
               color: btn.color,
@@ -78,12 +79,13 @@ export default function SimulationControls({ activeScenario, onTriggerScenario, 
             {btn.icon}
             {btn.label}
             {activeScenario === btn.scenario && (
-              <span className="w-1.5 h-1.5 rounded-full pulse-live ml-1" style={{ background: btn.color }} />
+              <span className="w-1.5 h-1.5 rounded-full pulse-live ml-1" style={{ background: btn.color }} aria-hidden="true" />
             )}
           </button>
         ))}
         <button
           onClick={onUserSafe}
+          aria-label="Mark user as safe and dismiss accident alert"
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
           style={{
             color: 'var(--color-emerald)',

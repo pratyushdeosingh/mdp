@@ -101,7 +101,7 @@ export default function CircuitSchematic() {
 
   return (
     <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full min-w-[760px]" style={{ maxHeight: '720px' }}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full min-w-[760px]" style={{ maxHeight: '720px' }} role="img" aria-label="Smart Safety Helmet circuit schematic showing Arduino Uno connections">
         {/* Background */}
         <rect width={W} height={H} rx={14} fill={C.bg} />
         <defs>

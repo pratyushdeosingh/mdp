@@ -46,11 +46,12 @@ export default function LocationCard({ latitude, longitude, speed, gpsState }: L
       </div>
 
       {/* Speed + GPS status */}
-      <div className="flex items-center justify-between mt-auto pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+      <div className="flex items-center justify-between mt-auto pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }} aria-live="polite">
         <div className="flex items-center gap-2">
           <span
             className="w-2 h-2 rounded-full status-dot-pulse"
             style={{ background: statusColor }}
+            aria-hidden="true"
           />
           <span className="text-xs font-medium" style={{ color: statusColor }}>
             {statusLabel}

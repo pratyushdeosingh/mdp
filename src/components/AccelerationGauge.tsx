@@ -1,5 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 
+const EASING_FACTOR = 0.12;
+
 interface AccelerationGaugeProps {
     value: number;
     maxValue?: number;
@@ -27,8 +29,7 @@ export default function AccelerationGauge({
                 setDisplayValue(target);
                 return;
             }
-            // Easing — moves 12% of remaining distance each frame
-            currentRef.current += diff * 0.12;
+            currentRef.current += diff * EASING_FACTOR;
             setDisplayValue(currentRef.current);
             animRef.current = requestAnimationFrame(animate);
         };
@@ -100,6 +101,8 @@ export default function AccelerationGauge({
                 height={size * 0.78}
                 viewBox={`0 0 ${size} ${size * 0.85}`}
                 className="overflow-visible"
+                role="img"
+                aria-label={`Acceleration gauge showing current value of ${displayValue.toFixed(1)} meters per second squared`}
             >
                 <defs>
                     {/* Needle gradient */}
