@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -23,6 +23,7 @@ import { exportSensorDataCSV, downloadCSV } from '../utils/simulator';
 import { generateSystemReport } from '../utils/reportGenerator';
 import { hardwareModules } from '../constants/hardware';
 import AccordionSection from './AccordionSection';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const navPages = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -46,8 +47,10 @@ interface NavDrawerProps {
 export default function NavDrawer({ open, onClose }: NavDrawerProps) {
   const { dataMode, setDataMode, sensorData, sensorHistory, connectionStatus } = useAppContext();
   const { toast } = useToast();
-  const panelRef = useRef<HTMLDivElement>(null);
   const [closing, setClosing] = useState(false);
+  
+  // Focus trap for WCAG compliance
+  const focusTrapRef = useFocusTrap(open && !closing);
 
   // Define handleClose for closing with animation
   const handleClose = useCallback(() => {
@@ -98,23 +101,25 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
 
   return (
     <>
-      {/* Overlay */}
-      <div
+      {/* Overlay - use button for accessibility */}
+      <button
+        type="button"
         className="drawer-overlay"
         onClick={handleClose}
         aria-label="Close navigation"
+        tabIndex={-1}
       />
 
-      {/* Panel */}
+      {/* Panel with focus trap */}
       <div
-        ref={panelRef}
+        ref={focusTrapRef}
         className={`drawer-panel ${closing ? 'closing' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation drawer"
       >
-        {/* Header */}
-        <div
+      {/* Header */}
+      <div
           className="flex items-center justify-between px-5 py-4"
           style={{ borderBottom: '1px solid var(--border-color)' }}
         >
@@ -182,10 +187,10 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
           accentColor="var(--color-emerald)"
         >
           {/* Data Mode Toggle */}
-          <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--text-muted)' }}>
+          <fieldset>
+            <legend className="text-[11px] font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--text-muted)' }}>
               Data Source
-            </label>
+            </legend>
             <div className="flex rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-color)' }}>
               <button
                 onClick={() => setDataMode('simulation')}
@@ -230,7 +235,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                 </span>
               </div>
             )}
-          </div>
+          </fieldset>
         </AccordionSection>
 
         {/* Exports */}

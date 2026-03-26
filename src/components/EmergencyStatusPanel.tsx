@@ -87,7 +87,6 @@ export default function EmergencyStatusPanel({ sensorData, accidentState, onUser
 
   return (
     <section
-      role="region"
       aria-label="Emergency Status Monitor"
       aria-live="assertive"
       aria-atomic="true"

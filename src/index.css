@@ -787,3 +787,50 @@ body {
 }
 
 .sidebar-mobile-enter { animation: sidebarSlideIn 0.3s ease-out; }
+
+/* ===== WCAG 2.1 SC 2.3.3 — Respect user motion preferences ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable specific complex animations */
+  .pulse-live,
+  .status-dot-pulse,
+  .gps-dot-pulse,
+  .timer-active,
+  .severity-pulse,
+  .emergency-panel-alert,
+  .gauge-needle-pulse,
+  .gauge-status-pulse,
+  .animate-slow-pulse,
+  .landing-orb-1,
+  .landing-orb-2,
+  .landing-icon-float,
+  .skeleton {
+    animation: none !important;
+  }
+
+  /* Keep visual indicators visible without animation */
+  .pulse-live { box-shadow: 0 0 4px var(--success); }
+  .status-dot-pulse { transform: scale(1); opacity: 1; }
+  .severity-pulse { box-shadow: 0 0 4px currentColor; }
+}
+
+/* ===== Focus fallback for non-animated environments ===== */
+.focus-ring-animate:focus-visible,
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===== Firefox scrollbar support ===== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-muted) transparent;
+}
