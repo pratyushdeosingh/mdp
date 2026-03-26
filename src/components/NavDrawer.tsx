@@ -7,8 +7,6 @@ import {
   Terminal,
   Cpu,
   FileText,
-  Sun,
-  Moon,
   Radio,
   Wifi,
   Download,
@@ -46,7 +44,7 @@ interface NavDrawerProps {
 }
 
 export default function NavDrawer({ open, onClose }: NavDrawerProps) {
-  const { theme, toggleTheme, dataMode, setDataMode, sensorData, sensorHistory, connectionStatus } = useAppContext();
+  const { dataMode, setDataMode, sensorData, sensorHistory, connectionStatus } = useAppContext();
   const { toast } = useToast();
   const panelRef = useRef<HTMLDivElement>(null);
   const [closing, setClosing] = useState(false);
@@ -184,7 +182,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
           accentColor="var(--color-emerald)"
         >
           {/* Data Mode Toggle */}
-          <div className="mb-4">
+          <div>
             <label className="text-[11px] font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--text-muted)' }}>
               Data Source
             </label>
@@ -233,16 +231,6 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
               </div>
             )}
           </div>
-
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-colors"
-            style={{ color: 'var(--text-secondary)' }}
-          >
-            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-          </button>
         </AccordionSection>
 
         {/* Exports */}

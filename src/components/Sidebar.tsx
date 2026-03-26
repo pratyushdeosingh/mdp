@@ -6,8 +6,6 @@ import {
   Terminal,
   Cpu,
   FileText,
-  Sun,
-  Moon,
   Radio,
   Wifi,
   Download,
@@ -45,7 +43,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: SidebarProps) {
-  const { theme, toggleTheme, dataMode, setDataMode, sensorData, sensorHistory, connectionStatus } = useAppContext();
+  const { dataMode, setDataMode, sensorData, sensorHistory, connectionStatus } = useAppContext();
   const { toast } = useToast();
   const location = useLocation();
 
@@ -199,15 +197,6 @@ export default function Sidebar({ collapsed, setCollapsed, onMobileClose }: Side
         >
           <FileText size={14} />
           {!collapsed && 'System Report'}
-        </button>
-        <button
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${collapsed ? 'justify-center' : ''}`}
-          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        >
-          {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-          {!collapsed && (theme === 'dark' ? 'Light Mode' : 'Dark Mode')}
         </button>
         <button
           onClick={() => setCollapsed(!collapsed)}

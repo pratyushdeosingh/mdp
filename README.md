@@ -83,15 +83,15 @@ Two operating modes are supported:
 - 📖 **Documentation** — In-app circuit diagrams, block diagram, flowchart, and roadmap
 
 ### UI/UX
-- 🌗 **Dark/Light Theme** — Persisted in `localStorage`, 16 semantic CSS variables, glass-morphism design
-- 🎨 **Theme-Aware Colors** — Automatic contrast adjustment (dark: `-400` variants, light: `-600` variants)
-- 📱 **Mobile Responsive** — Hamburger menu overlay, adaptive grid layouts
+- 🌙 **Dark Mode Only** — Optimized dark theme with glass-morphism design and 16 semantic CSS variables
+- 🎨 **WCAG Compliant Colors** — High-contrast text and accent colors meeting AA accessibility standards
+- 📱 **Mobile Responsive** — Hamburger menu overlay, collapsible sidebar, adaptive grid layouts
 - 🎬 **Smooth Animations** — Page transitions, staggered fade-ins, gauge easing, skeleton loading states
 - 🔔 **Toast Notifications** — Success/error/warning/info toasts with 4-second auto-dismiss
 - ♿ **Accessibility** — ARIA labels, `focus-visible` rings, `aria-live` regions, keyboard navigation
 - 📤 **Data Export** — CSV sensor logs + PDF system reports (jsPDF + AutoTable)
 - ⚡ **Code-Split Bundle** — Lazy-loaded routes, vendor chunk splitting (81% smaller initial load)
-- 🧩 **Reusable Components** — EmptyState, StatusBadge, GlassCard, MetricCard, AccelerationGauge
+- 🧩 **Reusable Components** — EmptyState, StatusBadge, GlassCard, MetricCard, ImpactMeter, AccelerationGauge
 
 ### Server
 - 🔄 **Serial ↔ WebSocket Bridge** — Transparent data translation with payload validation
@@ -392,11 +392,11 @@ mdp/
 │   │   ├── ImpactMeter.tsx         # Semicircular severity gauge (0-100%)
 │   │   ├── MetricCard.tsx          # Data display card with icon + pulse indicator
 │   │   ├── NavDrawer.tsx           # Mobile navigation overlay drawer
-│   │   ├── Sidebar.tsx             # Desktop navigation, theme toggle, exports
-│   │   └── StatusBadge.tsx         # Theme-aware color-coded status indicators
+│   │   ├── Sidebar.tsx             # Desktop navigation, mode toggle, exports
+│   │   └── StatusBadge.tsx         # Color-coded status indicators
 │   │
 │   ├── context/
-│   │   ├── AppContext.tsx          # Global state (sensors, theme, mode, accidents)
+│   │   ├── AppContext.tsx          # Global state (sensors, mode, accidents)
 │   │   └── ToastContext.tsx        # Toast notification system
 │   │
 │   ├── hooks/
@@ -1290,16 +1290,18 @@ The dashboard uses **code splitting** and **vendor chunking** to minimize initia
 | Cancel button bounce | 200ms software debounce |
 | JSON document size | `StaticJsonDocument<300>` — fits 14 fields with 76-byte headroom |
 
-### Theme System
+### Design System
 
-16 semantic CSS variables automatically adapt between dark and light modes:
+16 semantic CSS variables provide consistent styling across all components:
 
 ```
-Light Mode: -600 Tailwind variants (e.g., --color-emerald: #059669)
-Dark Mode:  -400 Tailwind variants (e.g., --color-emerald: #34d399)
+Color Palette: --color-{emerald, red, amber, blue, cyan, orange, purple, gray}
+Status Backgrounds: --status-{emerald, red, amber, blue}-bg
+Text Hierarchy: --text-primary, --text-secondary, --text-muted
+Surfaces: --bg-primary, --bg-secondary, --glass-bg, --glass-border
 ```
 
-Variables: `--color-{emerald, red, amber, blue, cyan, orange, purple, gray}` + `--status-*-bg` backgrounds.
+All colors are optimized for dark mode with WCAG AA contrast compliance.
 
 ---
 
@@ -1401,7 +1403,7 @@ The dashboard is designed with accessibility in mind, following **WCAG 2.1 AA** 
 | **Focus Indicators** | Visible `focus-visible` rings on all interactive elements (blue outline) |
 | **Motion Reduction** | Respects `prefers-reduced-motion` media query for animations |
 | **Scalable Text** | All text uses `rem` units, scales with browser font size settings |
-| **Dark/Light Theme** | Both themes meet contrast requirements |
+| **Dark Mode Optimized** | High-contrast dark theme designed for extended use |
 
 ### Accessibility Testing
 
@@ -1456,8 +1458,8 @@ npm run build
 |------|-------|
 | **Simulation Mode** | Start streaming, verify data updates, trigger accident, resolve alert |
 | **Hardware Mode** | Connect Arduino, verify serial data, disconnect gracefully |
-| **Navigation** | All sidebar links work, mobile menu opens/closes |
-| **Theme** | Toggle dark/light, verify persistence after refresh |
+| **Navigation** | All sidebar links work, mobile menu opens/closes, collapse toggle |
+| **Mode Toggle** | Switch between Simulation/Hardware, verify connection status |
 | **Export** | Download CSV, generate PDF report |
 | **Map** | Marker moves, trail draws, zoom controls work |
 | **Charts** | Data populates, tooltips appear, responsive on resize |
