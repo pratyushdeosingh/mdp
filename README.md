@@ -109,6 +109,166 @@ Two operating modes are supported:
 
 ---
 
+## 🔄 State Management & Data Flow
+
+### Global State (AppContext)
+
+The application uses **React Context** for global state management, avoiding prop drilling across deeply nested components.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle: App Initialized
+    
+    Idle --> Streaming: Start Streaming
+    Streaming --> Idle: Stop Streaming
+    
+    state Streaming {
+        [*] --> ReceivingData
+        ReceivingData --> ProcessingData: New Packet
+        ProcessingData --> UpdatingState: Validate
+        UpdatingState --> ReceivingData: Broadcast
+        
+        UpdatingState --> AccidentDetected: totalAccel > 25
+        AccidentDetected --> AlertActive: Create Event
+        AlertActive --> ReceivingData: Resolve
+    }
+```
+
+### State Shape
+
+```typescript
+interface AppState {
+  // Connection State
+  dataMode: 'simulation' | 'hardware';
+  isStreaming: boolean;
+  connectionStatus: 'connected' | 'disconnected' | 'connecting' | 'error';
+  
+  // Sensor Data
+  sensorData: SensorData | null;           // Latest reading
+  sensorHistory: SensorData[];             // Last 60 readings
+  gpsTrail: [number, number][];            // Last 100 GPS points
+  
+  // Accident Tracking
+  accidentEvents: AccidentEvent[];         // All detected incidents
+  activeAlert: AccidentEvent | null;       // Currently active alert
+  
+  // UI State
+  theme: 'dark' | 'light';
+  serialLogs: LogMessage[];                // Last 200 log messages
+  
+  // Hardware State (hardware mode only)
+  availablePorts: string[];
+  selectedPort: string | null;
+}
+```
+
+### Data Flow Diagram
+
+```mermaid
+flowchart TD
+    subgraph Sources["📡 Data Sources"]
+        SIM["🧪 Simulator<br/><i>In-memory generator</i>"]
+        HW["🔧 Arduino<br/><i>USB Serial</i>"]
+    end
+    
+    subgraph Bridge["🖥️ Bridge Server"]
+        SERIAL["SerialPort<br/><i>ReadlineParser</i>"]
+        TRANSFORM["transformData()<br/><i>Key mapping</i>"]
+        WS_SERVER["WebSocket Server<br/><i>Broadcast</i>"]
+    end
+    
+    subgraph Client["🖼️ React Dashboard"]
+        WS_CLIENT["useSerialConnection<br/><i>WebSocket client</i>"]
+        VALIDATE["Payload Validation<br/><i>Type checking</i>"]
+        CONTEXT["AppContext<br/><i>Global state</i>"]
+        
+        subgraph Consumers["📊 State Consumers"]
+            DASH["Dashboard"]
+            MAP["LiveMap"]
+            SENS["SensorData"]
+            ANAL["Analytics"]
+            ACC["AccidentHistory"]
+        end
+    end
+    
+    SIM -->|"Direct update"| CONTEXT
+    HW -->|"9600 baud"| SERIAL
+    SERIAL -->|"JSON lines"| TRANSFORM
+    TRANSFORM --> WS_SERVER
+    WS_SERVER -->|"ws://localhost:3001/ws"| WS_CLIENT
+    WS_CLIENT --> VALIDATE
+    VALIDATE -->|"✅ Valid"| CONTEXT
+    VALIDATE -->|"❌ Invalid"| ERROR["Error Toast"]
+    
+    CONTEXT --> Consumers
+    
+    style Sources fill:#2e1f0a,stroke:#f59e0b
+    style Bridge fill:#0a2e2e,stroke:#10b981
+    style Client fill:#1a2744,stroke:#3b82f6
+```
+
+### Real-Time Update Sequence
+
+```mermaid
+sequenceDiagram
+    participant A as Arduino
+    participant S as Bridge Server
+    participant W as WebSocket
+    participant H as useSerialConnection
+    participant C as AppContext
+    participant D as Dashboard
+    
+    loop Every 1 second
+        A->>S: JSON line (9600 baud)
+        S->>S: Parse + Transform keys
+        S->>W: Broadcast to all clients
+        W->>H: onMessage event
+        H->>H: Validate payload
+        H->>C: updateSensorData()
+        
+        C->>C: Add to sensorHistory[]
+        C->>C: Update gpsTrail[]
+        C->>C: Check accident threshold
+        
+        alt totalAccel > 25 m/s²
+            C->>C: Create AccidentEvent
+            C->>D: Re-render with alert
+        else Normal reading
+            C->>D: Re-render with new data
+        end
+    end
+```
+
+### Context Provider Pattern
+
+```mermaid
+graph TD
+    subgraph Providers["Context Provider Stack"]
+        STRICT["<React.StrictMode>"]
+        TOAST["<ToastProvider>"]
+        APP["<AppProvider>"]
+        ROUTER["<BrowserRouter>"]
+        ROUTES["<Routes>"]
+    end
+    
+    STRICT --> TOAST
+    TOAST --> APP
+    APP --> ROUTER
+    ROUTER --> ROUTES
+    
+    subgraph Hooks["Available Hooks"]
+        USE_APP["useAppContext()"]
+        USE_TOAST["useToast()"]
+        USE_SERIAL["useSerialConnection()"]
+    end
+    
+    APP -.-> USE_APP
+    TOAST -.-> USE_TOAST
+    APP -.-> USE_SERIAL
+```
+
+---
+
 ## 🏗️ System Architecture
 
 ### Hardware Mode — Full Data Flow
@@ -229,45 +389,157 @@ mdp/
 │   │   ├── DashboardLayout.tsx     # Responsive layout with sidebar + mobile menu
 │   │   ├── EmptyState.tsx          # Reusable loading/empty state with skeleton placeholders
 │   │   ├── GlassCard.tsx           # Glass-morphism container component
+│   │   ├── ImpactMeter.tsx         # Semicircular severity gauge (0-100%)
 │   │   ├── MetricCard.tsx          # Data display card with icon + pulse indicator
-│   │   ├── Sidebar.tsx             # Navigation, theme toggle, exports, mode switch
+│   │   ├── NavDrawer.tsx           # Mobile navigation overlay drawer
+│   │   ├── Sidebar.tsx             # Desktop navigation, theme toggle, exports
 │   │   └── StatusBadge.tsx         # Theme-aware color-coded status indicators
 │   │
 │   ├── context/
-│   │   ├── AppContext.tsx           # Global state (sensors, theme, mode, accidents)
-│   │   └── ToastContext.tsx         # Toast notification system
+│   │   ├── AppContext.tsx          # Global state (sensors, theme, mode, accidents)
+│   │   └── ToastContext.tsx        # Toast notification system
 │   │
 │   ├── hooks/
-│   │   └── useSerialConnection.ts  # WebSocket client hook (auto-reconnect, backoff)
+│   │   ├── useSerialConnection.ts  # WebSocket client hook (auto-reconnect, backoff)
+│   │   └── useOfflineStore.ts      # IndexedDB offline data persistence
 │   │
 │   ├── pages/
-│   │   ├── Dashboard.tsx           # Main metrics dashboard
+│   │   ├── Dashboard.tsx           # Main metrics dashboard (grid layout)
 │   │   ├── LandingPage.tsx         # Welcome page with feature showcase
 │   │   ├── LiveMap.tsx             # GPS map with trail (lazy-loaded)
+│   │   ├── SensorData.tsx          # Severity meter + accelerometer readings
 │   │   ├── Analytics.tsx           # Rolling charts (lazy-loaded)
 │   │   ├── AccidentHistory.tsx     # Event log with stats (lazy-loaded)
 │   │   ├── SerialMonitor.tsx       # Terminal viewer with scroll-to-bottom
 │   │   ├── HardwareStatus.tsx      # Module status panel
-│   │   └── Documentation.tsx       # In-app docs with circuit/block/flow diagrams
+│   │   ├── Documentation.tsx       # In-app docs with diagrams
+│   │   ├── ValidationLogs.tsx      # Data validation monitoring
+│   │   ├── LoadTesting.tsx         # Performance benchmarking
+│   │   └── Onboarding.tsx          # First-time user tutorial
 │   │
 │   ├── constants/
 │   │   └── hardware.ts             # Hardware module definitions
 │   │
 │   ├── types/
-│   │   └── index.ts                # TypeScript interfaces (SensorData, AccidentEvent, etc.)
+│   │   └── index.ts                # TypeScript interfaces
 │   │
 │   └── utils/
 │       ├── simulator.ts            # Simulation data generator
-│       └── reportGenerator.ts      # CSV + PDF export utilities
+│       ├── reportGenerator.ts      # PDF report generation
+│       └── incidentReport.ts       # Incident CSV/PDF export
 │
 ├── public/                         # Static assets
 ├── index.html                      # Entry HTML
-├── vite.config.ts                  # Vite config with vendor chunk splitting
+├── vite.config.ts                  # Vite config with vendor splitting
 ├── tsconfig.json                   # TypeScript base config
-├── tsconfig.app.json               # App-specific TS config (verbatimModuleSyntax)
+├── tsconfig.app.json               # App TS config (verbatimModuleSyntax)
 ├── eslint.config.js                # ESLint configuration
 └── package.json                    # Frontend dependencies
 ```
+
+---
+
+## 🧩 Component Architecture
+
+The React application follows a **layered architecture** with clear separation of concerns:
+
+```mermaid
+graph TD
+    subgraph Entry["📱 Entry Point"]
+        MAIN["main.tsx<br/><i>React 19 Root</i>"]
+        APP["App.tsx<br/><i>Router + Providers</i>"]
+    end
+    
+    subgraph Providers["🔄 Context Providers"]
+        TOAST_CTX["ToastContext<br/><i>Notifications</i>"]
+        APP_CTX["AppContext<br/><i>Global State</i>"]
+    end
+    
+    subgraph Layout["📐 Layout Layer"]
+        DASH_LAYOUT["DashboardLayout<br/><i>Sidebar + Main Area</i>"]
+        SIDEBAR["Sidebar<br/><i>Desktop Nav</i>"]
+        NAV_DRAWER["NavDrawer<br/><i>Mobile Nav</i>"]
+    end
+    
+    subgraph Pages["📄 Page Components"]
+        LANDING["LandingPage"]
+        DASHBOARD["Dashboard"]
+        LIVEMAP["LiveMap"]
+        SENSORS["SensorData"]
+        ANALYTICS["Analytics"]
+        ACCIDENTS["AccidentHistory"]
+        SERIAL["SerialMonitor"]
+        HARDWARE["HardwareStatus"]
+        DOCS["Documentation"]
+    end
+    
+    subgraph Components["🧱 Reusable Components"]
+        GLASS["GlassCard"]
+        METRIC["MetricCard"]
+        GAUGE["AccelerationGauge"]
+        IMPACT["ImpactMeter"]
+        STATUS["StatusBadge"]
+        EMPTY["EmptyState"]
+        CONN["ConnectionPanel"]
+        CIRCUIT["CircuitSchematic"]
+    end
+    
+    MAIN --> APP
+    APP --> TOAST_CTX
+    TOAST_CTX --> APP_CTX
+    APP_CTX --> DASH_LAYOUT
+    DASH_LAYOUT --> SIDEBAR
+    DASH_LAYOUT --> NAV_DRAWER
+    DASH_LAYOUT --> Pages
+    
+    Pages --> Components
+    
+    style Entry fill:#1a2744,stroke:#3b82f6
+    style Providers fill:#2e1f0a,stroke:#f59e0b
+    style Layout fill:#0a2e2e,stroke:#10b981
+    style Pages fill:#2e0a2e,stroke:#a855f7
+    style Components fill:#2e0a0a,stroke:#ef4444
+```
+
+### Component Hierarchy
+
+```mermaid
+graph LR
+    subgraph Root["🌳 Component Tree"]
+        A["App"] --> B["ToastProvider"]
+        B --> C["AppProvider"]
+        C --> D["BrowserRouter"]
+        D --> E["Routes"]
+        
+        E --> F["LandingPage"]
+        E --> G["DashboardLayout"]
+        
+        G --> H["Sidebar / NavDrawer"]
+        G --> I["<Outlet />"]
+        
+        I --> J["Dashboard"]
+        I --> K["LiveMap"]
+        I --> L["SensorData"]
+        I --> M["Analytics"]
+        I --> N["AccidentHistory"]
+        I --> O["SerialMonitor"]
+        I --> P["HardwareStatus"]
+        I --> Q["Documentation"]
+    end
+```
+
+### Key Components Explained
+
+| Component | Purpose | Props | Notes |
+|-----------|---------|-------|-------|
+| **GlassCard** | Glass-morphism container | `className`, `children` | Semi-transparent background with blur |
+| **MetricCard** | Data display with icon | `icon`, `label`, `value`, `unit`, `trend` | Supports pulse animation |
+| **AccelerationGauge** | Circular SVG gauge | `value`, `max`, `zones` | 0-30 m/s² with color zones |
+| **ImpactMeter** | Severity gauge | `value`, `rawAcceleration`, `zone` | Semicircular with needle |
+| **StatusBadge** | Status indicator | `status`, `size` | Auto-colors by status type |
+| **EmptyState** | Loading/empty UI | `icon`, `title`, `message` | With skeleton placeholders |
+| **ConnectionPanel** | Serial port UI | — | Port selection + connect/disconnect |
+| **CircuitSchematic** | Wiring diagram | — | Interactive SVG schematic |
 
 ---
 
@@ -438,18 +710,498 @@ The simulator generates GPS coordinates around **Chennai, India** with realistic
 
 ---
 
-## 📄 Dashboard Pages
+## 📄 Dashboard Pages — Detailed Guide
 
-| Page | Route | Description |
-|------|-------|-------------|
-| 🏠 **Landing** | `/` | Feature showcase, mode selection, tech stack overview |
-| 📊 **Dashboard** | `/dashboard` | Real-time metrics — GPS, speed, altitude, acceleration, circular gauge, accident alert banner |
-| 🗺️ **Live Map** | `/map` | Interactive Leaflet map with live marker + movement trail |
-| 📈 **Analytics** | `/analytics` | 60-second rolling charts — acceleration, speed, altitude time series |
-| 🚨 **Accidents** | `/accidents` | Event history log with summary stats, GPS, peak accel, duration per event |
-| 📟 **Serial** | `/serial` | macOS-style terminal viewer with color-coded log messages |
-| 🔌 **Hardware** | `/hardware` | Module status (GPS, MPU6050, Buzzer, Button) with connectivity badges |
-| 📖 **Docs** | `/docs` | In-app documentation, project abstract, and roadmap |
+The dashboard is organized into **10 primary pages** accessible via the sidebar navigation. Each page serves a specific purpose in the helmet monitoring ecosystem.
+
+### Navigation Overview
+
+```mermaid
+graph TD
+    subgraph Navigation["📍 Dashboard Navigation"]
+        LAND["🏠 Landing Page"]
+        DASH["📊 Dashboard"]
+        MAP["🗺️ Live Map"]
+        SENS["📡 Sensor Data"]
+        ANAL["📈 Analytics"]
+        ACC["🚨 Accident History"]
+        SER["📟 Serial Monitor"]
+        HW["🔌 Hardware Status"]
+        DOC["📖 Documentation"]
+        VALID["✅ Validation Logs"]
+        LOAD["⚡ Load Testing"]
+        ONBD["🎓 Onboarding"]
+    end
+    
+    LAND --> DASH
+    DASH --> MAP
+    DASH --> SENS
+    DASH --> ANAL
+    DASH --> ACC
+    DASH --> SER
+    DASH --> HW
+    DASH --> DOC
+    DASH --> VALID
+    DASH --> LOAD
+    DASH --> ONBD
+    
+    style LAND fill:#1a2744,stroke:#3b82f6
+    style DASH fill:#0a2e2e,stroke:#10b981
+    style SENS fill:#2e1f0a,stroke:#f97316
+```
+
+---
+
+### 🏠 Landing Page (`/`)
+
+**Purpose:** Welcome screen and mode selection hub
+
+The landing page is the entry point to the application, designed to onboard new users and allow returning users to quickly jump into their preferred mode.
+
+**Key Sections:**
+| Section | Description |
+|---------|-------------|
+| **Hero Banner** | Animated tagline with project branding and call-to-action buttons |
+| **Mode Selection** | Two large cards: 🧪 **Simulation Mode** (no hardware) and 🔧 **Hardware Mode** (Arduino connected) |
+| **Feature Showcase** | Grid of 6 feature cards with icons highlighting key capabilities |
+| **Tech Stack** | Logos for Arduino, React, TypeScript, Node.js with brief descriptions |
+| **How It Works** | 3-step visual flow showing the accident detection pipeline |
+
+**User Flow:**
+```mermaid
+flowchart LR
+    A([Open App]) --> B{First Visit?}
+    B -->|Yes| C[View Feature Showcase]
+    B -->|No| D[Select Mode]
+    C --> D
+    D --> E{Hardware Available?}
+    E -->|Yes| F[Hardware Mode]
+    E -->|No| G[Simulation Mode]
+    F --> H([Navigate to Dashboard])
+    G --> H
+```
+
+---
+
+### 📊 Dashboard (`/dashboard`)
+
+**Purpose:** Central command center with all key metrics at a glance
+
+The main dashboard uses a responsive **12-column CSS Grid** layout that adapts from mobile to desktop. This is where operators spend most of their time monitoring the helmet's status.
+
+**Layout Structure:**
+```
+┌─────────────────────────────────────────────────────────┐
+│                   📍 Hero Status Card                   │  ← 8 cols, 2 rows
+│     Connection Status · GPS Coordinates · Speed         │
+│     Altitude · Last Update · Streaming Status           │
+├───────────────────┬─────────────────────────────────────┤
+│  🎯 Severity      │       ⚡ Quick Stats                │  ← 4 cols each
+│     Meter         │   Battery · MPU · Uptime            │
+├───────────────────┴─────────────────────────────────────┤
+│            🚨 Active Alert Banner (if accident)         │  ← Full width
+├─────────────────────────────────────────────────────────┤
+│  📐 Accelerometer │  📊 Circular  │  🗺️ Mini Map       │  ← 4 cols each
+│     X, Y, Z       │     Gauge     │    Preview          │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Key Components:**
+
+| Component | Description | Real-Time Updates |
+|-----------|-------------|-------------------|
+| **Hero Status Card** | Large card spanning 8 columns showing primary helmet status with connection indicator, GPS coordinates (lat/lng), current speed, altitude, and last update timestamp | ✅ 1 Hz |
+| **Severity Meter** | Circular gauge (0-100%) showing impact intensity with color-coded zones (Safe, Caution, Danger) | ✅ 1 Hz |
+| **Quick Stats** | Battery percentage, MPU6050 status, system uptime in compact cards | ✅ 1 Hz |
+| **Alert Banner** | Full-width red banner that appears when an accident is detected, with dismiss button and auto-resolve countdown | ✅ Event-driven |
+| **Accelerometer Display** | Three cards showing X, Y, Z axis values with visual bars | ✅ 1 Hz |
+| **Circular Gauge** | SVG donut chart showing total acceleration from 0-30 m/s² | ✅ 1 Hz |
+| **Mini Map** | Leaflet map preview showing current GPS position | ✅ 1 Hz |
+
+**Accident Alert Behavior:**
+```mermaid
+sequenceDiagram
+    participant S as Sensor
+    participant A as AppContext
+    participant D as Dashboard
+    participant T as Toast
+    
+    S->>A: totalAccel > 25 m/s²
+    A->>A: Add to accidentEvents[]
+    A->>D: Trigger re-render
+    D->>D: Show Alert Banner
+    D->>T: Show Error Toast
+    
+    alt User Clicks Resolve
+        D->>A: Mark event resolved
+        A->>D: Hide Banner
+    else 10s Timeout
+        A->>A: Auto-resolve event
+        A->>D: Hide Banner
+    end
+```
+
+---
+
+### 🗺️ Live Map (`/map`)
+
+**Purpose:** Real-time GPS tracking with movement history
+
+The map page provides a full-screen interactive map powered by **Leaflet** and **React-Leaflet**. It shows the helmet's current position and a trail of recent positions.
+
+**Layout:** Full-page split view
+```
+┌────────────────────────────────┬─────────────┐
+│                                │ 📊 Stats    │
+│                                │ ─────────── │
+│        🗺️ Interactive Map     │ Lat: 13.08  │
+│            (3/4 width)        │ Lng: 80.27  │
+│                                │ Speed: 45   │
+│                                │ Alt: 120m   │
+│                                │ ─────────── │
+│                                │ 📍 Trail    │
+│                                │ 45 points   │
+└────────────────────────────────┴─────────────┘
+```
+
+**Features:**
+
+| Feature | Description |
+|---------|-------------|
+| **Live Position Marker** | Blue pulsing marker at current GPS coordinates, updates at 1 Hz |
+| **Movement Trail** | Polyline connecting last 100 GPS positions, shows recent path |
+| **Trail History Card** | Shows count of waypoints in the current trail |
+| **Map Controls** | Zoom in/out, reset view, layer selection (street/satellite) |
+| **Auto-Center** | Map automatically pans to keep the marker in view |
+| **Offline Tiles** | Caches recently viewed tiles for offline use |
+
+**Map Interaction:**
+```mermaid
+flowchart TD
+    A[GPS Update Received] --> B[Add to Trail Array]
+    B --> C{Trail > 100 points?}
+    C -->|Yes| D[Remove Oldest Point]
+    C -->|No| E[Keep All Points]
+    D --> F[Update Marker Position]
+    E --> F
+    F --> G[Redraw Polyline]
+    G --> H{Auto-Center On?}
+    H -->|Yes| I[Pan Map to Marker]
+    H -->|No| J[Keep Current View]
+```
+
+---
+
+### 📡 Sensor Data (`/sensors`)
+
+**Purpose:** Dedicated view for raw sensor readings and impact severity
+
+This page is designed for **technical users** who need to see the raw accelerometer data and understand the severity calculation.
+
+**Layout:**
+```
+┌─────────────────────────────────────────────────────────┐
+│ 📡 Sensor Data                                          │
+│ Real-time MPU6050 readings and impact severity analysis │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│    ┌───────────────────────────────────────────────┐   │
+│    │           🎯 Severity Meter                    │   │
+│    │                                               │   │
+│    │         ╭───────────────────╮                 │   │
+│    │        ╱   ◉ SAFE ZONE ◉    ╲                │   │
+│    │       ╱      32% (9.8 m/s²)  ╲               │   │
+│    │      ╱                        ╲              │   │
+│    │     ╰──────────────────────────╯             │   │
+│    │                                               │   │
+│    │  🟢 Safe: 0-12    🟡 Caution: 12-25    🔴 Danger: 25+  │
+│    └───────────────────────────────────────────────┘   │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│  │   📐 Axis X     │  │   📐 Axis Y     │  │   📐 Axis Z     │
+│  │                 │  │                 │  │                 │
+│  │   ████████░░░   │  │   ███░░░░░░░░   │  │   ██████████    │
+│  │   +0.52 m/s²    │  │   -0.18 m/s²    │  │   +9.78 m/s²    │
+│  │   Range: ±20    │  │   Range: ±20    │  │   Range: ±20    │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Severity Zones Explained:**
+
+| Zone | Threshold | Color | Description |
+|------|-----------|-------|-------------|
+| **Safe** | 0 – 12 m/s² | 🟢 Green | Normal riding conditions, minor vibrations |
+| **Caution** | 12 – 25 m/s² | 🟡 Amber | Rough terrain, hard braking, or bumps — no alert triggered |
+| **Danger** | 25+ m/s² | 🔴 Red | Potential impact detected — accident alert triggered |
+
+**ImpactMeter Component:**
+- Semicircular SVG gauge from 0° to 180°
+- Needle animation with easing for smooth transitions
+- Zone arc coloring (green → yellow → red gradient)
+- Digital readout showing percentage and raw m/s² value
+- Zone indicator badge below the gauge
+
+---
+
+### 📈 Analytics (`/analytics`)
+
+**Purpose:** Time-series visualization of sensor data
+
+The analytics page renders **6 interactive charts** using **Recharts**, showing the last 60 seconds of telemetry data.
+
+**Charts Available:**
+
+| Chart | Type | Data | Purpose |
+|-------|------|------|---------|
+| **Accelerometer XYZ** | Line Chart | `accX`, `accY`, `accZ` | Monitor individual axis movement patterns |
+| **Speed** | Area Chart | `speed` (km/h) | Track velocity changes over time |
+| **Altitude** | Area Chart | `altitude` (m) | Monitor elevation changes |
+| **Total Acceleration** | Area Chart | `totalAccel` (m/s²) | Key safety metric for accident detection |
+| **Severity Distribution** | Pie Chart | Incident counts by severity | Overview of incident severity breakdown |
+| **Incidents by Hour** | Bar Chart | Hourly incident count | Identify accident-prone time periods |
+
+**Data Flow:**
+```mermaid
+flowchart LR
+    subgraph Data["Data Pipeline"]
+        WS["WebSocket<br/>1 Hz Updates"]
+        CTX["AppContext<br/>sensorHistory[]"]
+        MEMO["useMemo()<br/>chartData"]
+    end
+    
+    subgraph Charts["Recharts"]
+        LINE["LineChart<br/>Accelerometer"]
+        AREA["AreaChart<br/>Speed, Altitude"]
+        PIE["PieChart<br/>Severity Dist."]
+        BAR["BarChart<br/>Time Pattern"]
+    end
+    
+    WS --> CTX
+    CTX --> MEMO
+    MEMO --> LINE
+    MEMO --> AREA
+    CTX --> PIE
+    CTX --> BAR
+```
+
+**Chart Styling:**
+- Dark-themed tooltips with rounded corners and shadows
+- Axis labels in secondary text color for readability
+- Gradient fills for area charts (opacity 30% → 0%)
+- Smooth curve interpolation (`type="monotone"`)
+- Animated entry with staggered timing
+
+---
+
+### 🚨 Accident History (`/accidents`)
+
+**Purpose:** Complete log of detected accident events
+
+This page maintains a chronological record of all accident events with full sensor snapshots.
+
+**Layout:**
+```
+┌─────────────────────────────────────────────────────────┐
+│ 🚨 Accident History                [Export PDF] [CSV]  │
+│ All detected accident events with timestamps           │
+├─────────────────────────────────────────────────────────┤
+│  ⚫ 3 Active    ⚪ 12 Resolved                          │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐                 │
+│  │ Total   │  │ Peak    │  │ Mode    │                 │
+│  │ Events  │  │ Accel   │  │         │                 │
+│  │   15    │  │ 38.2    │  │  SIM    │                 │
+│  └─────────┘  └─────────┘  └─────────┘                 │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ 🔴 Event #15                          [ACTIVE]   │  │
+│  │ 2:34:56 PM — Jan 15, 2025                        │  │
+│  ├──────────────────────────────────────────────────┤  │
+│  │ 📍 13.0827°, 80.2707°  ⚡ 45.2 km/h              │  │
+│  │ 📐 Total: 38.24 m/s²   ⏱️ Ongoing                │  │
+│  ├──────────────────────────────────────────────────┤  │
+│  │ Acc X: +2.450 m/s²  Y: -1.230 m/s²  Z: +37.82   │  │
+│  └──────────────────────────────────────────────────┘  │
+│                                                         │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ ✅ Event #14                         [RESOLVED]  │  │
+│  │ ...                                              │  │
+│  └──────────────────────────────────────────────────┘  │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Event Data Captured:**
+
+| Field | Description |
+|-------|-------------|
+| `id` | Auto-incrementing event ID |
+| `timestamp` | Unix timestamp when accident was detected |
+| `gps` | Full GPS snapshot (lat, lng, speed, altitude) |
+| `accelerometer` | Raw X, Y, Z values at moment of impact |
+| `totalAcceleration` | Computed magnitude (√x² + y² + z²) |
+| `resolved` | Boolean indicating if event was acknowledged |
+| `resolvedAt` | Timestamp when resolved (manual or auto) |
+
+**Export Options:**
+- **PDF Report** — Generated via jsPDF with AutoTable, includes summary statistics and event details
+- **CSV Export** — Raw data export for spreadsheet analysis
+
+---
+
+### 📟 Serial Monitor (`/serial`)
+
+**Purpose:** Raw communication logs for debugging
+
+A macOS-style terminal interface showing all messages received from the Arduino or simulator.
+
+**Features:**
+
+| Feature | Description |
+|---------|-------------|
+| **Color-Coded Logs** | Boot messages (blue), data packets (green), errors (red), warnings (amber) |
+| **Timestamp Prefix** | Each line prefixed with `HH:MM:SS.mmm` |
+| **Auto-Scroll** | Automatically scrolls to newest message, with manual scroll lock |
+| **Scroll-to-Bottom Button** | Floating button appears when scrolled up |
+| **Log Limit** | Last 200 messages (configurable) to prevent memory issues |
+| **Copy to Clipboard** | Click any line to copy its content |
+
+**Log Message Types:**
+```
+[12:34:56.789] [BOOT] MDP firmware ready
+[12:34:57.234] [DATA] {"lat":13.08,"lng":80.27,"spd":45.2,...}
+[12:34:58.456] [WARN] GPS fix lost
+[12:34:59.123] [ERROR] MPU6050 not responding
+```
+
+---
+
+### 🔌 Hardware Status (`/hardware`)
+
+**Purpose:** Module connectivity and integration overview
+
+Visual status panel showing the connection state of each hardware module.
+
+**Module Status Cards:**
+
+| Module | Status Indicators | Description |
+|--------|-------------------|-------------|
+| **GPS (NEO-6M)** | 🟢 Connected, 🟡 No Fix, 🔴 Disconnected | Satellite lock status and coordinate validity |
+| **MPU6050** | 🟢 Active, 🔴 Fault | Accelerometer/gyroscope I2C communication |
+| **Buzzer** | 🟢 Ready, 🟡 Sounding, 🔴 Fault | Alert system status |
+| **Cancel Button** | 🟢 Ready, 🔴 Stuck | Hardware debounce status |
+| **Serial Port** | 🟢 Connected, 🔴 Disconnected | USB serial connection to bridge server |
+| **WebSocket** | 🟢 Connected, 🟡 Reconnecting, 🔴 Disconnected | Real-time data stream status |
+
+**Circuit Visualization:**
+The page includes an interactive circuit schematic (SVG) showing the Arduino wiring diagram with clickable components.
+
+---
+
+### 📖 Documentation (`/docs`)
+
+**Purpose:** In-app reference documentation
+
+Comprehensive documentation embedded within the application, including:
+
+| Section | Content |
+|---------|---------|
+| **Project Abstract** | Academic summary of the project goals and methodology |
+| **Architecture Overview** | Block diagrams and data flow explanations |
+| **Circuit Diagrams** | Detailed wiring schematics (SVG) |
+| **Data Protocol** | JSON schema and field descriptions |
+| **Flowcharts** | Algorithm flowcharts for accident detection |
+| **Future Roadmap** | Planned features and improvements |
+
+---
+
+### ✅ Validation Logs (`/validation`)
+
+**Purpose:** System health and data integrity monitoring
+
+Technical page showing validation results for incoming data packets.
+
+**Validation Checks:**
+
+| Check | Description | Status |
+|-------|-------------|--------|
+| **JSON Parse** | Incoming packet is valid JSON | ✅/❌ |
+| **Schema Validation** | All required fields present | ✅/❌ |
+| **Range Checks** | Values within expected bounds | ✅/❌ |
+| **GPS Validity** | Coordinates are realistic | ✅/❌ |
+| **Timestamp Continuity** | No large gaps in data stream | ✅/❌ |
+
+---
+
+### ⚡ Load Testing (`/load-testing`)
+
+**Purpose:** Performance benchmarking tools
+
+Developer tools for stress-testing the dashboard under high data rates.
+
+**Features:**
+- Adjustable update frequency (1 Hz → 60 Hz)
+- Memory usage monitoring
+- Frame rate (FPS) counter
+- Render time profiling
+- WebSocket message queue depth
+
+---
+
+### 🎓 Onboarding (`/onboarding`)
+
+**Purpose:** First-time user tutorial
+
+Guided walkthrough for new users, explaining:
+1. How to select a mode (Simulation vs Hardware)
+2. How to connect to Arduino (if using Hardware Mode)
+3. Dashboard layout overview
+4. How to interpret the severity meter
+5. What happens when an accident is detected
+
+---
+
+## 🧭 User Journey Map
+
+```mermaid
+journey
+    title Smart Helmet Dashboard User Journey
+    section First Visit
+      Open Application: 5: User
+      View Landing Page: 5: User
+      Read Feature Overview: 4: User
+      Choose Mode: 5: User
+    section Simulation Mode
+      Click Simulation: 5: User
+      Navigate to Dashboard: 5: User
+      Start Streaming: 5: User
+      Observe Real-time Data: 5: User
+    section Hardware Mode
+      Click Hardware: 4: User
+      Start Bridge Server: 3: User
+      Connect Arduino: 4: User
+      Refresh Ports: 4: User
+      Select COM Port: 4: User
+      Connect: 5: User
+      Stream Live Data: 5: User
+    section Monitoring
+      Watch Severity Meter: 5: User
+      Check Map Position: 5: User
+      Review Analytics: 4: User
+    section Incident Response
+      Accident Detected: 2: System
+      Alert Banner Shown: 3: User
+      Review Event Details: 4: User
+      Resolve or Wait: 4: User
+      Export Report: 5: User
+```
 
 ---
 
@@ -575,13 +1327,279 @@ Variables: `--color-{emerald, red, amber, blue, cyan, orange, purple, gray}` + `
 | 🟢 Low | **Temperature Monitoring** | DHT22 module for ambient temperature sensing |
 | 🟢 Low | **Geofencing** | Alert when rider leaves designated safe zones |
 
+### Future Architecture Vision
+
+```mermaid
+graph TB
+    subgraph Helmets["🏍️ Multiple Helmets"]
+        H1["Helmet A<br/><i>ESP32 + LoRa</i>"]
+        H2["Helmet B<br/><i>ESP32 + LoRa</i>"]
+        H3["Helmet C<br/><i>ESP32 + LoRa</i>"]
+    end
+    
+    subgraph Gateway["📡 LoRa Gateway"]
+        GW["Raspberry Pi<br/><i>LoRaWAN</i>"]
+    end
+    
+    subgraph Cloud["☁️ Cloud Platform"]
+        IOT["AWS IoT Core"]
+        DB["DynamoDB"]
+        ML["SageMaker<br/><i>Anomaly Detection</i>"]
+        SNS["SNS<br/><i>Notifications</i>"]
+    end
+    
+    subgraph Clients["📱 Clients"]
+        WEB["Web Dashboard"]
+        APP["Mobile App"]
+        SMS["SMS Gateway"]
+    end
+    
+    H1 & H2 & H3 -->|"LoRa 915MHz"| GW
+    GW -->|"MQTT"| IOT
+    IOT --> DB
+    IOT --> ML
+    ML -->|"Accident Alert"| SNS
+    SNS --> APP
+    SNS --> SMS
+    IOT --> WEB
+    
+    style Cloud fill:#0a2e3e,stroke:#06b6d4
+    style Helmets fill:#2e1f0a,stroke:#f59e0b
+```
+
+---
+
+## ♿ Accessibility
+
+The dashboard is designed with accessibility in mind, following **WCAG 2.1 AA** guidelines.
+
+### Keyboard Navigation
+
+| Key | Action |
+|-----|--------|
+| `Tab` | Move focus to next interactive element |
+| `Shift+Tab` | Move focus to previous element |
+| `Enter` / `Space` | Activate buttons and links |
+| `Escape` | Close modals and drawers |
+| `Arrow Keys` | Navigate within menus and lists |
+
+### Screen Reader Support
+
+| Feature | Implementation |
+|---------|----------------|
+| **ARIA Labels** | All interactive elements have descriptive `aria-label` attributes |
+| **Live Regions** | `aria-live="polite"` for toast notifications, `aria-live="assertive"` for accident alerts |
+| **Role Attributes** | Semantic roles on custom components (`role="alert"`, `role="status"`, `role="navigation"`) |
+| **Alt Text** | All images and icons have alternative text descriptions |
+| **Heading Hierarchy** | Proper `h1` → `h6` hierarchy on all pages |
+
+### Visual Accessibility
+
+| Feature | Description |
+|---------|-------------|
+| **Color Contrast** | All text meets WCAG AA contrast ratio (≥4.5:1 for normal text, ≥3:1 for large text) |
+| **Focus Indicators** | Visible `focus-visible` rings on all interactive elements (blue outline) |
+| **Motion Reduction** | Respects `prefers-reduced-motion` media query for animations |
+| **Scalable Text** | All text uses `rem` units, scales with browser font size settings |
+| **Dark/Light Theme** | Both themes meet contrast requirements |
+
+### Accessibility Testing
+
+```bash
+# Run accessibility audit (requires axe-core)
+npm run test:a11y
+
+# Manual testing checklist:
+# ✅ Navigate entire app with keyboard only
+# ✅ Test with VoiceOver (macOS) or NVDA (Windows)
+# ✅ Test with browser zoom at 200%
+# ✅ Test with high contrast mode
+# ✅ Verify focus order matches visual order
+```
+
+---
+
+## 🛡️ Security Considerations
+
+| Area | Implementation |
+|------|----------------|
+| **CORS** | Server allows only `localhost:5173` and `localhost:5174` origins |
+| **Rate Limiting** | 30 requests/minute per IP to prevent abuse |
+| **Input Validation** | All incoming sensor data validated against schema |
+| **XSS Prevention** | React's built-in XSS protection + no `dangerouslySetInnerHTML` |
+| **No Secrets in Code** | No API keys or credentials in source code |
+| **Dependencies** | Regular `npm audit` and dependabot alerts |
+
+---
+
+## 🧪 Testing
+
+### Running Tests
+
+```bash
+# Unit tests (when available)
+npm run test
+
+# Type checking
+npm run typecheck
+
+# Lint
+npm run lint
+
+# Build (includes type check)
+npm run build
+```
+
+### Manual Testing Checklist
+
+| Area | Tests |
+|------|-------|
+| **Simulation Mode** | Start streaming, verify data updates, trigger accident, resolve alert |
+| **Hardware Mode** | Connect Arduino, verify serial data, disconnect gracefully |
+| **Navigation** | All sidebar links work, mobile menu opens/closes |
+| **Theme** | Toggle dark/light, verify persistence after refresh |
+| **Export** | Download CSV, generate PDF report |
+| **Map** | Marker moves, trail draws, zoom controls work |
+| **Charts** | Data populates, tooltips appear, responsive on resize |
+| **Responsive** | Test at 320px, 768px, 1024px, 1440px widths |
+
+---
+
+## 📚 API Reference
+
+### Bridge Server REST Endpoints
+
+| Method | Endpoint | Description | Response |
+|--------|----------|-------------|----------|
+| `GET` | `/api/ports` | List available serial ports | `{ ports: ["COM3", "COM4"] }` |
+| `POST` | `/api/connect` | Connect to serial port | `{ success: true, port: "COM3" }` |
+| `POST` | `/api/disconnect` | Disconnect from port | `{ success: true }` |
+| `GET` | `/api/status` | Get connection status | `{ connected: true, port: "COM3" }` |
+
+### WebSocket Protocol
+
+**Connection:** `ws://localhost:3001/ws`
+
+**Incoming Messages (Server → Client):**
+```json
+{
+  "type": "sensor_data",
+  "payload": {
+    "gpsValid": true,
+    "latitude": 13.0827,
+    "longitude": 80.2707,
+    "speed": 45.2,
+    "altitude": 120.5,
+    "accelerometer": { "x": 0.12, "y": -0.45, "z": 9.81 },
+    "totalAcceleration": 9.83,
+    "accidentDetected": false,
+    "battery": 100,
+    "mpuStatus": true,
+    "uptime": 45000
+  }
+}
+```
+
+**Client → Server Messages:**
+```json
+{ "type": "ping" }  // Keepalive
+{ "type": "subscribe", "channel": "sensor_data" }
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **Commit** your changes: `git commit -m 'Add amazing feature'`
+4. **Push** to the branch: `git push origin feature/amazing-feature`
+5. **Open** a Pull Request
+
+### Code Style
+
+- TypeScript strict mode enabled
+- ESLint configuration provided
+- Prettier formatting (run `npm run format`)
+- Use `verbatimModuleSyntax` for type imports (`import type`)
+
+---
+
+## 📜 License
+
+This project is developed as part of a **Multidisciplinary Project (MDP)** at [Your University]. It is provided for academic and educational purposes.
+
 ---
 
 <div align="center">
 
+## 🏆 Project Showcase
+
+<table>
+<tr>
+<td align="center" width="33%">
+
+### 📊 Dashboard
+Real-time metrics with glass-morphism design
+
+</td>
+<td align="center" width="33%">
+
+### 🗺️ Live Map
+GPS tracking with movement trail
+
+</td>
+<td align="center" width="33%">
+
+### 📈 Analytics
+60-second rolling time-series charts
+
+</td>
+</tr>
+<tr>
+<td align="center" width="33%">
+
+### 📡 Sensor Data
+Severity gauge + accelerometer readings
+
+</td>
+<td align="center" width="33%">
+
+### 🚨 Accidents
+Event log with full sensor snapshots
+
+</td>
+<td align="center" width="33%">
+
+### 📟 Serial Monitor
+macOS-style debug terminal
+
+</td>
+</tr>
+</table>
+
+---
+
 **Built with ❤️ as a Multidisciplinary Project**
 
 *Saving lives through technology — one helmet at a time.*
+
+```
+   ╔════════════════════════════════════════════════════════════╗
+   ║                                                            ║
+   ║   🏍️  S M A R T   S A F E T Y   H E L M E T  🏍️          ║
+   ║                                                            ║
+   ║   Real-Time IoT Accident Detection & Emergency Response   ║
+   ║                                                            ║
+   ╠════════════════════════════════════════════════════════════╣
+   ║                                                            ║
+   ║   Arduino Uno R3 · React 19 · TypeScript 5.9 · Node.js    ║
+   ║   WebSocket · Leaflet · Recharts · TailwindCSS · Vite     ║
+   ║                                                            ║
+   ╚════════════════════════════════════════════════════════════╝
+```
 
 ---
 
@@ -589,7 +1607,7 @@ Variables: `--color-{emerald, red, amber, blue, cyan, orange, purple, gray}` + `
 
 **Smart Safety Helmet** © 2025 — Multidisciplinary Project (MDP)
 
-Arduino Uno R3 · React 19 · TypeScript 5.9 · Node.js · WebSocket · Leaflet · Recharts
+[🔝 Back to Top](#-smart-safety-helmet)
 
 </sub>
 
