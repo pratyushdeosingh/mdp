@@ -84,6 +84,8 @@ function transformArduinoData(raw) {
       batteryLevel: raw.bat ?? 100, // Default to 100 when no battery sensor
       temperature: raw.tmp ?? 0,
       gpsValid: hasGPS,
+      mpuStatus: mpuOk,
+      uptime: raw.ms ?? 0,
     },
   };
 }

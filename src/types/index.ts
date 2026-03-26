@@ -17,6 +17,8 @@ export interface SensorData {
   batteryLevel: number;
   temperature: number;
   gpsValid?: boolean;
+  mpuStatus?: boolean;
+  uptime?: number;
 }
 
 export interface HardwareModule {
@@ -58,17 +60,20 @@ export type ScenarioType = 'normal' | 'accident' | 'severe' | 'gps_loss' | 'sens
 // Hardware integration types
 
 export interface ArduinoRawData {
-  lat: number;
-  lng: number;
-  spd: number;
-  alt: number;
-  ax: number;
-  ay: number;
-  az: number;
-  ta: number;
-  ad: number;
-  bat?: number;
-  tmp: number;
+  gv: number;       // GPS valid flag (0 or 1)
+  lat: number;      // Latitude
+  lng: number;      // Longitude
+  spd: number;      // Speed (km/h)
+  alt: number;      // Altitude (m)
+  ax: number;       // Accelerometer X (m/s²)
+  ay: number;       // Accelerometer Y (m/s²)
+  az: number;       // Accelerometer Z (m/s²)
+  ta: number;       // Total acceleration (m/s²)
+  ad: number;       // Accident detected (0 or 1)
+  tmp: number;      // Temperature (placeholder)
+  bat?: number;     // Battery level (placeholder)
+  mpu: number;      // MPU6050 status (0 or 1)
+  ms: number;       // Uptime in milliseconds
 }
 
 export interface BridgeMessage {

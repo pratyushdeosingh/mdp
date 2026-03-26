@@ -12,6 +12,9 @@ let batteryLevel = 95;
 let lastBatteryUpdate = Date.now();
 const BATTERY_DRAIN_RATE = 0.002; // % per second (roughly 0.12% per minute, 7.2% per hour)
 
+// Simulator start time for uptime tracking
+const simulatorStartTime = Date.now();
+
 // Stable temperature simulation - fluctuates slowly around a base
 let currentTemp = 35 + Math.random() * 3;
 
@@ -137,6 +140,8 @@ export function generateSensorData(): SensorData {
     batteryLevel: Math.floor(batteryLevel),
     temperature: parseFloat(currentTemp.toFixed(1)),
     gpsValid: true,
+    mpuStatus: true,
+    uptime: Date.now() - simulatorStartTime,
   };
 }
 
