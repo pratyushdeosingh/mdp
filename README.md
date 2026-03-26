@@ -71,7 +71,8 @@ Two operating modes are supported:
 - 🔊 **Buzzer Alert** — 500ms on/off beep pattern during active alert
 - 🛑 **Cancel Button** — Hardware debounced (200ms) manual alert cancellation
 - 🩺 **Health Reporting** — `mpu` status flag, `ms` uptime, `bat` battery field
-- 🧠 **Memory-Safe** — `dtostrf()` stack buffers instead of `String()` heap allocations (2KB SRAM safe)
+- 🧠 **Memory-Safe** — `dtostrf()` 24-byte stack buffers instead of `String()` heap allocations (2KB SRAM safe)
+- 🐕 **Watchdog Timer** — 2-second AVR watchdog prevents firmware lockups on I2C bus hang
 
 ### Dashboard
 - 📊 **Real-Time Metrics** — GPS, speed, altitude, 3-axis acceleration, total accel, system status
@@ -84,12 +85,12 @@ Two operating modes are supported:
 
 ### UI/UX
 - 🌙 **Dark Mode Only** — Optimized dark theme with glass-morphism design and 16 semantic CSS variables
-- 🎨 **WCAG Compliant Colors** — High-contrast text and accent colors meeting AA accessibility standards
+- 🎨 **WCAG AA Compliant** — High-contrast text, accessible colors, `prefers-reduced-motion` support
 - 📱 **Mobile Responsive** — Hamburger menu overlay, collapsible sidebar, adaptive grid layouts
 - 🎬 **Smooth Animations** — Page transitions, staggered fade-ins, gauge easing, skeleton loading states
 - 🔔 **Toast Notifications** — Success/error/warning/info toasts with 4-second auto-dismiss
-- ♿ **Accessibility** — ARIA labels, `focus-visible` rings, `aria-live` regions, keyboard navigation
-- 📤 **Data Export** — CSV sensor logs + PDF system reports (jsPDF + AutoTable)
+- ♿ **Accessibility** — Full ARIA labels on all interactive elements, SVG `role="img"`, focus trap modals, `aria-live` regions, keyboard navigation
+- 📤 **Data Export** — CSV sensor logs + PDF system reports with try-catch error handling (jsPDF + AutoTable)
 - ⚡ **Code-Split Bundle** — Lazy-loaded routes, vendor chunk splitting (81% smaller initial load)
 - 🧩 **Reusable Components** — EmptyState, StatusBadge, GlassCard, MetricCard, ImpactMeter, AccelerationGauge
 
@@ -99,6 +100,7 @@ Two operating modes are supported:
 - 📡 **REST API** — Port listing, connect/disconnect, status endpoints
 - 🧹 **Resource Management** — Proper WebSocket cleanup, heartbeat monitoring, graceful shutdown
 - ⚠️ **Error Handling** — Express error middleware, serial parser recovery, broadcast try-catch
+- 📦 **Request Size Limit** — 10KB JSON body limit to prevent DoS attacks
 
 ### Resilience
 - 🔁 **Auto-Reconnect** — Exponential backoff (1s → 16s, max 5 attempts) for WebSocket
@@ -106,6 +108,16 @@ Two operating modes are supported:
 - ✅ **Payload Validation** — Runtime type-checking on all incoming sensor data
 - ⏱️ **Fetch Timeout** — 10-second AbortController wrapper prevents hanging requests
 - 🚦 **Graceful Shutdown** — Server handles SIGINT/SIGTERM with resource cleanup + 5s force-exit
+- 🧹 **Memory Safety** — setTimeout refs tracked and cleaned up on component unmount
+- 📦 **IndexedDB Cleanup** — Proper `db.close()` on all error paths
+
+### Code Quality
+- 🧪 **Testing Infrastructure** — Vitest + React Testing Library + jsdom environment ready
+- 🔍 **Accessibility Linting** — `eslint-plugin-jsx-a11y` enforces WCAG compliance
+- 📝 **TypeScript Strict Mode** — Full type safety with `noUnusedLocals`, `noUnusedParameters`
+- 🚫 **No Console Logs** — ESLint `no-console` rule (warn level, allow warn/error)
+- 📊 **Named Constants** — Magic numbers extracted to descriptive constants
+- 🔒 **Secrets Protected** — `.gitignore` includes all `.env` patterns
 
 ---
 
@@ -401,7 +413,13 @@ mdp/
 │   │
 │   ├── hooks/
 │   │   ├── useSerialConnection.ts  # WebSocket client hook (auto-reconnect, backoff)
+│   │   ├── useAccidentDetection.ts # Accident detection state machine
+│   │   ├── useGPSStatus.ts         # GPS lock status tracking
+│   │   ├── useFocusTrap.ts         # WCAG-compliant modal focus trap
 │   │   └── useOfflineStore.ts      # IndexedDB offline data persistence
+│   │
+│   ├── test/
+│   │   └── setup.ts                # Vitest setup with browser mocks
 │   │
 │   ├── pages/
 │   │   ├── Dashboard.tsx           # Main metrics dashboard (grid layout)
@@ -431,9 +449,10 @@ mdp/
 ├── public/                         # Static assets
 ├── index.html                      # Entry HTML
 ├── vite.config.ts                  # Vite config with vendor splitting
+├── vitest.config.ts                # Vitest test runner config
 ├── tsconfig.json                   # TypeScript base config
 ├── tsconfig.app.json               # App TS config (verbatimModuleSyntax)
-├── eslint.config.js                # ESLint configuration
+├── eslint.config.js                # ESLint flat config with jsx-a11y
 └── package.json                    # Frontend dependencies
 ```
 
