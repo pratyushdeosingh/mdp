@@ -64,11 +64,12 @@ function validateSensorData(data: SensorData): ValidationEntry[] {
   }
 
   // Speed reasonableness (>200 km/h is unusual for a motorcycle/bicycle)
-  if (data.gps.speed > 200) {
+  const speed = data.gps.speed ?? 0;
+  if (speed > 200) {
     entries.push({
       id: idCounter++, timestamp: now, check: 'Speed Range',
-      status: 'fail', message: `Speed ${data.gps.speed} km/h is unreasonably high — possible GPS error`,
-      value: `${data.gps.speed} km/h`,
+      status: 'fail', message: `Speed ${speed} km/h is unreasonably high — possible GPS error`,
+      value: `${speed} km/h`,
     });
   }
 

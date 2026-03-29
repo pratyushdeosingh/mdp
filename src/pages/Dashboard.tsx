@@ -69,7 +69,7 @@ const Dashboard = memo(function Dashboard() {
   const isAccident = accidentState.isAccidentActive;
   const battLevel = d.batteryLevel;
   const temp = d.temperature;
-  const speed = d.gps.speed;
+  const speed = d.gps.speed ?? 0;
 
   return (
     <div className="w-full h-full min-h-[calc(100vh-120px)] flex flex-col gap-6">
@@ -193,7 +193,7 @@ const Dashboard = memo(function Dashboard() {
                   Current Location
                 </p>
                 <p className="text-lg font-semibold mt-1" style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
-                  {d.gps.latitude.toFixed(6)}°, {d.gps.longitude.toFixed(6)}°
+                  {(d.gps.latitude ?? 0).toFixed(6)}°, {(d.gps.longitude ?? 0).toFixed(6)}°
                 </p>
               </div>
             </div>

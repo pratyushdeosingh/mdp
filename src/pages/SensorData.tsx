@@ -49,7 +49,14 @@ const SensorData = memo(function SensorData() {
     );
   }
 
-  const { accelerometer, totalAcceleration, temperature, gps } = sensorData;
+  const { accelerometer, totalAcceleration, temperature } = sensorData;
+  const gps = {
+    ...sensorData.gps,
+    speed: sensorData.gps.speed ?? 0,
+    altitude: sensorData.gps.altitude ?? 0,
+    latitude: sensorData.gps.latitude ?? 0,
+    longitude: sensorData.gps.longitude ?? 0,
+  };
 
   // Impact threshold constants (match Arduino firmware)
   const ACCIDENT_THRESHOLD = 25; // m/s²

@@ -1,9 +1,17 @@
 /**
  * MDP IoT Serial-to-WebSocket Bridge Server
+ * Version 2.0 — Production Safety Fixes
  *
  * Reads JSON lines from Arduino over USB serial,
  * transforms them into the SensorData format,
  * and broadcasts via WebSocket to the React dashboard.
+ *
+ * Safety Features:
+ * - Numeric validation on all Arduino data fields
+ * - WebSocket memory leak prevention with client cleanup
+ * - Backpressure handling for slow clients
+ * - Connection race condition prevention
+ * - Sequence numbers for packet loss detection
  *
  * Usage:
  *   cd server
@@ -21,11 +29,31 @@
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
-const { WebSocketServer } = require('ws');
+const { WebSocketServer, WebSocket } = require('ws');
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 
 const PORT = 3001;
+
+// ── Validation Constants ───────────────────────────────────
+const MAX_LINE_LENGTH = 512;  // Max JSON line length from Arduino
+const DEAD_CONNECTION_THRESHOLD = 3;  // Send failures before terminating client
+const MAX_BACKLOG_BYTES = 16 * 1024 * 1024;  // 16MB max buffer per client
+
+// Numeric field ranges for Arduino data validation
+const FIELD_RANGES = {
+  lat: [-90, 90],
+  lng: [-180, 180],
+  spd: [0, 500],        // km/h (500 allows for future high-speed applications)
+  alt: [-1000, 50000],  // meters (below sea level to aircraft altitude)
+  ax: [-320, 320],      // m/s² (±16g * 9.81 * 2 safety margin)
+  ay: [-320, 320],
+  az: [-320, 320],
+  ta: [0, 500],         // total acceleration magnitude
+  bat: [0, 100],        // percentage
+  tmp: [-40, 125],      // temperature range (typical sensor limits)
+  ms: [0, 4294967295],  // 32-bit millis() max
+};
 
 const app = express();
 app.use(cors({
@@ -47,11 +75,59 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 let serialPort = null;
 let parser = null;
 let heartbeatInterval = null;
+let connectionLock = null;  // Prevents race conditions in /api/connect
+let messageSequence = 0;    // Packet sequence number for loss detection
 let connectionState = {
   connected: false,
   port: null,
   baudRate: 9600,
 };
+
+// Metrics for monitoring
+const metrics = {
+  parseSuccess: 0,
+  parseFailed: 0,
+  parseInvalid: 0,
+  broadcastCount: 0,
+  clientsTerminated: 0,
+};
+
+// ── Data Validation ────────────────────────────────────────
+/**
+ * Validates Arduino data fields are within expected ranges.
+ * Prevents Infinity, NaN, and out-of-range values from reaching clients.
+ */
+function isValidArduinoData(raw) {
+  if (!raw || typeof raw !== 'object') return false;
+
+  // Validate numeric fields against defined ranges
+  for (const [key, [min, max]] of Object.entries(FIELD_RANGES)) {
+    if (key in raw) {
+      const val = raw[key];
+      // Must be a finite number within range
+      if (typeof val !== 'number' || !Number.isFinite(val) || val < min || val > max) {
+        console.warn(`[Validation] Field '${key}' invalid: ${val} (expected ${min}-${max})`);
+        return false;
+      }
+    }
+  }
+
+  // Validate flag fields (must be 0 or 1)
+  if ('gv' in raw && ![0, 1].includes(raw.gv)) {
+    console.warn(`[Validation] Field 'gv' invalid: ${raw.gv}`);
+    return false;
+  }
+  if ('ad' in raw && ![0, 1].includes(raw.ad)) {
+    console.warn(`[Validation] Field 'ad' invalid: ${raw.ad}`);
+    return false;
+  }
+  if ('mpu' in raw && ![0, 1].includes(raw.mpu)) {
+    console.warn(`[Validation] Field 'mpu' invalid: ${raw.mpu}`);
+    return false;
+  }
+
+  return true;
+}
 
 // ── Transform Arduino short-key JSON → full SensorData ─────
 function transformArduinoData(raw) {
@@ -63,26 +139,30 @@ function transformArduinoData(raw) {
   if (!hasGPS && !mpuOk) systemStatus = 'offline';
   else if (!hasGPS || !mpuOk) systemStatus = 'warning';
 
+  // Increment sequence number for packet loss detection
+  messageSequence++;
+
   return {
     type: 'data',
+    sequence: messageSequence,
     payload: {
       timestamp: Date.now(),
       gps: {
-        latitude: raw.lat ?? 0,
-        longitude: raw.lng ?? 0,
-        speed: raw.spd ?? 0,
-        altitude: raw.alt ?? 0,
+        latitude: hasGPS ? (raw.lat ?? 0) : null,
+        longitude: hasGPS ? (raw.lng ?? 0) : null,
+        speed: hasGPS ? (raw.spd ?? 0) : null,
+        altitude: hasGPS ? (raw.alt ?? 0) : null,
       },
       accelerometer: {
-        x: raw.ax ?? 0,
-        y: raw.ay ?? 0,
-        z: raw.az ?? 0,
+        x: mpuOk ? (raw.ax ?? 0) : null,
+        y: mpuOk ? (raw.ay ?? 0) : null,
+        z: mpuOk ? (raw.az ?? 0) : null,
       },
       systemStatus,
-      totalAcceleration: raw.ta ?? 0,
-      accidentDetected: (raw.ad ?? 0) === 1,
-      batteryLevel: raw.bat ?? 100, // Default to 100 when no battery sensor
-      temperature: raw.tmp ?? 0,
+      totalAcceleration: mpuOk ? (raw.ta ?? 0) : null,
+      accidentDetected: mpuOk && (raw.ad ?? 0) === 1,
+      batteryLevel: 'bat' in raw ? raw.bat : null,
+      temperature: 'tmp' in raw ? raw.tmp : null,
       gpsValid: hasGPS,
       mpuStatus: mpuOk,
       uptime: raw.ms ?? 0,
@@ -91,26 +171,79 @@ function transformArduinoData(raw) {
 }
 
 // ── Broadcast to all WebSocket clients ─────────────────────
+/**
+ * Broadcasts a message to all connected WebSocket clients.
+ * Includes backpressure handling and dead connection cleanup.
+ */
 function broadcast(message) {
   const data = JSON.stringify(message);
-  wss.clients.forEach((client) => {
-    if (client.readyState === 1) { // WebSocket.OPEN
+  const deadClients = [];
+  let slowClients = 0;
+
+  for (const client of wss.clients) {
+    // Initialize failure counter if not present
+    if (client.sendFailures === undefined) client.sendFailures = 0;
+
+    if (client.readyState === WebSocket.OPEN) {
+      // CRITICAL FIX: Check backpressure before sending
+      if (client.bufferedAmount > MAX_BACKLOG_BYTES) {
+        slowClients++;
+        console.warn(`[WS] Client backlog ${(client.bufferedAmount / 1024 / 1024).toFixed(2)}MB — terminating`);
+        deadClients.push(client);
+        continue;
+      }
+
       try {
         client.send(data);
+        client.sendFailures = 0;  // Reset on success
       } catch (err) {
-        console.warn(`[WS] Send failed for client: ${err.message}`);
+        client.sendFailures++;
+        console.warn(`[WS] Send failed (${client.sendFailures}): ${err.message}`);
+
+        // CRITICAL FIX: Remove persistently failing clients
+        if (client.sendFailures >= DEAD_CONNECTION_THRESHOLD) {
+          deadClients.push(client);
+        }
       }
+    } else if (client.readyState === WebSocket.CLOSING || client.readyState === WebSocket.CLOSED) {
+      // Cleanup clients in transitional states
+      deadClients.push(client);
     }
-  });
+  }
+
+  // Terminate dead/slow connections
+  for (const client of deadClients) {
+    try {
+      client.terminate();
+      metrics.clientsTerminated++;
+    } catch (err) {
+      console.warn(`[WS] Terminate failed: ${err.message}`);
+    }
+  }
+
+  if (slowClients > 0) {
+    console.error(`[WS] Terminated ${slowClients} slow clients`);
+  }
+
+  metrics.broadcastCount++;
 }
 
 // ── Serial Port Helpers ────────────────────────────────────
 function openSerialPort(portPath, baudRate) {
   return new Promise((resolve, reject) => {
+    // CRITICAL FIX: Check connection lock to prevent race conditions
+    if (connectionLock) {
+      reject(new Error('Connection already in progress'));
+      return;
+    }
+
     if (serialPort && serialPort.isOpen) {
       reject(new Error('Already connected. Disconnect first.'));
       return;
     }
+
+    // Acquire lock
+    connectionLock = { portPath, baudRate, startTime: Date.now() };
 
     serialPort = new SerialPort({
       path: portPath,
@@ -131,32 +264,56 @@ function openSerialPort(portPath, baudRate) {
       const trimmed = line.trim();
       if (!trimmed) return;
 
+      // CRITICAL FIX: Validate line length to prevent DoS
+      if (trimmed.length > MAX_LINE_LENGTH) {
+        console.warn(`[Parse] Line too long (${trimmed.length} > ${MAX_LINE_LENGTH})`);
+        metrics.parseFailed++;
+        return;
+      }
+
       try {
         const raw = JSON.parse(trimmed);
 
-        // Skip boot/status messages from Arduino
+        // Skip boot/status/error messages from Arduino
         if (raw.status === 'boot') {
           console.log(`[Arduino] ${raw.msg || 'Booted'}`);
           broadcast({ type: 'log', message: raw.msg || 'Arduino booted' });
           return;
         }
 
+        if (raw.err) {
+          console.error(`[Arduino] Error: ${raw.err} - ${raw.msg || ''}`);
+          broadcast({ type: 'error', message: `Arduino: ${raw.err}` });
+          return;
+        }
+
+        // CRITICAL FIX: Validate data before transformation
+        if (!isValidArduinoData(raw)) {
+          console.warn(`[Parse] Invalid Arduino data: ${JSON.stringify(raw).substring(0, 100)}`);
+          metrics.parseInvalid++;
+          return;
+        }
+
         const message = transformArduinoData(raw);
         broadcast(message);
+        metrics.parseSuccess++;
       } catch (err) {
-        // Partial or malformed JSON line — skip silently
+        // Partial or malformed JSON line — skip
         console.warn(`[Parse] Skipping malformed line: ${trimmed.substring(0, 80)}`);
+        metrics.parseFailed++;
       }
     });
 
     serialPort.on('close', () => {
       console.log(`[Serial] Port closed`);
+      connectionLock = null;  // Release lock
       connectionState = { connected: false, port: null, baudRate };
       broadcast({ type: 'status', connected: false, port: null });
     });
 
     serialPort.on('error', (err) => {
       console.error(`[Serial] Error: ${err.message}`);
+      connectionLock = null;  // Release lock
       connectionState = { connected: false, port: null, baudRate };
       broadcast({ type: 'error', message: err.message });
       // Clean up references to prevent stale state
@@ -165,6 +322,8 @@ function openSerialPort(portPath, baudRate) {
     });
 
     serialPort.open((err) => {
+      connectionLock = null;  // Release lock regardless of outcome
+      
       if (err) {
         serialPort = null;
         parser = null;
@@ -258,6 +417,14 @@ app.get('/api/ports', async (req, res) => {
 app.post('/api/connect', async (req, res) => {
   const { port, baudRate = 9600 } = req.body;
 
+  // CRITICAL FIX: Check for connection in progress
+  if (connectionLock) {
+    return res.status(409).json({ 
+      error: 'Connection already in progress',
+      lockInfo: { port: connectionLock.portPath, startTime: connectionLock.startTime }
+    });
+  }
+
   // Validate port is a non-empty string
   if (!port || typeof port !== 'string') {
     return res.status(400).json({ error: 'Port is required and must be a string' });
@@ -294,7 +461,12 @@ app.post('/api/disconnect', async (req, res) => {
 
 // Get connection status
 app.get('/api/status', (req, res) => {
-  res.json(connectionState);
+  res.json({
+    ...connectionState,
+    metrics,
+    sequence: messageSequence,
+    wsClients: wss.clients.size,
+  });
 });
 
 // ── Express error handler (must be last middleware) ─────────
@@ -307,6 +479,9 @@ app.use((err, _req, res, _next) => {
 wss.on('connection', (ws) => {
   console.log('[WS] Client connected');
   ws.isAlive = true;
+  ws.sendFailures = 0;
+  ws.connectedAt = Date.now();
+  ws.connectionId = Math.random().toString(36).substring(7);
 
   ws.on('pong', () => {
     ws.isAlive = true;
@@ -314,30 +489,73 @@ wss.on('connection', (ws) => {
 
   // Send current status to newly connected client
   try {
-    ws.send(JSON.stringify({ type: 'status', connected: connectionState.connected, port: connectionState.port }));
+    ws.send(JSON.stringify({ 
+      type: 'status', 
+      connected: connectionState.connected, 
+      port: connectionState.port,
+      sequence: messageSequence,
+    }));
   } catch (err) {
     console.warn(`[WS] Failed to send initial status: ${err.message}`);
   }
 
-  ws.on('close', () => {
-    console.log('[WS] Client disconnected');
+  ws.on('close', (code, reason) => {
+    const uptime = Date.now() - ws.connectedAt;
+    console.log(`[WS] Client ${ws.connectionId} disconnected (code: ${code}, uptime: ${Math.round(uptime / 1000)}s)`);
   });
 
   ws.on('error', (err) => {
-    console.warn(`[WS] Client error: ${err.message}`);
+    console.warn(`[WS] Client ${ws.connectionId} error: ${err.message}`);
+    ws.terminate();
+  });
+
+  // Rate limit incoming messages (clients shouldn't send much)
+  let messagesThisSecond = 0;
+  let lastSecond = Date.now();
+  
+  ws.on('message', (data) => {
+    const now = Date.now();
+    if (now - lastSecond > 1000) {
+      messagesThisSecond = 0;
+      lastSecond = now;
+    } else {
+      messagesThisSecond++;
+      if (messagesThisSecond > 100) {
+        console.warn(`[WS] Client ${ws.connectionId} rate limit exceeded`);
+        ws.terminate();
+        return;
+      }
+    }
+    // Optional: handle client commands here (e.g., sync requests)
   });
 });
 
+// Heartbeat with proper termination
 heartbeatInterval = setInterval(() => {
-  wss.clients.forEach((ws) => {
+  for (const ws of wss.clients) {
     if (ws.isAlive === false) {
-      console.log('[WS] Terminating dead client');
-      return ws.terminate();
+      console.log(`[WS] Terminating dead client ${ws.connectionId || 'unknown'}`);
+      ws.terminate();
+      metrics.clientsTerminated++;
+      continue;  // Don't ping a terminated client
     }
     ws.isAlive = false;
     ws.ping();
-  });
+  }
 }, 30000);
+
+// Periodic cleanup of orphaned connections (safety net)
+setInterval(() => {
+  let orphaned = 0;
+  for (const ws of wss.clients) {
+    if (ws.readyState === WebSocket.CLOSED) {
+      orphaned++;
+    }
+  }
+  if (orphaned > 0) {
+    console.log(`[WS] Found ${orphaned} orphaned connections in set`);
+  }
+}, 60000);
 
 // ── Start Server ───────────────────────────────────────────
 server.listen(PORT, () => {

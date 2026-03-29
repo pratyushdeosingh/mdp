@@ -88,7 +88,7 @@ export function generateSystemReport(
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text(`Total data points collected: ${history.length}`, 20, 30);
-  doc.text(`Average speed: ${(history.reduce((s, d) => s + d.gps.speed, 0) / Math.max(history.length, 1)).toFixed(1)} km/h`, 20, 38);
+  doc.text(`Average speed: ${(history.reduce((s, d) => s + (d.gps.speed ?? 0), 0) / Math.max(history.length, 1)).toFixed(1)} km/h`, 20, 38);
   doc.text(`Average total acceleration: ${(history.reduce((s, d) => s + d.totalAcceleration, 0) / Math.max(history.length, 1)).toFixed(2)} m/s²`, 20, 46);
   doc.text(`Accident events in session: ${history.filter(d => d.accidentDetected).length}`, 20, 54);
   doc.text(`Execution Progress: 100%`, 20, 62);

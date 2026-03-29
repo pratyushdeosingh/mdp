@@ -31,8 +31,10 @@ const COLD_START_MAX_SECONDS = 900;      // 15 minutes — beyond this, likely a
 function isGPSValid(data: SensorData): boolean {
   // Prefer explicit gpsValid flag from Arduino firmware (gv field)
   if (data.gpsValid !== undefined) return data.gpsValid;
-  // Fallback: check if coordinates are non-zero
-  return data.gps.latitude !== 0 || data.gps.longitude !== 0;
+  // Fallback: check if coordinates are non-null and non-zero
+  const lat = data.gps.latitude;
+  const lng = data.gps.longitude;
+  return lat !== null && lng !== null && (lat !== 0 || lng !== 0);
 }
 
 function getStateMessage(state: GPSState, elapsed: number, hasEverLocked: boolean): string {
@@ -126,8 +128,10 @@ export function useGPSStatus(sensorData: SensorData | null): GPSStatus {
         ? Math.floor((Date.now() - lastFixLostTime.current) / 1000)
         : 0;
 
-      const coords = sensorData && isGPSValid(sensorData)
-        ? { lat: sensorData.gps.latitude, lng: sensorData.gps.longitude }
+      const lat = sensorData?.gps?.latitude;
+      const lng = sensorData?.gps?.longitude;
+      const coords = sensorData && isGPSValid(sensorData) && lat != null && lng != null
+        ? { lat: lat as number, lng: lng as number }
         : null;
 
       const progress = state === 'cold_start'

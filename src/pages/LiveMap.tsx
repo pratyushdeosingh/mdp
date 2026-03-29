@@ -38,9 +38,11 @@ const LiveMap = memo(function LiveMap() {
   const { sensorData, sensorHistory } = useAppContext();
 
   // Trail from history — memoized to avoid recalculating on every render
-  // Must be called before any early returns to satisfy rules of hooks
+  // Filter out entries with null coordinates
   const trail = useMemo<[number, number][]>(
-    () => sensorHistory.map(d => [d.gps.latitude, d.gps.longitude]),
+    () => sensorHistory
+      .filter(d => d.gps.latitude !== null && d.gps.longitude !== null)
+      .map(d => [d.gps.latitude as number, d.gps.longitude as number]),
     [sensorHistory]
   );
 
@@ -52,7 +54,9 @@ const LiveMap = memo(function LiveMap() {
     );
   }
 
-  const { latitude, longitude, speed } = sensorData.gps;
+  const latitude = sensorData.gps.latitude ?? 0;
+  const longitude = sensorData.gps.longitude ?? 0;
+  const speed = sensorData.gps.speed ?? 0;
 
   return (
     <div className="w-full min-h-[calc(100vh-120px)] flex flex-col gap-4">

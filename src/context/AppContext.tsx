@@ -66,7 +66,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const event: AccidentEvent = {
         id: accidentIdRef.current,
         timestamp: data.timestamp,
-        gps: { ...data.gps },
+        gps: { 
+          latitude: data.gps.latitude ?? 0, 
+          longitude: data.gps.longitude ?? 0,
+          speed: data.gps.speed ?? 0,
+          altitude: data.gps.altitude ?? 0,
+        },
         accelerometer: { ...data.accelerometer },
         totalAcceleration: data.totalAcceleration,
         resolved: false,
@@ -92,10 +97,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return updated.length > MAX_HISTORY ? updated.slice(-MAX_HISTORY) : updated;
     });
     setLogs(prev => {
+      const lat = data.gps.latitude?.toFixed(4) ?? 'N/A';
+      const lng = data.gps.longitude?.toFixed(4) ?? 'N/A';
+      const spd = data.gps.speed ?? 0;
       const newLog: LogEntry = {
         timestamp: Date.now(),
         type: 'info',
-        message: `[HW] GPS: ${data.gps.latitude.toFixed(4)},${data.gps.longitude.toFixed(4)} | Spd: ${data.gps.speed} km/h | Accel: ${data.totalAcceleration} m/s²${data.accidentDetected ? ' | !! ACCIDENT !!' : ''}`,
+        message: `[HW] GPS: ${lat},${lng} | Spd: ${spd} km/h | Accel: ${data.totalAcceleration} m/s²${data.accidentDetected ? ' | !! ACCIDENT !!' : ''}`,
       };
       const updated = prev.concat(newLog);
       return updated.length > MAX_LOGS ? updated.slice(-MAX_LOGS) : updated;

@@ -1,10 +1,10 @@
 export interface SensorData {
   timestamp: number;
   gps: {
-    latitude: number;
-    longitude: number;
-    speed: number;
-    altitude: number;
+    latitude: number | null;
+    longitude: number | null;
+    speed: number | null;
+    altitude: number | null;
   };
   accelerometer: {
     x: number;
@@ -82,6 +82,7 @@ export interface BridgeMessage {
   connected?: boolean;
   port?: string;
   message?: string;
+  sequence?: number;
 }
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
