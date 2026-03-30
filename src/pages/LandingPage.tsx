@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Radio, ArrowRight, FileText, MapPin, Activity, Shield, Wifi, Zap, Sun, Moon } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
@@ -9,7 +10,7 @@ const features = [
   { icon: Wifi, title: 'Live Dashboard', colorVar: 'var(--color-blue)', desc: 'WebSocket data stream' },
 ];
 
-export default function LandingPage() {
+const LandingPage = memo(function LandingPage() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useAppContext();
 
@@ -95,4 +96,6 @@ export default function LandingPage() {
 
     </div>
   );
-}
+});
+
+export default LandingPage;

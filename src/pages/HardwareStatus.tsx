@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { ReactNode } from 'react';
 import { Cpu, Radio, MapPin, Activity, Wrench, CheckCircle, Volume2, ToggleRight } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
@@ -13,7 +14,7 @@ const iconMap: Record<string, ReactNode> = {
   button: <ToggleRight size={24} />,
 };
 
-export default function HardwareStatus() {
+const HardwareStatus = memo(function HardwareStatus() {
   const workingCount = hardwareModules.filter(m => m.status === 'working').length;
   const total = hardwareModules.length;
 
@@ -112,4 +113,6 @@ export default function HardwareStatus() {
       </GlassCard>
     </div>
   );
-}
+});
+
+export default HardwareStatus;

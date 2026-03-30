@@ -9,7 +9,7 @@ const severityConfig: Record<ImpactSeverity, { color: string; bg: string; label:
   none:   { color: 'var(--color-gray)',    bg: 'var(--status-gray-bg)',    label: 'None' },
   low:    { color: 'var(--color-emerald)', bg: 'var(--status-emerald-bg)', label: 'Low Impact' },
   medium: { color: 'var(--color-amber)',   bg: 'var(--status-amber-bg)',   label: 'Medium Impact' },
-  high:   { color: '#f97316',              bg: 'rgba(249, 115, 22, 0.15)', label: 'High Impact' },
+  high:   { color: 'var(--color-orange)',  bg: 'var(--status-orange-bg)',  label: 'High Impact' },
   severe: { color: 'var(--color-red)',     bg: 'var(--status-red-bg)',     label: 'Severe Crash' },
 };
 

@@ -1,10 +1,11 @@
+import { memo } from 'react';
 import { AlertTriangle, MapPin, Gauge, Activity, Clock, CheckCircle, XCircle, FileDown, Trash2 } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 import { useAppContext } from '../context/AppContext';
 import { generateIncidentReport, exportIncidentCSV } from '../utils/incidentReport';
 import { downloadCSV } from '../utils/simulator';
 
-export default function AccidentHistory() {
+const AccidentHistory = memo(function AccidentHistory() {
   const { accidentEvents, dataMode, clearAccidentHistory } = useAppContext();
 
   const activeCount = accidentEvents.filter(e => !e.resolved).length;
@@ -210,4 +211,6 @@ export default function AccidentHistory() {
       )}
     </div>
   );
-}
+});
+
+export default AccidentHistory;

@@ -35,6 +35,9 @@
     --status-amber-bg: rgba(245, 158, 11, 0.12);
     --status-blue-bg: rgba(96, 165, 250, 0.12);
     --status-gray-bg: rgba(156, 163, 175, 0.12);
+    --status-orange-bg: rgba(251, 146, 60, 0.12);
+    --status-purple-bg: rgba(216, 180, 254, 0.12);
+    --status-cyan-bg: rgba(0, 212, 255, 0.12);
     /* Nav/Drawer */
     --nav-active-bg: rgba(0, 212, 255, 0.1);
     --nav-active-text: #00d4ff;
@@ -85,6 +88,9 @@
     --status-amber-bg: rgba(217, 119, 6, 0.08);
     --status-blue-bg: rgba(37, 99, 235, 0.08);
     --status-gray-bg: rgba(107, 114, 128, 0.08);
+    --status-orange-bg: rgba(234, 88, 12, 0.08);
+    --status-purple-bg: rgba(124, 58, 237, 0.08);
+    --status-cyan-bg: rgba(8, 145, 178, 0.08);
     /* Navigation */
     --nav-active-bg: rgba(8, 145, 178, 0.1);
     --nav-active-text: #0891b2;

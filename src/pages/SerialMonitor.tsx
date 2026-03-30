@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { useAppContext } from '../context/AppContext';
 import GlassCard from '../components/GlassCard';
 import { Terminal, Circle, ArrowDown } from 'lucide-react';
 import type { LogEntry } from '../types';
 
-function LogLine({ entry }: { entry: LogEntry }) {
+const LogLine = memo(function LogLine({ entry }: { entry: LogEntry }) {
   const colorMap: Record<string, string> = {
     info: 'var(--color-blue)',
     success: 'var(--color-emerald)',
@@ -25,9 +25,9 @@ function LogLine({ entry }: { entry: LogEntry }) {
       <span style={{ color: colorMap[entry.type] || 'var(--color-gray)' }}>{entry.message}</span>
     </div>
   );
-}
+});
 
-export default function SerialMonitor() {
+const SerialMonitor = memo(function SerialMonitor() {
   const { logs, dataMode } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -159,4 +159,6 @@ export default function SerialMonitor() {
       </div>
     </div>
   );
-}
+});
+
+export default SerialMonitor;

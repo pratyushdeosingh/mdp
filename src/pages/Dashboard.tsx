@@ -85,6 +85,8 @@ const Dashboard = memo(function Dashboard() {
         <GlassCard
           className={`lg:col-span-8 lg:row-span-2 p-8 flex flex-col justify-center ${isAccident ? 'emergency-panel-alert' : ''}`}
           style={isAccident ? { borderColor: 'var(--color-red)', borderWidth: '2px' } : undefined}
+          aria-live="polite"
+          aria-atomic="true"
         >
           <div className="flex flex-col items-center justify-center gap-6 text-center h-full">
             {/* Large Icon */}
@@ -93,6 +95,7 @@ const Dashboard = memo(function Dashboard() {
               style={{
                 background: isAccident ? 'var(--status-red-bg)' : 'var(--status-emerald-bg)',
               }}
+              aria-hidden="true"
             >
               {isAccident
                 ? <ShieldAlert size={64} style={{ color: 'var(--color-red)' }} />
@@ -105,6 +108,7 @@ const Dashboard = memo(function Dashboard() {
               <h1
                 className="text-3xl md:text-4xl lg:text-5xl font-extrabold"
                 style={{ color: isAccident ? 'var(--color-red)' : 'var(--color-emerald)' }}
+                role={isAccident ? 'alert' : undefined}
               >
                 {isAccident ? 'ACCIDENT DETECTED' : "You're Safe"}
               </h1>
@@ -120,9 +124,10 @@ const Dashboard = memo(function Dashboard() {
               <button
                 onClick={accidentState.markUserSafe}
                 className="mt-2 px-10 py-5 rounded-2xl text-lg font-bold text-white transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
-                style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}
+                style={{ background: 'linear-gradient(135deg, var(--color-emerald), #10b981)' }}
+                aria-label="Mark yourself as safe and dismiss accident alert"
               >
-                <ShieldCheck size={24} className="inline mr-2 -mt-0.5" />
+                <ShieldCheck size={24} className="inline mr-2 -mt-0.5" aria-hidden="true" />
                 I'm Safe
               </button>
             )}
