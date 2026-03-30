@@ -41,44 +41,58 @@
     /* Legacy compat (used by existing sub-pages) */
     --glass-bg: #161616;
     --glass-border: rgba(255, 255, 255, 0.08);
+    /* Hover state for borders in dark mode */
+    --border-hover: rgba(255, 255, 255, 0.12);
   }
 
-  /* Light mode — minimal override to not break toggle */
+  /* Light mode — refined aesthetics */
   .light {
-    --bg-primary: #f8fafc;
-    --bg-secondary: #f1f5f9;
-    --bg-card: rgba(255, 255, 255, 0.9);
-    --bg-card-hover: #ffffff;
+    /* Soft, warm off-white backgrounds */
+    --bg-primary: #f9fafb;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8fafc;
     --bg-elevated: #ffffff;
-    --text-primary: #0f172a;
-    --text-secondary: #334155;
-    --text-muted: #64748b;
-    --border-color: rgba(148, 163, 184, 0.25);
-    --border-subtle: rgba(148, 163, 184, 0.12);
+    /* Rich, readable text colors */
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #6b7280;
+    /* Subtle, elegant borders */
+    --border-color: rgba(17, 24, 39, 0.08);
+    --border-subtle: rgba(17, 24, 39, 0.04);
+    /* Vibrant accent - teal/cyan for continuity with dark mode */
     --accent: #0891b2;
-    --accent-glow: rgba(8, 145, 178, 0.1);
+    --accent-glow: rgba(8, 145, 178, 0.12);
+    /* Status colors - slightly deeper for light backgrounds */
     --success: #059669;
     --warning: #d97706;
     --danger: #dc2626;
-    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+    /* Refined shadows */
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+    --card-shadow-hover: 0 10px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+    /* Semantic status colors */
     --color-emerald: #059669;
     --color-red: #dc2626;
     --color-amber: #d97706;
     --color-blue: #2563eb;
     --color-cyan: #0891b2;
-    --color-orange: #c2410c;
+    --color-orange: #ea580c;
     --color-purple: #7c3aed;
     --color-gray: #6b7280;
-    --status-emerald-bg: rgba(5, 150, 105, 0.1);
-    --status-red-bg: rgba(220, 38, 38, 0.1);
-    --status-amber-bg: rgba(217, 119, 6, 0.1);
-    --status-blue-bg: rgba(37, 99, 235, 0.1);
-    --status-gray-bg: rgba(107, 114, 128, 0.1);
-    --nav-active-bg: rgba(8, 145, 178, 0.08);
+    /* Status backgrounds - lighter, more subtle */
+    --status-emerald-bg: rgba(5, 150, 105, 0.08);
+    --status-red-bg: rgba(220, 38, 38, 0.08);
+    --status-amber-bg: rgba(217, 119, 6, 0.08);
+    --status-blue-bg: rgba(37, 99, 235, 0.08);
+    --status-gray-bg: rgba(107, 114, 128, 0.08);
+    /* Navigation */
+    --nav-active-bg: rgba(8, 145, 178, 0.1);
     --nav-active-text: #0891b2;
-    --glass-bg: rgba(255, 255, 255, 0.8);
-    --glass-border: rgba(148, 163, 184, 0.2);
+    /* Glass effects for light mode */
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(17, 24, 39, 0.06);
+    /* Hover state for borders */
+    --border-hover: rgba(17, 24, 39, 0.12);
   }
 
   /* Keep .dark as alias (toggle uses this class) */
@@ -130,6 +144,15 @@ body {
   border-radius: 3px;
 }
 
+/* Light mode scrollbar */
+.light ::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.4);
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.6);
+}
+
 /* ===== CARD STYLES ===== */
 .glass-card {
   background: var(--bg-card);
@@ -140,7 +163,7 @@ body {
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--border-hover, rgba(255, 255, 255, 0.12));
   box-shadow: var(--card-shadow-hover);
 }
 
@@ -168,7 +191,7 @@ body {
 }
 
 .status-card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--border-hover, rgba(255, 255, 255, 0.12));
   transform: translateY(-2px);
 }
 
@@ -244,7 +267,7 @@ body {
 }
 
 .accordion-header:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-card-hover);
 }
 
 .accordion-header .accordion-icon {
@@ -396,7 +419,7 @@ body {
 .hamburger-btn:hover {
   background: var(--bg-card-hover);
   color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--border-hover, rgba(255, 255, 255, 0.15));
 }
 
 /* ===== GAUGE (existing component compat) ===== */
@@ -730,6 +753,14 @@ body {
 /* ===== LEAFLET DARK MODE ===== */
 .dark .leaflet-tile-pane { filter: brightness(0.7) contrast(1.1) saturate(0.8); }
 .dark .leaflet-control-zoom a { background: var(--bg-secondary) !important; color: var(--text-primary) !important; border-color: var(--border-color) !important; }
+
+/* ===== LEAFLET LIGHT MODE ===== */
+.light .leaflet-control-zoom a { 
+  background: var(--bg-secondary) !important; 
+  color: var(--text-primary) !important; 
+  border-color: var(--border-color) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+}
 
 .threshold-bar { transition: width 0.5s ease-out; }
 

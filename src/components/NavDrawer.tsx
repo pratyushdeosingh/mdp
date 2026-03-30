@@ -16,6 +16,8 @@ import {
   ShieldCheck,
   Zap,
   Activity,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
@@ -45,7 +47,7 @@ interface NavDrawerProps {
 }
 
 export default function NavDrawer({ open, onClose }: NavDrawerProps) {
-  const { dataMode, setDataMode, sensorData, sensorHistory, connectionStatus } = useAppContext();
+  const { dataMode, setDataMode, sensorData, sensorHistory, connectionStatus, theme, toggleTheme } = useAppContext();
   const { toast } = useToast();
   const [closing, setClosing] = useState(false);
   
@@ -168,7 +170,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                   `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     isActive
                       ? 'sidebar-nav-active text-[var(--nav-active-text)]'
-                      : 'text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.04)] hover:text-[var(--text-primary)]'
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] hover:text-[var(--text-primary)]'
                   }`
                 }
               >
@@ -186,6 +188,45 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
           defaultOpen={false}
           accentColor="var(--color-emerald)"
         >
+          {/* Theme Toggle */}
+          <fieldset className="mb-4">
+            <legend className="text-[11px] font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--text-muted)' }}>
+              Appearance
+            </legend>
+            <button
+              onClick={toggleTheme}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all"
+              style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+              }}
+            >
+              <div className="flex items-center gap-3">
+                {theme === 'dark' ? (
+                  <Moon size={18} style={{ color: 'var(--color-purple)' }} />
+                ) : (
+                  <Sun size={18} style={{ color: 'var(--color-amber)' }} />
+                )}
+                <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                </span>
+              </div>
+              <div
+                className="relative w-11 h-6 rounded-full transition-colors"
+                style={{
+                  background: theme === 'dark' ? 'var(--color-purple)' : 'var(--color-amber)',
+                }}
+              >
+                <div
+                  className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform"
+                  style={{
+                    transform: theme === 'dark' ? 'translateX(1.25rem)' : 'translateX(0.125rem)',
+                  }}
+                />
+              </div>
+            </button>
+          </fieldset>
+
           {/* Data Mode Toggle */}
           <fieldset>
             <legend className="text-[11px] font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'var(--text-muted)' }}>

@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { Radio, ArrowRight, FileText, MapPin, Activity, Shield, Wifi, Zap } from 'lucide-react';
+import { Radio, ArrowRight, FileText, MapPin, Activity, Shield, Wifi, Zap, Sun, Moon } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
 const features = [
   { icon: MapPin, title: 'GPS Tracking', colorVar: 'var(--color-cyan)', desc: 'Real-time location & speed' },
@@ -10,12 +11,26 @@ const features = [
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useAppContext();
 
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-6 py-12"
       style={{ background: 'var(--bg-primary)' }}
     >
+      {/* Theme toggle button - top right */}
+      <button
+        onClick={toggleTheme}
+        className="absolute top-6 right-6 p-3 rounded-xl transition-all hover:scale-105"
+        style={{
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+          color: 'var(--text-secondary)',
+        }}
+        aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      >
+        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
       {/* Animated background orbs */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-3xl opacity-20 landing-orb-1" style={{ background: 'var(--accent-glow)' }} aria-hidden="true" />
       <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] rounded-full blur-3xl opacity-10 landing-orb-2" style={{ background: 'var(--color-emerald)' }} aria-hidden="true" />

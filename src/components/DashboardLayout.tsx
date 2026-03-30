@@ -1,7 +1,8 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { Menu, Radio } from 'lucide-react';
+import { Menu, Radio, Sun, Moon } from 'lucide-react';
 import NavDrawer from './NavDrawer';
+import { useAppContext } from '../context/AppContext';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -19,6 +20,7 @@ export default function DashboardLayout() {
   const location = useLocation();
   const isLanding = location.pathname === '/';
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { theme, toggleTheme } = useAppContext();
 
   // Memoize close handler
   const handleClose = useCallback(() => setDrawerOpen(false), []);
@@ -67,12 +69,26 @@ export default function DashboardLayout() {
           </div>
         </div>
 
-        {/* Connection indicator */}
-        <div className="flex items-center gap-1.5 shrink-0 select-none">
-          <span className="w-2 h-2 rounded-full pulse-live" style={{ background: 'var(--color-emerald)' }} />
-          <span className="hidden sm:inline text-[11px] font-medium" style={{ color: 'var(--color-emerald)' }}>
-            Online
-          </span>
+        {/* Theme toggle + Connection indicator */}
+        <div className="flex items-center gap-3 shrink-0 select-none">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-xl transition-colors"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
+            }}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full pulse-live" style={{ background: 'var(--color-emerald)' }} />
+            <span className="hidden sm:inline text-[11px] font-medium" style={{ color: 'var(--color-emerald)' }}>
+              Online
+            </span>
+          </div>
         </div>
       </header>
 

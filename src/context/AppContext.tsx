@@ -137,7 +137,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const toggleTheme = useCallback(() => {
     setTheme(prev => {
       const next = prev === 'dark' ? 'light' : 'dark';
-      document.documentElement.classList.toggle('dark', next === 'dark');
+      document.documentElement.classList.remove('dark', 'light');
+      document.documentElement.classList.add(next);
       localStorage.setItem('helmet-theme', next);
       return next;
     });
@@ -145,7 +146,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Initialize theme from saved preference
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(theme);
   }, [theme]);
 
   // Data simulation loop
